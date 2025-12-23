@@ -1,19 +1,18 @@
 import { SOCIAL_LINKS } from '@/constants/vacancy';
 import logo from '@/assets/RR-Logo.png';
 import { useLanguage } from '@/contexts/LanguageContext';
-
 const Footer = () => {
-  const { t } = useLanguage();
-
-  return (
-    <footer className="gradient-primary border-t border-white/5 py-16">
+  const {
+    t
+  } = useLanguage();
+  return <footer className="gradient-primary border-t border-white/5 py-16">
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="text-center md:text-left">
             <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
               <img src={logo} alt="RentROP" className="h-12 w-auto" />
               <span className="text-white font-bold text-2xl tracking-tight">
-                РентРОП <span className="text-gradient-gold">HR</span>
+                ​RentROP <span className="text-gradient-gold">HR</span>
               </span>
             </div>
             <p className="text-white/60 text-sm max-w-xs">{t('footer.slogan')}</p>
@@ -42,8 +41,6 @@ const Footer = () => {
           {t('footer.copyright')}
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

@@ -3,47 +3,50 @@ import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowRight, Building2, History, Users, FileText, UserCheck, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const workPages = [
-  { 
-    title: 'Аренда РОПов', 
-    description: 'Основной продукт компании — аренда руководителей отделов продаж',
-    icon: Building2,
-    path: '/work/arenda-ropov'
-  },
-  { 
-    title: 'О компании', 
-    description: 'История компании с 2017 года и наши достижения',
-    icon: History,
-    path: '/work/about'
-  },
-  { 
-    title: 'Сообщество', 
-    description: 'Первое сообщество про продажи для РОПов и предпринимателей',
-    icon: Users,
-    path: '/work/community'
-  },
-  { 
-    title: 'Отчеты', 
-    description: 'Система ежедневной и еженедельной отчетности',
-    icon: FileText,
-    path: '/work/reports'
-  },
-  { 
-    title: 'ДПР', 
-    description: 'Директора по развитию — наставники для РОПов',
-    icon: UserCheck,
-    path: '/work/dpr'
-  },
-  { 
-    title: 'Сотрудники', 
-    description: 'Структура отделов компании',
-    icon: UsersRound,
-    path: '/work/employees'
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const WorkIndex = () => {
+  const { t } = useLanguage();
+
+  const workPages = [
+    { 
+      titleKey: 'work.arendaRopov', 
+      descKey: 'work.arendaRopovDesc',
+      icon: Building2,
+      path: '/work/arenda-ropov'
+    },
+    { 
+      titleKey: 'work.about', 
+      descKey: 'work.aboutDesc',
+      icon: History,
+      path: '/work/about'
+    },
+    { 
+      titleKey: 'work.community', 
+      descKey: 'work.communityDesc',
+      icon: Users,
+      path: '/work/community'
+    },
+    { 
+      titleKey: 'work.reports', 
+      descKey: 'work.reportsDesc',
+      icon: FileText,
+      path: '/work/reports'
+    },
+    { 
+      titleKey: 'work.dpr', 
+      descKey: 'work.dprDesc',
+      icon: UserCheck,
+      path: '/work/dpr'
+    },
+    { 
+      titleKey: 'work.employees', 
+      descKey: 'work.employeesDesc',
+      icon: UsersRound,
+      path: '/work/employees'
+    },
+  ];
+
   return (
     <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
@@ -51,10 +54,10 @@ const WorkIndex = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-4">
-              <span className="text-gradient-gold">Работа</span>
+              <span className="text-gradient-gold">{t('work.title')}</span>
             </h1>
             <p className="text-xl text-white/70 mb-12">
-              Узнайте больше о работе в РентРОП
+              {t('work.subtitle')}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -67,10 +70,10 @@ const WorkIndex = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-accent transition-colors flex items-center gap-2">
-                          {page.title}
+                          {t(page.titleKey)}
                           <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </h3>
-                        <p className="text-white/60 text-sm">{page.description}</p>
+                        <p className="text-white/60 text-sm">{t(page.descKey)}</p>
                       </div>
                     </div>
                   </CardGlassDark>

@@ -3,41 +3,44 @@ import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowRight, DollarSign, GraduationCap, FolderKanban, FileCheck, Wallet } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const conditionsPages = [
-  { 
-    title: 'Мотивация', 
-    description: 'Система оплаты труда: фикс, переменка, партнерка',
-    icon: DollarSign,
-    path: '/conditions/motivation'
-  },
-  { 
-    title: 'Обучение', 
-    description: 'Поэтапное обучение с аттестацией и доступом к базе знаний',
-    icon: GraduationCap,
-    path: '/conditions/training'
-  },
-  { 
-    title: 'Проекты', 
-    description: 'Открытый подбор проектов через телеграм канал',
-    icon: FolderKanban,
-    path: '/conditions/projects'
-  },
-  { 
-    title: 'Оформление', 
-    description: 'Договора для России и Казахстана, ИП и самозанятых',
-    icon: FileCheck,
-    path: '/conditions/registration'
-  },
-  { 
-    title: 'Выплаты', 
-    description: 'Выплаты дважды в месяц на расчетный счет',
-    icon: Wallet,
-    path: '/conditions/payments'
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ConditionsIndex = () => {
+  const { t } = useLanguage();
+
+  const conditionsPages = [
+    { 
+      titleKey: 'conditions.motivation', 
+      descKey: 'conditions.motivationDesc',
+      icon: DollarSign,
+      path: '/conditions/motivation'
+    },
+    { 
+      titleKey: 'conditions.training', 
+      descKey: 'conditions.trainingDesc',
+      icon: GraduationCap,
+      path: '/conditions/training'
+    },
+    { 
+      titleKey: 'conditions.projects', 
+      descKey: 'conditions.projectsDesc',
+      icon: FolderKanban,
+      path: '/conditions/projects'
+    },
+    { 
+      titleKey: 'conditions.registration', 
+      descKey: 'conditions.registrationDesc',
+      icon: FileCheck,
+      path: '/conditions/registration'
+    },
+    { 
+      titleKey: 'conditions.payments', 
+      descKey: 'conditions.paymentsDesc',
+      icon: Wallet,
+      path: '/conditions/payments'
+    },
+  ];
+
   return (
     <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
@@ -45,10 +48,10 @@ const ConditionsIndex = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-4">
-              <span className="text-gradient-gold">Условия</span>
+              <span className="text-gradient-gold">{t('conditions.title')}</span>
             </h1>
             <p className="text-xl text-white/70 mb-12">
-              Условия работы в компании РентРОП
+              {t('conditions.subtitle')}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -61,10 +64,10 @@ const ConditionsIndex = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-2 group-hover:text-accent transition-colors flex items-center gap-2">
-                          {page.title}
+                          {t(page.titleKey)}
                           <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </h3>
-                        <p className="text-white/60 text-sm">{page.description}</p>
+                        <p className="text-white/60 text-sm">{t(page.descKey)}</p>
                       </div>
                     </div>
                   </CardGlassDark>

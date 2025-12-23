@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -8,18 +8,126 @@ interface Message {
   content: string;
 }
 
+// Quick reply suggestions based on language
+const getQuickReplies = (language: string) => {
+  switch (language) {
+    case 'en':
+      return [
+        'How to pass the interview?',
+        'What is the salary?',
+        'How does training work?',
+        'Work schedule?'
+      ];
+    case 'kz':
+      return [
+        'Сұхбаттан қалай өтуге болады?',
+        'Жалақы қандай?',
+        'Оқыту қалай жүреді?',
+        'Жұмыс кестесі?'
+      ];
+    default:
+      return [
+        'Как пройти собеседование?',
+        'Какая зарплата?',
+        'Как проходит обучение?',
+        'График работы?'
+      ];
+  }
+};
+
+// Parse message content and render links as buttons
+const MessageContent = ({ content, isAssistant }: { content: string; isAssistant: boolean }) => {
+  if (!content) return null;
+
+  // Regex to find URLs
+  const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+  
+  // Split content by URLs
+  const parts = content.split(urlRegex);
+  const urls: string[] = content.match(urlRegex) || [];
+  
+  // Collect unique URLs for button display
+  const uniqueUrls = [...new Set(urls)];
+  
+  // Render text with inline clickable links
+  const renderTextWithLinks = () => {
+    return parts.map((part, i) => {
+      if (urls.includes(part)) {
+        const url = part;
+        return (
+          <a
+            key={i}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors break-all"
+          >
+            {url}
+          </a>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="whitespace-pre-wrap">{renderTextWithLinks()}</div>
+      
+      {/* URL buttons for quick access */}
+      {isAssistant && uniqueUrls.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2">
+          {uniqueUrls.slice(0, 4).map((url, i) => {
+            // Extract domain for button label
+            let label = '';
+            try {
+              const domain = new URL(url).hostname.replace('www.', '');
+              label = domain.split('.')[0];
+              // Capitalize first letter
+              label = label.charAt(0).toUpperCase() + label.slice(1);
+            } catch {
+              label = 'Ссылка';
+            }
+            
+            return (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(45, 74%, 65%) 0%, hsl(35, 62%, 55%) 100%)',
+                  color: 'hsl(207, 52%, 20%)'
+                }}
+              >
+                <ExternalLink className="w-3 h-3" />
+                {label}
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AIAssistant = () => {
   const { language, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const quickReplies = getQuickReplies(language);
 
   // Set initial greeting based on language
   useEffect(() => {
     setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
+    setShowQuickReplies(true);
   }, [language, t]);
 
   const scrollToBottom = () => {
@@ -36,13 +144,15 @@ const AIAssistant = () => {
     }
   }, [isOpen]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = { role: 'user', content: textToSend };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setShowQuickReplies(false);
 
     let assistantContent = '';
 
@@ -118,6 +228,10 @@ const AIAssistant = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickReply = (reply: string) => {
+    sendMessage(reply);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -220,12 +334,39 @@ const AIAssistant = () => {
                     border: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
-                  {message.content || (isLoading && index === messages.length - 1 && (
-                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
-                  ))}
+                  {message.content ? (
+                    <MessageContent 
+                      content={message.content} 
+                      isAssistant={message.role === 'assistant'} 
+                    />
+                  ) : (
+                    isLoading && index === messages.length - 1 && (
+                      <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                    )
+                  )}
                 </div>
               </div>
             ))}
+            
+            {/* Quick reply buttons */}
+            {showQuickReplies && messages.length === 1 && !isLoading && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {quickReplies.map((reply, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleQuickReply(reply)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium text-white/80 hover:text-white transition-all hover:scale-105"
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 
@@ -255,7 +396,7 @@ const AIAssistant = () => {
                 disabled={isLoading}
               />
               <Button
-                onClick={sendMessage}
+                onClick={() => sendMessage()}
                 disabled={!input.trim() || isLoading}
                 size="sm"
                 className="w-9 h-9 p-0 rounded-xl"

@@ -1,6 +1,7 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/sections/HeroSection';
+import VideoSection from '@/components/sections/VideoSection';
 import VacancySection from '@/components/sections/VacancySection';
 
 const Index = () => {
@@ -13,6 +14,7 @@ const Index = () => {
       <Header onNavigate={handleNavigate} />
       <main>
         <HeroSection />
+        <VideoSection />
         <VacancySection />
       </main>
       <Footer />

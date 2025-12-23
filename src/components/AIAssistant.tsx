@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -35,44 +36,94 @@ const getQuickReplies = (language: string) => {
   }
 };
 
-// Parse message content and render links as buttons
+// Extract URLs from content
+const extractUrls = (content: string): string[] => {
+  const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+  return content.match(urlRegex) || [];
+};
+
+// Parse message content with Markdown and render links as buttons
 const MessageContent = ({ content, isAssistant }: { content: string; isAssistant: boolean }) => {
   if (!content) return null;
 
-  // Regex to find URLs
-  const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
-  
-  // Split content by URLs
-  const parts = content.split(urlRegex);
-  const urls: string[] = content.match(urlRegex) || [];
-  
-  // Collect unique URLs for button display
+  const urls = extractUrls(content);
   const uniqueUrls = [...new Set(urls)];
-  
-  // Render text with inline clickable links
-  const renderTextWithLinks = () => {
-    return parts.map((part, i) => {
-      if (urls.includes(part)) {
-        const url = part;
-        return (
-          <a
-            key={i}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors break-all"
-          >
-            {url}
-          </a>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
-  };
 
   return (
     <div className="space-y-3">
-      <div className="whitespace-pre-wrap">{renderTextWithLinks()}</div>
+      {/* Markdown rendered content */}
+      <div className="prose prose-sm prose-invert max-w-none">
+        <ReactMarkdown
+          components={{
+            // Custom heading styles
+            h1: ({ children }) => (
+              <h1 className="text-base font-bold text-white mt-3 mb-2 first:mt-0">{children}</h1>
+            ),
+            h2: ({ children }) => (
+              <h2 className="text-sm font-bold text-white mt-2 mb-1.5 first:mt-0">{children}</h2>
+            ),
+            h3: ({ children }) => (
+              <h3 className="text-sm font-semibold text-white/90 mt-2 mb-1 first:mt-0">{children}</h3>
+            ),
+            // Paragraph
+            p: ({ children }) => (
+              <p className="text-white/90 mb-2 last:mb-0 leading-relaxed">{children}</p>
+            ),
+            // Strong/bold text
+            strong: ({ children }) => (
+              <strong className="font-semibold text-white">{children}</strong>
+            ),
+            // Emphasis/italic
+            em: ({ children }) => (
+              <em className="italic text-white/80">{children}</em>
+            ),
+            // Lists
+            ul: ({ children }) => (
+              <ul className="list-disc list-inside space-y-1 mb-2 ml-1">{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="list-decimal list-inside space-y-1 mb-2 ml-1">{children}</ol>
+            ),
+            li: ({ children }) => (
+              <li className="text-white/90">{children}</li>
+            ),
+            // Links - styled as clickable
+            a: ({ href, children }) => (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors break-all"
+              >
+                {children}
+              </a>
+            ),
+            // Code blocks
+            code: ({ children, className }) => {
+              const isInline = !className;
+              return isInline ? (
+                <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs text-accent font-mono">
+                  {children}
+                </code>
+              ) : (
+                <code className="block bg-white/10 p-2 rounded-lg text-xs text-white/90 font-mono overflow-x-auto my-2">
+                  {children}
+                </code>
+              );
+            },
+            // Blockquote
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-2 border-accent/50 pl-3 my-2 text-white/70 italic">
+                {children}
+              </blockquote>
+            ),
+            // Horizontal rule
+            hr: () => <hr className="border-white/20 my-3" />,
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
       
       {/* URL buttons for quick access */}
       {isAssistant && uniqueUrls.length > 0 && (

@@ -76,8 +76,8 @@ const ArendaRopov = () => {
                   <p>{t('arenda.variablePartDesc3')}</p>
                   <p className="mt-4">
                     {t('arenda.moreDetails')}{' '}
-                    <a href="https://rentrop.top" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                      rentrop.top
+                    <a href="https://arenda-ropa.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                      arenda-ropa.com
                     </a>
                   </p>
                 </div>

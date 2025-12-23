@@ -3,32 +3,35 @@ import { ChevronDown, Send, Menu, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '@/assets/RR-Logo.png';
 import { SOCIAL_LINKS } from '@/constants/vacancy';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface HeaderProps {
   onNavigate: (section: string) => void;
 }
 
-const workPages = [
-  { name: 'Аренда РОПов', path: '/work/arenda-ropov' },
-  { name: 'О компании', path: '/work/about' },
-  { name: 'Сообщество', path: '/work/community' },
-  { name: 'Отчеты', path: '/work/reports' },
-  { name: 'ДПР', path: '/work/dpr' },
-  { name: 'Сотрудники', path: '/work/employees' },
-];
-
-const conditionsPages = [
-  { name: 'Мотивация', path: '/conditions/motivation' },
-  { name: 'Обучение', path: '/conditions/training' },
-  { name: 'Проекты', path: '/conditions/projects' },
-  { name: 'Оформление', path: '/conditions/registration' },
-  { name: 'Выплаты', path: '/conditions/payments' },
-];
-
 const Header = ({ onNavigate }: HeaderProps) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const workPages = [
+    { name: t('work.arendaRopov'), path: '/work/arenda-ropov' },
+    { name: t('work.about'), path: '/work/about' },
+    { name: t('work.community'), path: '/work/community' },
+    { name: t('work.reports'), path: '/work/reports' },
+    { name: t('work.dpr'), path: '/work/dpr' },
+    { name: t('work.employees'), path: '/work/employees' },
+  ];
+
+  const conditionsPages = [
+    { name: t('conditions.motivation'), path: '/conditions/motivation' },
+    { name: t('conditions.training'), path: '/conditions/training' },
+    { name: t('conditions.projects'), path: '/conditions/projects' },
+    { name: t('conditions.registration'), path: '/conditions/registration' },
+    { name: t('conditions.payments'), path: '/conditions/payments' },
+  ];
 
   return (
     <header className="fixed top-0 w-full z-50 glass-dark border-b border-white/10">
@@ -50,7 +53,7 @@ const Header = ({ onNavigate }: HeaderProps) => {
             to="/" 
             className="hover:text-accent transition-colors"
           >
-            Главная
+            {t('nav.home')}
           </Link>
 
           {/* Работа Dropdown */}
@@ -60,7 +63,7 @@ const Header = ({ onNavigate }: HeaderProps) => {
             onMouseLeave={() => setActiveDropdown(null)}
           >
             <Link to="/work" className="hover:text-accent transition-colors flex items-center gap-1">
-              Работа
+              {t('nav.work')}
               <ChevronDown className="w-4 h-4" />
             </Link>
             <div className={`absolute top-full left-0 mt-2 w-48 glass-dark rounded-2xl shadow-2xl py-2 transition-all duration-200 ${activeDropdown === 'work' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
@@ -84,7 +87,7 @@ const Header = ({ onNavigate }: HeaderProps) => {
             onMouseLeave={() => setActiveDropdown(null)}
           >
             <Link to="/conditions" className="hover:text-accent transition-colors flex items-center gap-1">
-              Условия
+              {t('nav.conditions')}
               <ChevronDown className="w-4 h-4" />
             </Link>
             <div className={`absolute top-full left-0 mt-2 w-48 glass-dark rounded-2xl shadow-2xl py-2 transition-all duration-200 ${activeDropdown === 'conditions' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
@@ -104,6 +107,8 @@ const Header = ({ onNavigate }: HeaderProps) => {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          
           <a 
             href={SOCIAL_LINKS.telegram} 
             target="_blank"
@@ -132,21 +137,21 @@ const Header = ({ onNavigate }: HeaderProps) => {
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/70 hover:text-accent transition-colors text-left py-2"
             >
-              Главная
+              {t('nav.home')}
             </Link>
             <Link 
               to="/work"
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/70 hover:text-accent transition-colors text-left py-2"
             >
-              Работа
+              {t('nav.work')}
             </Link>
             <Link 
               to="/conditions"
               onClick={() => setMobileMenuOpen(false)}
               className="text-white/70 hover:text-accent transition-colors text-left py-2"
             >
-              Условия
+              {t('nav.conditions')}
             </Link>
           </nav>
         </div>

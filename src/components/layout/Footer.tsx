@@ -1,7 +1,12 @@
 import { SOCIAL_LINKS } from '@/constants/vacancy';
 import logo from '@/assets/RR-Logo.png';
+import { useLanguage } from '@/contexts/LanguageContext';
+
 const Footer = () => {
-  return <footer className="gradient-primary border-t border-white/5 py-16">
+  const { t } = useLanguage();
+
+  return (
+    <footer className="gradient-primary border-t border-white/5 py-16">
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="text-center md:text-left">
@@ -11,7 +16,7 @@ const Footer = () => {
                 РентРОП <span className="text-gradient-gold">HR</span>
               </span>
             </div>
-            <p className="text-white/60 text-sm max-w-xs">Системно строим отделы продаж с 2017 года.</p>
+            <p className="text-white/60 text-sm max-w-xs">{t('footer.slogan')}</p>
           </div>
           
           <div className="flex gap-4">
@@ -33,8 +38,12 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/40 text-xs uppercase font-semibold tracking-widest">© 2026 РЕНТРОП. МЫ СТРОИМ ПРОДАЖИ — ВЫ СТРОИТЕ БУДУЩЕЕ.</div>
+        <div className="mt-12 pt-8 border-t border-white/10 text-center text-white/40 text-xs uppercase font-semibold tracking-widest">
+          {t('footer.copyright')}
+        </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

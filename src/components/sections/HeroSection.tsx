@@ -1,22 +1,9 @@
-import { Button } from '@/components/ui/button';
 import { RENTROP_VACANCY } from '@/constants/vacancy';
-import { ArrowRight, MapPin, Briefcase, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Briefcase, TrendingUp, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
-  const scrollToApply = () => {
-    const element = document.getElementById('apply');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const scrollToVacancy = () => {
-    const element = document.getElementById('vacancy');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <section id="hero" className="relative min-h-screen hero-gradient overflow-hidden">
       {/* Decorative elements */}
@@ -68,22 +55,24 @@ const HeroSection = () => {
 
           {/* CTAs */}
           <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in animate-delay-500">
-            <Button 
-              variant="cta" 
-              size="xl"
-              onClick={scrollToApply}
-              className="group"
-            >
-              Откликнуться сейчас
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button 
-              variant="glassDark" 
-              size="xl"
-              onClick={scrollToVacancy}
-            >
-              Узнать больше
-            </Button>
+            <Link to="/work">
+              <Button 
+                variant="cta" 
+                size="xl"
+                className="group"
+              >
+                Узнать о работе
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/conditions">
+              <Button 
+                variant="glassDark" 
+                size="xl"
+              >
+                Условия работы
+              </Button>
+            </Link>
           </div>
         </div>
 

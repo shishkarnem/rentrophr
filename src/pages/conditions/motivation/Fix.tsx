@@ -5,11 +5,10 @@ import { ArrowLeft, DollarSign, Clock, MapPin, Briefcase, AlertTriangle } from '
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
-import DownloadButton from '@/components/ui/DownloadButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
-import { AnimatedSection, AnimatedText, StaggerContainer, StaggerItem, Magnetic } from '@/components/ui/AnimatedSection';
+import { AnimatedSection, AnimatedText, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedSection';
 
 const Fix = () => {
   const { t } = useLanguage();
@@ -27,15 +26,12 @@ const Fix = () => {
           </AnimatedSection>
           
           <div className="max-w-4xl mx-auto">
-            <AnimatedSection variant="blurIn" className="flex items-center justify-between mb-8">
+            <AnimatedSection variant="blurIn" className="mb-8">
               <h1 className="text-4xl sm:text-5xl font-black text-white">
                 <span className="text-gradient-gold">
                   <AnimatedText text={t('fix.title')} />
                 </span>
               </h1>
-              <Magnetic>
-                <DownloadButton filename="fix" title={`${t('fix.title')} - РентРОП`} />
-              </Magnetic>
             </AnimatedSection>
             
             <AnimatedSection variant="morphIn" delay={0.2}>

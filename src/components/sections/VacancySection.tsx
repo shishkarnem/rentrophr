@@ -1,0 +1,91 @@
+import { RENTROP_VACANCY } from '@/constants/vacancy';
+import { CardGlass } from '@/components/ui/card';
+import { Target, CheckCircle2, Gift } from 'lucide-react';
+
+const VacancySection = () => {
+  return (
+    <section id="vacancy" className="py-24 bg-background">
+      <div className="container mx-auto px-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Section header */}
+          <div className="mb-16 text-center space-y-4">
+            <h2 className="text-4xl sm:text-5xl font-black text-foreground uppercase tracking-tight">
+              Детали позиции
+            </h2>
+            <div className="h-1 w-24 gradient-gold mx-auto rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main content - left side */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Responsibilities */}
+              <CardGlass className="p-10">
+                <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
+                    <Target className="w-5 h-5 text-primary" />
+                  </span>
+                  Ваши задачи
+                </h3>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {RENTROP_VACANCY.responsibilities.map((item, i) => (
+                    <li key={i} className="flex gap-4 text-muted-foreground text-sm leading-relaxed group">
+                      <div className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-accent group-hover:scale-150 transition-transform" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardGlass>
+
+              {/* Requirements */}
+              <CardGlass className="p-10">
+                <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                  </span>
+                  Что мы ждем от вас
+                </h3>
+                <ul className="space-y-4">
+                  {RENTROP_VACANCY.requirements.map((item, i) => (
+                    <li key={i} className="flex gap-4 text-muted-foreground text-sm leading-relaxed group">
+                      <div className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-accent group-hover:scale-150 transition-transform" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardGlass>
+            </div>
+
+            {/* Sidebar - right side */}
+            <div className="space-y-8">
+              {/* Benefits card */}
+              <CardGlass className="p-8 sticky top-28">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-xl gradient-cta flex items-center justify-center">
+                    <Gift className="w-5 h-5 text-white" />
+                  </span>
+                  Что вы получите
+                </h3>
+                <ul className="space-y-4">
+                  {RENTROP_VACANCY.benefits.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-sm leading-relaxed group">
+                      <span className="text-accent font-bold">✓</span>
+                      <span className="text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Salary highlight */}
+                <div className="mt-8 p-6 gradient-gold rounded-2xl text-center">
+                  <p className="text-sm font-semibold text-primary/70 mb-1">Зарплата</p>
+                  <p className="text-2xl font-black text-primary">{RENTROP_VACANCY.salary}</p>
+                </div>
+              </CardGlass>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default VacancySection;

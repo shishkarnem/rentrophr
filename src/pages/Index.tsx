@@ -1,12 +1,26 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/sections/HeroSection';
+import VacancySection from '@/components/sections/VacancySection';
+import AIChatSection from '@/components/sections/AIChatSection';
+import ApplicationSection from '@/components/sections/ApplicationSection';
 
 const Index = () => {
+  const handleNavigate = (section: string) => {
+    console.log('Navigate to:', section);
+    // Could implement page navigation here
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header onNavigate={handleNavigate} />
+      <main>
+        <HeroSection />
+        <VacancySection />
+        <AIChatSection />
+        <ApplicationSection />
+      </main>
+      <Footer />
     </div>
   );
 };

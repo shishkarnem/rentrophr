@@ -1,12 +1,12 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CardGlass } from '@/components/ui/card';
+import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ArendaRopov = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
@@ -16,20 +16,20 @@ const ArendaRopov = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-8">
+            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
               Аренда <span className="text-gradient-gold">РОПов</span>
             </h1>
             
             <div className="space-y-8">
-              <CardGlass className="p-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <CardGlassDark className="p-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <Building2 className="w-5 h-5 text-primary" />
                   </span>
                   Продукт
                 </h2>
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p className="text-lg font-semibold text-foreground">
+                <div className="space-y-4 text-white/70 leading-relaxed">
+                  <p className="text-lg font-semibold text-white">
                     Основной продукт — Аренда Руководителей Отделов Продаж.
                   </p>
                   <p>
@@ -37,16 +37,16 @@ const ArendaRopov = () => {
                     но выполняет обязанности РОПа у заказчика. Работает удаленно.
                   </p>
                 </div>
-              </CardGlass>
+              </CardGlassDark>
 
-              <CardGlass className="p-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <CardGlassDark className="p-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <DollarSign className="w-5 h-5 text-primary" />
                   </span>
                   Оплата труда
                 </h2>
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <div className="space-y-4 text-white/70 leading-relaxed">
                   <p>За работу РОП получает зарплату состоящую из двух частей:</p>
                   <ul className="space-y-4">
                     <li className="flex gap-3">
@@ -63,16 +63,16 @@ const ArendaRopov = () => {
                     </li>
                   </ul>
                 </div>
-              </CardGlass>
+              </CardGlassDark>
 
-              <CardGlass className="p-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <CardGlassDark className="p-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <Percent className="w-5 h-5 text-primary" />
                   </span>
                   Переменная часть
                 </h2>
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <div className="space-y-4 text-white/70 leading-relaxed">
                   <p>
                     Переменная часть на каждом проекте индивидуальна, как правило это процент с выручки отдела.
                   </p>
@@ -90,7 +90,7 @@ const ArendaRopov = () => {
                     </a>
                   </p>
                 </div>
-              </CardGlass>
+              </CardGlassDark>
             </div>
           </div>
         </div>

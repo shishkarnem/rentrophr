@@ -1,6 +1,6 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CardGlass } from '@/components/ui/card';
+import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const motivationItems = [
 
 const Motivation = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
@@ -24,12 +24,12 @@ const Motivation = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-8">
+            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
               <span className="text-gradient-gold">Мотивация</span>
             </h1>
             
-            <CardGlass className="p-8">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <CardGlassDark className="p-8">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-primary" />
                 </span>
@@ -37,12 +37,12 @@ const Motivation = () => {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {motivationItems.map((item, i) => (
-                  <div key={i} className="p-4 glass rounded-xl">
+                  <div key={i} className="p-4 glass-dark rounded-xl">
                     <div className="flex items-center gap-3 mb-2">
                       <item.icon className="w-5 h-5 text-accent" />
-                      <span className="font-semibold text-foreground">{item.name}</span>
+                      <span className="font-semibold text-white">{item.name}</span>
                     </div>
-                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                    <p className="text-white/60 text-sm">{item.description}</p>
                   </div>
                 ))}
               </div>
@@ -51,7 +51,7 @@ const Motivation = () => {
                 <p className="text-sm font-semibold text-primary/70 mb-1">Общий доход</p>
                 <p className="text-2xl font-black text-primary">от 150 000 до 450 000 ₽</p>
               </div>
-            </CardGlass>
+            </CardGlassDark>
           </div>
         </div>
       </main>

@@ -1,6 +1,6 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CardGlass } from '@/components/ui/card';
+import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, Users, GraduationCap, Scale, TrendingUp, Handshake, FolderKanban, Settings, Megaphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ const departments = [
 
 const Employees = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
@@ -26,12 +26,12 @@ const Employees = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-8">
+            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
               <span className="text-gradient-gold">Сотрудники</span>
             </h1>
             
-            <CardGlass className="p-8">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <CardGlassDark className="p-8">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                   <Users className="w-5 h-5 text-primary" />
                 </span>
@@ -39,13 +39,13 @@ const Employees = () => {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {departments.map((dept, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 glass rounded-xl">
+                  <div key={i} className="flex items-center gap-4 p-4 glass-dark rounded-xl">
                     <dept.icon className="w-6 h-6 text-accent flex-shrink-0" />
-                    <span className="text-foreground font-medium">{dept.name}</span>
+                    <span className="text-white font-medium">{dept.name}</span>
                   </div>
                 ))}
               </div>
-            </CardGlass>
+            </CardGlassDark>
           </div>
         </div>
       </main>

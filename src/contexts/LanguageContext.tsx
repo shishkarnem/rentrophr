@@ -1,11 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ru' | 'en' | 'kz';
+
+interface Translation {
+  key: string;
+  text_ru: string;
+  text_en: string;
+  text_kz: string;
+}
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  loading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

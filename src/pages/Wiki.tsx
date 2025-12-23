@@ -265,39 +265,6 @@ const Wiki = () => {
             )}
           </AnimatePresence>
 
-          {/* Category Filter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="max-w-3xl mx-auto mb-8"
-          >
-            <div className="flex flex-wrap gap-2 justify-center">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedCategory === null
-                    ? 'bg-accent text-white'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
-                }`}
-              >
-                {language === 'ru' ? 'Все' : language === 'en' ? 'All' : 'Барлығы'}
-              </button>
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedCategory === category
-                      ? 'bg-accent text-white'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  {getCategoryLabel(category)}
-                </button>
-              ))}
-            </div>
-          </motion.div>
 
           {/* FAQ List */}
           <div className="max-w-3xl mx-auto space-y-6">

@@ -33,7 +33,7 @@ const Training = () => {
       opacity: 1,
       scale: 1,
       rotateY: 0,
-      transition: { duration: 0.5, delay: 0.4 + i * 0.1, type: 'spring', stiffness: 100 }
+      transition: { duration: 0.5, delay: 0.4 + i * 0.1, type: 'spring' as const, stiffness: 100 }
     })
   };
 

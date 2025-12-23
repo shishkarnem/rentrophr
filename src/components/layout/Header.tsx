@@ -71,10 +71,6 @@ const Header = ({
             {t('nav.home')}
           </Link>
 
-          <Link to="/wiki" className="hover:text-accent transition-colors">
-            {t('nav.wiki')}
-          </Link>
-
           {/* Работа Dropdown */}
           <div className="relative" onMouseEnter={() => setActiveDropdown('work')} onMouseLeave={() => setActiveDropdown(null)}>
             <Link to="/work" className="hover:text-accent transition-colors flex items-center gap-1">
@@ -100,6 +96,10 @@ const Header = ({
                 </Link>)}
             </div>
           </div>
+
+          <Link to="/wiki" className="hover:text-accent transition-colors">
+            {t('nav.wiki')}
+          </Link>
         </nav>
 
         {/* Right side */}
@@ -121,14 +121,14 @@ const Header = ({
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.home')}
             </Link>
-            <Link to="/wiki" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
-              {t('nav.wiki')}
-            </Link>
             <Link to="/work" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.work')}
             </Link>
             <Link to="/conditions" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.conditions')}
+            </Link>
+            <Link to="/wiki" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
+              {t('nav.wiki')}
             </Link>
           </nav>
         </div>}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TelegramUser {
   id: number;
@@ -66,51 +67,6 @@ interface TelegramProfile {
   updated_at: string;
 }
 
-// Get the initData from Telegram WebApp
-function getInitData(): string | null {
-  const tg = window.Telegram?.WebApp;
-  return tg?.initData || null;
-}
-
-// Get functions URL
-function getFunctionsUrl(): string {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  return `${supabaseUrl}/functions/v1`;
-}
-
-// Call edge function with Telegram initData
-async function callProfileFunction(action: string, updates?: Record<string, unknown>): Promise<TelegramProfile | null> {
-  const initData = getInitData();
-  if (!initData) {
-    console.error('No Telegram init data available');
-    return null;
-  }
-
-  try {
-    const response = await fetch(`${getFunctionsUrl()}/telegram-profile`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-telegram-init-data': initData,
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      body: JSON.stringify({ action, updates }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Profile function error:', error);
-      return null;
-    }
-
-    const data = await response.json();
-    return data.profile;
-  } catch (error) {
-    console.error('Error calling profile function:', error);
-    return null;
-  }
-}
-
 export const useTelegramWebApp = () => {
   const [isTelegram, setIsTelegram] = useState(false);
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
@@ -132,11 +88,8 @@ export const useTelegramWebApp = () => {
           tg.ready();
           tg.expand();
           
-          // Save or update profile via edge function
-          const profileData = await callProfileFunction('upsert');
-          if (profileData) {
-            setProfile(profileData);
-          }
+          // Save or update profile in database
+          await saveOrUpdateProfile(user);
         } else {
           setIsTelegram(false);
         }
@@ -151,16 +104,84 @@ export const useTelegramWebApp = () => {
     initTelegram();
   }, []);
 
+  const saveOrUpdateProfile = async (user: TelegramUser) => {
+    try {
+      // Check if profile exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('telegram_profiles')
+        .select('*')
+        .eq('telegram_id', user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', fetchError);
+        return;
+      }
+
+      if (existingProfile) {
+        // Update existing profile with new data from Telegram
+        const { data: updatedProfile, error: updateError } = await supabase
+          .from('telegram_profiles')
+          .update({
+            username: user.username || existingProfile.username,
+            first_name: user.first_name || existingProfile.first_name,
+            last_name: user.last_name || existingProfile.last_name,
+            language_code: user.language_code || existingProfile.language_code,
+            photo_url: user.photo_url || existingProfile.photo_url,
+          })
+          .eq('telegram_id', user.id)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Error updating profile:', updateError);
+        } else {
+          setProfile(updatedProfile);
+        }
+      } else {
+        // Create new profile
+        const { data: newProfile, error: insertError } = await supabase
+          .from('telegram_profiles')
+          .insert({
+            telegram_id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            language_code: user.language_code || 'ru',
+            photo_url: user.photo_url,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        } else {
+          setProfile(newProfile);
+        }
+      }
+    } catch (error) {
+      console.error('Error in saveOrUpdateProfile:', error);
+    }
+  };
+
   const updateProfile = async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
     if (!profile) return null;
 
     try {
-      const updatedProfile = await callProfileFunction('update', updates);
-      if (updatedProfile) {
-        setProfile(updatedProfile);
-        return updatedProfile;
+      const { data, error } = await supabase
+        .from('telegram_profiles')
+        .update(updates)
+        .eq('telegram_id', profile.telegram_id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        return null;
       }
-      return null;
+
+      setProfile(data);
+      return data;
     } catch (error) {
       console.error('Error in updateProfile:', error);
       return null;
@@ -170,39 +191,28 @@ export const useTelegramWebApp = () => {
   const uploadPhoto = async (file: File): Promise<string | null> => {
     if (!profile) return null;
 
-    const initData = getInitData();
-    if (!initData) {
-      console.error('No Telegram init data available');
-      return null;
-    }
-
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profile.telegram_id}_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-      const response = await fetch(`${getFunctionsUrl()}/telegram-storage`, {
-        method: 'POST',
-        headers: {
-          'x-telegram-init-data': initData,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: formData,
-      });
+      const { error: uploadError } = await supabase.storage
+        .from('profile-photos')
+        .upload(filePath, file, { upsert: true });
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Upload error:', error);
+      if (uploadError) {
+        console.error('Error uploading photo:', uploadError);
         return null;
       }
 
-      const data = await response.json();
-      
-      // Update local profile with new photo URL
-      if (data.url) {
-        setProfile(prev => prev ? { ...prev, photo_url: data.url } : null);
-      }
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(filePath);
 
-      return data.url;
+      // Update profile with new photo URL
+      await updateProfile({ photo_url: publicUrl });
+
+      return publicUrl;
     } catch (error) {
       console.error('Error in uploadPhoto:', error);
       return null;
@@ -212,13 +222,14 @@ export const useTelegramWebApp = () => {
   const refetchProfile = async () => {
     if (!telegramUser) return;
 
-    try {
-      const profileData = await callProfileFunction('get');
-      if (profileData) {
-        setProfile(profileData);
-      }
-    } catch (error) {
-      console.error('Error refetching profile:', error);
+    const { data, error } = await supabase
+      .from('telegram_profiles')
+      .select('*')
+      .eq('telegram_id', telegramUser.id)
+      .single();
+
+    if (!error && data) {
+      setProfile(data);
     }
   };
 

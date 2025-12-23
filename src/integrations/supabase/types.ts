@@ -55,27 +55,42 @@ export type Database = {
       faq_knowledge: {
         Row: {
           answer: string
+          answer_en: string | null
+          answer_kz: string | null
+          category: string | null
           created_at: string
           id: string
           question: string
+          question_en: string | null
+          question_kz: string | null
           row_hash: string | null
           search_keywords: string | null
           updated_at: string
         }
         Insert: {
           answer: string
+          answer_en?: string | null
+          answer_kz?: string | null
+          category?: string | null
           created_at?: string
           id?: string
           question: string
+          question_en?: string | null
+          question_kz?: string | null
           row_hash?: string | null
           search_keywords?: string | null
           updated_at?: string
         }
         Update: {
           answer?: string
+          answer_en?: string | null
+          answer_kz?: string | null
+          category?: string | null
           created_at?: string
           id?: string
           question?: string
+          question_en?: string | null
+          question_kz?: string | null
           row_hash?: string | null
           search_keywords?: string | null
           updated_at?: string

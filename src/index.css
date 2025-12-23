@@ -154,6 +154,10 @@
     background: linear-gradient(135deg, hsl(var(--primary-start)), hsl(var(--primary-end)));
   }
 
+  /* Primary Gradient (Vertical) */
+  .gradient-primary-vertical {
+    background: linear-gradient(180deg, hsl(var(--primary-start)), hsl(var(--primary-end)));
+  }
   /* Gold Gradient */
   .gradient-gold {
     background: linear-gradient(135deg, hsl(var(--gold-start)), hsl(var(--gold-end)));

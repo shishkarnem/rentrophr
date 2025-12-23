@@ -6,6 +6,8 @@ import { SOCIAL_LINKS } from '@/constants/vacancy';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import SmartSearch from '@/components/SmartSearch';
+import ProfileIcon from '@/components/ProfileIcon';
+
 interface HeaderProps {
   onNavigate: (section: string) => void;
 }
@@ -100,6 +102,7 @@ const Header = ({
         <div className="flex items-center gap-4">
           <SmartSearch />
           <LanguageSwitcher />
+          <ProfileIcon />
           
           <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-accent transition-colors">
             <Send className="w-5 h-5" />

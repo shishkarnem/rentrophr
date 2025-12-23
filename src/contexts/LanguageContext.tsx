@@ -373,7 +373,10 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // AI Assistant
     'ai.placeholder': 'Задайте вопрос о вакансии...',
-    'ai.title': 'AI Ассистент',
+    'ai.title': 'AI-Консультант',
+    'ai.subtitle': 'РентРОП',
+    'ai.greeting': 'Привет! Я AI-ассистент РентРОП. Задайте мне любой вопрос о вакансии, условиях работы или компании.',
+    'ai.error': 'Извините, произошла ошибка. Попробуйте еще раз.',
   },
   en: {
     // Navigation
@@ -737,7 +740,10 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // AI Assistant
     'ai.placeholder': 'Ask a question about the vacancy...',
-    'ai.title': 'AI Assistant',
+    'ai.title': 'AI Consultant',
+    'ai.subtitle': 'RentROP',
+    'ai.greeting': 'Hello! I am the RentROP AI assistant. Ask me any question about the vacancy, working conditions, or the company.',
+    'ai.error': 'Sorry, an error occurred. Please try again.',
   },
   kz: {
     // Navigation
@@ -1101,7 +1107,10 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // AI Assistant
     'ai.placeholder': 'Вакансия туралы сұрақ қойыңыз...',
-    'ai.title': 'AI Көмекші',
+    'ai.title': 'AI Кеңесші',
+    'ai.subtitle': 'РентРОП',
+    'ai.greeting': 'Сәлеметсіз бе! Мен РентРОП AI көмекшісімін. Вакансия, жұмыс шарттары немесе компания туралы кез келген сұрақ қойыңыз.',
+    'ai.error': 'Кешіріңіз, қате орын алды. Қайталап көріңіз.',
   },
 };
 

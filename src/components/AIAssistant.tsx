@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -8,14 +9,18 @@ interface Message {
 }
 
 const AIAssistant = () => {
+  const { language, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Привет! Я AI-ассистент РентРОП. Задайте мне любой вопрос о вакансии, условиях работы или компании.' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Set initial greeting based on language
+  useEffect(() => {
+    setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
+  }, [language, t]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,7 +57,8 @@ const AIAssistant = () => {
           messages: [...messages.slice(1), userMessage].map(m => ({
             role: m.role,
             content: m.content
-          }))
+          })),
+          language: language
         }),
       });
 
@@ -108,7 +114,7 @@ const AIAssistant = () => {
       }
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Извините, произошла ошибка. Попробуйте еще раз.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: t('ai.error') }]);
     } finally {
       setIsLoading(false);
     }
@@ -169,8 +175,8 @@ const AIAssistant = () => {
                 <Bot className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-sm">AI-Консультант</h3>
-                <p className="text-white/50 text-xs">РентРОП</p>
+                <h3 className="text-white font-semibold text-sm">{t('ai.title')}</h3>
+                <p className="text-white/50 text-xs">{t('ai.subtitle')}</p>
               </div>
             </div>
             <button
@@ -244,7 +250,7 @@ const AIAssistant = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Задайте вопрос..."
+                placeholder={t('ai.placeholder')}
                 className="flex-1 bg-transparent text-white placeholder:text-white/40 text-sm px-2 outline-none"
                 disabled={isLoading}
               />

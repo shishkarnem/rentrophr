@@ -72,7 +72,7 @@ const Header = ({
           </Link>
 
           <Link to="/wiki" className="hover:text-accent transition-colors">
-            Вики
+            {t('nav.wiki')}
           </Link>
 
           {/* Работа Dropdown */}
@@ -122,7 +122,7 @@ const Header = ({
               {t('nav.home')}
             </Link>
             <Link to="/wiki" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
-              Вики
+              {t('nav.wiki')}
             </Link>
             <Link to="/work" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.work')}

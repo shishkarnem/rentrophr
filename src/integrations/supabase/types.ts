@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      faq_knowledge: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          row_hash: string | null
+          search_keywords: string | null
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question: string
+          row_hash?: string | null
+          search_keywords?: string | null
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          row_hash?: string | null
+          search_keywords?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       translations: {
         Row: {
           category: string | null

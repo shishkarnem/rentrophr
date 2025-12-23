@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 interface TelegramUser {
   id: number;
@@ -73,10 +72,43 @@ function getInitData(): string | null {
   return tg?.initData || null;
 }
 
-// Get Supabase functions URL
+// Get functions URL
 function getFunctionsUrl(): string {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   return `${supabaseUrl}/functions/v1`;
+}
+
+// Call edge function with Telegram initData
+async function callProfileFunction(action: string, updates?: Record<string, unknown>): Promise<TelegramProfile | null> {
+  const initData = getInitData();
+  if (!initData) {
+    console.error('No Telegram init data available');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${getFunctionsUrl()}/telegram-profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-telegram-init-data': initData,
+        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ action, updates }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Profile function error:', error);
+      return null;
+    }
+
+    const data = await response.json();
+    return data.profile;
+  } catch (error) {
+    console.error('Error calling profile function:', error);
+    return null;
+  }
 }
 
 export const useTelegramWebApp = () => {
@@ -84,39 +116,6 @@ export const useTelegramWebApp = () => {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
   const [profile, setProfile] = useState<TelegramProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Call edge function with Telegram initData
-  const callProfileFunction = useCallback(async (action: string, updates?: Record<string, unknown>) => {
-    const initData = getInitData();
-    if (!initData) {
-      console.error('No Telegram init data available');
-      return null;
-    }
-
-    try {
-      const response = await fetch(`${getFunctionsUrl()}/telegram-profile`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-telegram-init-data': initData,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({ action, updates }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Profile function error:', error);
-        return null;
-      }
-
-      const data = await response.json();
-      return data.profile;
-    } catch (error) {
-      console.error('Error calling profile function:', error);
-      return null;
-    }
-  }, []);
 
   useEffect(() => {
     const initTelegram = async () => {
@@ -150,9 +149,9 @@ export const useTelegramWebApp = () => {
     };
 
     initTelegram();
-  }, [callProfileFunction]);
+  }, []);
 
-  const updateProfile = useCallback(async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
+  const updateProfile = async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
     if (!profile) return null;
 
     try {
@@ -166,9 +165,9 @@ export const useTelegramWebApp = () => {
       console.error('Error in updateProfile:', error);
       return null;
     }
-  }, [profile, callProfileFunction]);
+  };
 
-  const uploadPhoto = useCallback(async (file: File): Promise<string | null> => {
+  const uploadPhoto = async (file: File): Promise<string | null> => {
     if (!profile) return null;
 
     const initData = getInitData();
@@ -208,9 +207,9 @@ export const useTelegramWebApp = () => {
       console.error('Error in uploadPhoto:', error);
       return null;
     }
-  }, [profile]);
+  };
 
-  const refetchProfile = useCallback(async () => {
+  const refetchProfile = async () => {
     if (!telegramUser) return;
 
     try {
@@ -221,7 +220,7 @@ export const useTelegramWebApp = () => {
     } catch (error) {
       console.error('Error refetching profile:', error);
     }
-  }, [telegramUser, callProfileFunction]);
+  };
 
   return {
     isTelegram,

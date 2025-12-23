@@ -17,7 +17,6 @@ const SmartSearch = () => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -65,19 +64,6 @@ const SmartSearch = () => {
       return titleMatch || categoryMatch || keywordMatch;
     }).slice(0, 8); // Limit to 8 results
   }, [query, searchItems]);
-
-  // Handle click outside to close
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-        setQuery('');
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Focus input when opened
   useEffect(() => {
@@ -137,18 +123,14 @@ const SmartSearch = () => {
   };
 
   return (
-    <div ref={containerRef} className="relative">
-      {/* Search trigger button */}
+    <>
+      {/* Search trigger button - only icon */}
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 text-white/60 hover:text-accent transition-colors px-2 py-1.5 rounded-lg hover:bg-white/5"
-        aria-label={t('search.placeholder')}
+        className="flex items-center justify-center text-white/60 hover:text-accent transition-colors p-2 rounded-lg hover:bg-white/5"
+        aria-label="Поиск"
       >
         <Search className="w-5 h-5" />
-        <span className="hidden md:inline text-xs font-medium">{t('search.button')}</span>
-        <kbd className="hidden md:inline text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40">
-          ⌘K
-        </kbd>
       </button>
 
       {/* Search modal */}
@@ -160,7 +142,7 @@ const SmartSearch = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
               onClick={() => {
                 setIsOpen(false);
                 setQuery('');
@@ -169,33 +151,33 @@ const SmartSearch = () => {
 
             {/* Search container */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.15 }}
-              className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 px-4"
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed top-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg z-[101]"
             >
-              <div className="glass-dark rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+              <div className="bg-[#1a1a2e] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                 {/* Search input */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-                  <Search className="w-5 h-5 text-white/40" />
+                <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+                  <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
                   <input
                     ref={inputRef}
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={t('search.placeholder')}
+                    placeholder="Поиск по сайту..."
                     className="flex-1 bg-transparent text-white placeholder:text-white/40 outline-none text-base"
                   />
                   {query && (
                     <button
                       onClick={() => setQuery('')}
-                      className="text-white/40 hover:text-white/60 transition-colors"
+                      className="text-white/40 hover:text-white/60 transition-colors flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
-                  <kbd className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40">
+                  <kbd className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 flex-shrink-0">
                     ESC
                   </kbd>
                 </div>
@@ -204,7 +186,7 @@ const SmartSearch = () => {
                 <div className="max-h-80 overflow-y-auto">
                   {query && filteredResults.length === 0 ? (
                     <div className="px-4 py-8 text-center text-white/40 text-sm">
-                      {t('search.noResults')}
+                      Ничего не найдено
                     </div>
                   ) : (
                     <div className="py-2">
@@ -219,7 +201,7 @@ const SmartSearch = () => {
                               : 'text-white/70 hover:bg-white/5'
                           }`}
                         >
-                          <Search className="w-4 h-4 text-white/40" />
+                          <Search className="w-4 h-4 text-white/40 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="font-medium truncate">{item.title}</div>
                             <div className="text-xs text-white/40 truncate">{item.category}</div>
@@ -237,10 +219,10 @@ const SmartSearch = () => {
                 {filteredResults.length > 0 && (
                   <div className="px-4 py-2 border-t border-white/10 flex items-center gap-4 text-[10px] text-white/30">
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white/10 px-1 rounded">↑↓</kbd> {t('search.navigate')}
+                      <kbd className="bg-white/10 px-1 rounded">↑↓</kbd> навигация
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white/10 px-1 rounded">↵</kbd> {t('search.select')}
+                      <kbd className="bg-white/10 px-1 rounded">↵</kbd> выбрать
                     </span>
                   </div>
                 )}
@@ -249,7 +231,7 @@ const SmartSearch = () => {
           </>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 

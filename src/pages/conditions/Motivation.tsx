@@ -3,6 +3,8 @@ import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import tariffTable from '@/assets/tariff-table.jpg';
+import motivationTable from '@/assets/motivation-table.jpg';
 
 const motivationItems = [
   { name: 'Фикс', description: 'Фиксированная часть зарплаты — оклад за работу', icon: DollarSign, path: '/conditions/motivation/fix' },
@@ -57,6 +59,19 @@ const Motivation = () => {
               <div className="mt-8 p-6 gradient-gold rounded-2xl text-center">
                 <p className="text-sm font-semibold text-primary/70 mb-1">Общий доход</p>
                 <p className="text-2xl font-black text-primary">от 150 000 до 450 000 ₽</p>
+              </div>
+
+              {/* Таблицы */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-white mb-4">Тарифы и расчёт мотивации</h3>
+                <div className="space-y-4">
+                  <a href={tariffTable} target="_blank" rel="noopener noreferrer" className="block">
+                    <img src={tariffTable} alt="Тарифная сетка" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                  </a>
+                  <a href={motivationTable} target="_blank" rel="noopener noreferrer" className="block">
+                    <img src={motivationTable} alt="Таблица мотивации" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                  </a>
+                </div>
               </div>
             </CardGlassDark>
           </div>

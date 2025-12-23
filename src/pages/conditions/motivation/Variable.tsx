@@ -3,6 +3,8 @@ import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, Percent, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import tariffTable from '@/assets/tariff-table.jpg';
+import motivationTable from '@/assets/motivation-table.jpg';
 
 const Variable = () => {
   return (
@@ -61,6 +63,19 @@ const Variable = () => {
               <div className="p-6 gradient-gold rounded-2xl text-center">
                 <p className="text-sm font-semibold text-primary/70 mb-1">Премия начисляется</p>
                 <p className="text-xl font-black text-primary">Исходя из размера выручки отдела</p>
+              </div>
+
+              {/* Таблицы */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4">Расчёт мотивации</h3>
+                <div className="space-y-4">
+                  <a href={motivationTable} target="_blank" rel="noopener noreferrer" className="block">
+                    <img src={motivationTable} alt="Таблица мотивации" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                  </a>
+                  <a href={tariffTable} target="_blank" rel="noopener noreferrer" className="block">
+                    <img src={tariffTable} alt="Тарифная сетка" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                  </a>
+                </div>
               </div>
             </CardGlassDark>
           </div>

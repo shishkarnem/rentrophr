@@ -141,7 +141,7 @@ const Profile = () => {
             </div>
             <button
               onClick={handlePhotoClick}
-              className="absolute bottom-0 right-0 p-2 bg-accent rounded-full text-white hover:bg-accent/80 transition-colors"
+              className="absolute bottom-0 right-0 p-2 bg-accent rounded-full text-primary hover:bg-accent/80 transition-colors"
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -211,10 +211,10 @@ const Profile = () => {
               <Button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full bg-accent hover:bg-accent/80"
+                className="w-full bg-accent hover:bg-accent/80 text-primary"
               >
                 {isSaving ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />

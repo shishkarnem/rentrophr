@@ -1132,16 +1132,100 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return 'ru';
   });
 
+  const [dbTranslations, setDbTranslations] = useState<Record<string, Translation>>({});
+  const [loading, setLoading] = useState(true);
+
+  // Fetch translations from database
+  useEffect(() => {
+    const fetchTranslations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('translations')
+          .select('key, text_ru, text_en, text_kz');
+
+        if (error) {
+          console.error('Error fetching translations:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (data) {
+          const translationsMap: Record<string, Translation> = {};
+          data.forEach((item) => {
+            translationsMap[item.key] = item;
+          });
+          setDbTranslations(translationsMap);
+        }
+      } catch (err) {
+        console.error('Failed to fetch translations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTranslations();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('translations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'translations'
+        },
+        (payload) => {
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const newData = payload.new as Translation;
+            setDbTranslations(prev => ({
+              ...prev,
+              [newData.key]: newData
+            }));
+          } else if (payload.eventType === 'DELETE') {
+            const oldData = payload.old as { key: string };
+            setDbTranslations(prev => {
+              const updated = { ...prev };
+              delete updated[oldData.key];
+              return updated;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
 
   const t = (key: string): string => {
-    return translations[language][key] || translations['ru'][key] || key;
+    // First try to get from database
+    const dbTranslation = dbTranslations[key];
+    
+    if (dbTranslation) {
+      switch (language) {
+        case 'ru':
+          return dbTranslation.text_ru || translations.ru[key] || key;
+        case 'en':
+          return dbTranslation.text_en || dbTranslation.text_ru || translations.en?.[key] || translations.ru[key] || key;
+        case 'kz':
+          return dbTranslation.text_kz || dbTranslation.text_ru || translations.kz?.[key] || translations.ru[key] || key;
+        default:
+          return dbTranslation.text_ru || translations.ru[key] || key;
+      }
+    }
+
+    // Fallback to hardcoded translations
+    return translations[language]?.[key] || translations.ru?.[key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, loading: false }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, loading }}>
       {children}
     </LanguageContext.Provider>
   );

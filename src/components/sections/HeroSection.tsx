@@ -2,89 +2,176 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Briefcase, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { motion } from 'framer-motion';
+import { AnimatedSection, AnimatedText, Magnetic, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedSection';
 
 const HeroSection = () => {
   const { t } = useLanguage();
 
   return (
     <section id="hero" className="relative min-h-screen hero-gradient overflow-hidden">
-      {/* Decorative elements */}
+      {/* Decorative elements with parallax */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-glow" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary-end/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gold-end/10 rounded-full blur-2xl animate-float" />
+        <motion.div 
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ 
+            duration: 4, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary-end/20 rounded-full blur-3xl"
+          animate={{ 
+            x: [0, 30, 0],
+            y: [0, -20, 0]
+          }}
+          transition={{ 
+            duration: 6, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/2 right-1/3 w-64 h-64 bg-gold-end/10 rounded-full blur-2xl"
+          animate={{ 
+            rotate: [0, 360],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
       </div>
 
       {/* Content */}
       <div className="relative container mx-auto px-6 pt-32 pb-20 min-h-screen flex flex-col justify-center">
         <div className="max-w-4xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 glass-dark px-4 py-2 rounded-full mb-8 opacity-0 animate-fade-in">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-sm text-white/80 font-medium">{t('hero.badge')}</span>
-          </div>
+          <AnimatedSection variant="blurIn" delay={0}>
+            <div className="inline-flex items-center gap-2 glass-dark px-4 py-2 rounded-full mb-8">
+              <motion.span 
+                className="w-2 h-2 rounded-full bg-green-400"
+                animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span className="text-sm text-white/80 font-medium">{t('hero.badge')}</span>
+            </div>
+          </AnimatedSection>
 
           {/* Title */}
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-tight mb-6 opacity-0 animate-fade-in animate-delay-100">
-            {t('hero.title')}
-          </h1>
+          <AnimatedSection variant="slideUp" delay={0.1} className="mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-tight">
+              <AnimatedText text={t('hero.title')} delay={0.2} />
+            </h1>
+          </AnimatedSection>
 
           {/* Salary highlight */}
-          <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8 opacity-0 animate-fade-in animate-delay-200">
-            <span className="text-gradient-gold">{t('hero.salary')}</span>
-          </div>
+          <AnimatedSection variant="glitchIn" delay={0.3} className="mb-8">
+            <motion.div 
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <span className="text-gradient-gold">{t('hero.salary')}</span>
+            </motion.div>
+          </AnimatedSection>
 
           {/* Description */}
-          <p className="text-lg sm:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed opacity-0 animate-fade-in animate-delay-300">
-            {t('hero.description')}
-          </p>
+          <AnimatedSection variant="fadeUp" delay={0.4} className="mb-10">
+            <p className="text-lg sm:text-xl text-white/70 max-w-2xl leading-relaxed">
+              {t('hero.description')}
+            </p>
+          </AnimatedSection>
 
           {/* Meta info */}
-          <div className="flex flex-wrap gap-4 mb-12 opacity-0 animate-fade-in animate-delay-400">
-            <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
-              <MapPin className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">{t('hero.location')}</span>
-            </div>
-            <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
-              <Briefcase className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">{t('hero.type')}</span>
-            </div>
-            <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
-              <TrendingUp className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">{t('hero.careerGrowth')}</span>
-            </div>
-          </div>
+          <StaggerContainer className="flex flex-wrap gap-4 mb-12" staggerDelay={0.1}>
+            <StaggerItem variant="elasticIn">
+              <Magnetic>
+                <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
+                  <MapPin className="w-4 h-4 text-accent" />
+                  <span className="text-sm text-white/80">{t('hero.location')}</span>
+                </div>
+              </Magnetic>
+            </StaggerItem>
+            <StaggerItem variant="elasticIn">
+              <Magnetic>
+                <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
+                  <Briefcase className="w-4 h-4 text-accent" />
+                  <span className="text-sm text-white/80">{t('hero.type')}</span>
+                </div>
+              </Magnetic>
+            </StaggerItem>
+            <StaggerItem variant="elasticIn">
+              <Magnetic>
+                <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
+                  <TrendingUp className="w-4 h-4 text-accent" />
+                  <span className="text-sm text-white/80">{t('hero.careerGrowth')}</span>
+                </div>
+              </Magnetic>
+            </StaggerItem>
+          </StaggerContainer>
 
           {/* CTAs */}
-          <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in animate-delay-500">
-            <Link to="/work">
-              <Button 
-                variant="cta" 
-                size="xl"
-                className="group"
-              >
-                {t('hero.learnWork')}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link to="/conditions">
-              <Button 
-                variant="glassDark" 
-                size="xl"
-              >
-                {t('hero.workConditions')}
-              </Button>
-            </Link>
-          </div>
+          <AnimatedSection variant="scaleUp" delay={0.6}>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/work">
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <Button 
+                    variant="cta" 
+                    size="xl"
+                    className="group"
+                  >
+                    {t('hero.learnWork')}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              </Link>
+              <Link to="/conditions">
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <Button 
+                    variant="glassDark" 
+                    size="xl"
+                  >
+                    {t('hero.workConditions')}
+                  </Button>
+                </motion.div>
+              </Link>
+            </div>
+          </AnimatedSection>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-0 animate-fade-in animate-delay-500">
-          <span className="text-white/40 text-xs uppercase tracking-widest">{t('hero.scrollDown')}</span>
-          <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
-            <div className="w-1 h-2 bg-accent rounded-full animate-bounce" />
-          </div>
-        </div>
+        <AnimatedSection variant="fadeUp" delay={0.8} className="absolute bottom-10 left-1/2 -translate-x-1/2">
+          <motion.div 
+            className="flex flex-col items-center gap-2"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <span className="text-white/40 text-xs uppercase tracking-widest">{t('hero.scrollDown')}</span>
+            <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
+              <motion.div 
+                className="w-1 h-2 bg-accent rounded-full"
+                animate={{ y: [0, 12, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
+        </AnimatedSection>
       </div>
     </section>
   );

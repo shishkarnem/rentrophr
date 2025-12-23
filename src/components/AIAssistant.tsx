@@ -1,12 +1,61 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+const STORAGE_KEY = 'ai_chat_history';
+const SESSION_KEY = 'ai_chat_session_id';
+
+// Generate unique session ID
+const getSessionId = (): string => {
+  let sessionId = localStorage.getItem(SESSION_KEY);
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem(SESSION_KEY, sessionId);
+  }
+  return sessionId;
+};
+
+// Save messages to localStorage
+const saveToLocalStorage = (messages: Message[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  } catch (e) {
+    console.error('Failed to save chat history:', e);
+  }
+};
+
+// Load messages from localStorage
+const loadFromLocalStorage = (): Message[] | null => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (e) {
+    console.error('Failed to load chat history:', e);
+    return null;
+  }
+};
+
+// Log chat to database
+const logChatToDatabase = async (userMessage: string, assistantResponse: string, language: string) => {
+  try {
+    const sessionId = getSessionId();
+    await supabase.from('ai_chat_logs').insert({
+      session_id: sessionId,
+      user_message: userMessage,
+      assistant_response: assistantResponse,
+      language: language
+    });
+  } catch (e) {
+    console.error('Failed to log chat:', e);
+  }
+};
 
 // Quick reply suggestions based on language
 const getQuickReplies = (language: string) => {
@@ -121,14 +170,40 @@ const AIAssistant = () => {
   const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const initializedRef = useRef(false);
 
   const quickReplies = getQuickReplies(language);
 
-  // Set initial greeting based on language
+  // Load chat history from localStorage on mount
   useEffect(() => {
-    setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
+    const savedMessages = loadFromLocalStorage();
+    if (savedMessages && savedMessages.length > 0) {
+      setMessages(savedMessages);
+      setShowQuickReplies(false);
+    } else {
+      setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
+      setShowQuickReplies(true);
+    }
+  }, [t]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0 && initializedRef.current) {
+      saveToLocalStorage(messages);
+    }
+  }, [messages]);
+
+  // Clear chat history
+  const clearHistory = useCallback(() => {
+    const greeting: Message = { role: 'assistant', content: t('ai.greeting') };
+    setMessages([greeting]);
     setShowQuickReplies(true);
-  }, [language, t]);
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SESSION_KEY);
+  }, [t]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -222,6 +297,11 @@ const AIAssistant = () => {
           }
         }
       }
+
+      // Log to database after response is complete
+      if (assistantContent) {
+        logChatToDatabase(textToSend, assistantContent, language);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { role: 'assistant', content: t('ai.error') }]);
@@ -293,12 +373,23 @@ const AIAssistant = () => {
                 <p className="text-white/50 text-xs">{t('ai.subtitle')}</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-              <X className="w-5 h-5 text-white/70" />
-            </button>
+            <div className="flex items-center gap-1">
+              {messages.length > 1 && (
+                <button
+                  onClick={clearHistory}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                  title="Очистить историю"
+                >
+                  <Trash2 className="w-4 h-4 text-white/50 hover:text-white/70" />
+                </button>
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5 text-white/70" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}

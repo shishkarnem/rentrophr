@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTelegram } from '@/contexts/TelegramContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
@@ -11,6 +12,7 @@ interface Message {
 
 const STORAGE_KEY = 'ai_chat_history';
 const SESSION_KEY = 'ai_chat_session_id';
+const TELEGRAM_STORAGE_KEY = 'ai_chat_history_telegram_';
 
 // Generate unique session ID
 const getSessionId = (): string => {
@@ -22,19 +24,21 @@ const getSessionId = (): string => {
   return sessionId;
 };
 
-// Save messages to localStorage
-const saveToLocalStorage = (messages: Message[]) => {
+// Save messages to localStorage (with telegram support)
+const saveToLocalStorage = (messages: Message[], telegramId?: number) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    const key = telegramId ? `${TELEGRAM_STORAGE_KEY}${telegramId}` : STORAGE_KEY;
+    localStorage.setItem(key, JSON.stringify(messages));
   } catch (e) {
     console.error('Failed to save chat history:', e);
   }
 };
 
-// Load messages from localStorage
-const loadFromLocalStorage = (): Message[] | null => {
+// Load messages from localStorage (with telegram support)
+const loadFromLocalStorage = (telegramId?: number): Message[] | null => {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const key = telegramId ? `${TELEGRAM_STORAGE_KEY}${telegramId}` : STORAGE_KEY;
+    const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : null;
   } catch (e) {
     console.error('Failed to load chat history:', e);
@@ -43,15 +47,28 @@ const loadFromLocalStorage = (): Message[] | null => {
 };
 
 // Log chat to database
-const logChatToDatabase = async (userMessage: string, assistantResponse: string, language: string) => {
+const logChatToDatabase = async (userMessage: string, assistantResponse: string, language: string, telegramUserId?: number) => {
   try {
     const sessionId = getSessionId();
-    await supabase.from('ai_chat_logs').insert({
+    const insertData: {
+      session_id: string;
+      user_message: string;
+      assistant_response: string;
+      language: string;
+      telegram_user_id?: number;
+    } = {
       session_id: sessionId,
       user_message: userMessage,
       assistant_response: assistantResponse,
       language: language
-    });
+    };
+    
+    // Add telegram_user_id if available
+    if (telegramUserId) {
+      insertData.telegram_user_id = telegramUserId;
+    }
+    
+    await supabase.from('ai_chat_logs').insert(insertData);
   } catch (e) {
     console.error('Failed to log chat:', e);
   }
@@ -163,6 +180,7 @@ const MessageContent = ({ content, isAssistant }: { content: string; isAssistant
 
 const AIAssistant = () => {
   const { language, t } = useLanguage();
+  const { isTelegram, profile } = useTelegram();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -172,6 +190,7 @@ const AIAssistant = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
 
+  const telegramId = isTelegram && profile ? profile.telegram_id : undefined;
   const quickReplies = getQuickReplies(language);
 
   // Load chat history from localStorage on mount
@@ -179,7 +198,7 @@ const AIAssistant = () => {
     if (initializedRef.current) return;
     initializedRef.current = true;
     
-    const savedMessages = loadFromLocalStorage();
+    const savedMessages = loadFromLocalStorage(telegramId);
     if (savedMessages && savedMessages.length > 0) {
       setMessages(savedMessages);
       setShowQuickReplies(false);
@@ -187,23 +206,27 @@ const AIAssistant = () => {
       setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
       setShowQuickReplies(true);
     }
-  }, [t]);
+  }, [t, telegramId]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     if (messages.length > 0 && initializedRef.current) {
-      saveToLocalStorage(messages);
+      saveToLocalStorage(messages, telegramId);
     }
-  }, [messages]);
+  }, [messages, telegramId]);
 
   // Clear chat history
   const clearHistory = useCallback(() => {
     const greeting: Message = { role: 'assistant', content: t('ai.greeting') };
     setMessages([greeting]);
     setShowQuickReplies(true);
-    localStorage.removeItem(STORAGE_KEY);
+    if (telegramId) {
+      localStorage.removeItem(`${TELEGRAM_STORAGE_KEY}${telegramId}`);
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     localStorage.removeItem(SESSION_KEY);
-  }, [t]);
+  }, [t, telegramId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -300,7 +323,7 @@ const AIAssistant = () => {
 
       // Log to database after response is complete
       if (assistantContent) {
-        logChatToDatabase(textToSend, assistantContent, language);
+        logChatToDatabase(textToSend, assistantContent, language, telegramId);
       }
     } catch (error) {
       console.error('Chat error:', error);

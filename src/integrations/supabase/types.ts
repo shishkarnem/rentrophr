@@ -21,6 +21,7 @@ export type Database = {
           id: string
           language: string | null
           session_id: string
+          telegram_user_id: number | null
           user_message: string
         }
         Insert: {
@@ -29,6 +30,7 @@ export type Database = {
           id?: string
           language?: string | null
           session_id: string
+          telegram_user_id?: number | null
           user_message: string
         }
         Update: {
@@ -37,9 +39,18 @@ export type Database = {
           id?: string
           language?: string | null
           session_id?: string
+          telegram_user_id?: number | null
           user_message?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_logs_telegram_user_id_fkey"
+            columns: ["telegram_user_id"]
+            isOneToOne: false
+            referencedRelation: "telegram_profiles"
+            referencedColumns: ["telegram_id"]
+          },
+        ]
       }
       faq_knowledge: {
         Row: {
@@ -68,6 +79,42 @@ export type Database = {
           row_hash?: string | null
           search_keywords?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      telegram_profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          language_code: string | null
+          last_name: string | null
+          photo_url: string | null
+          telegram_id: number
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          language_code?: string | null
+          last_name?: string | null
+          photo_url?: string | null
+          telegram_id: number
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          language_code?: string | null
+          last_name?: string | null
+          photo_url?: string | null
+          telegram_id?: number
+          updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }

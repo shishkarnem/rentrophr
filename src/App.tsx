@@ -24,6 +24,13 @@ import Projects from "./pages/conditions/Projects";
 import Registration from "./pages/conditions/Registration";
 import Payments from "./pages/conditions/Payments";
 
+// Motivation sub-pages
+import Fix from "./pages/conditions/motivation/Fix";
+import Variable from "./pages/conditions/motivation/Variable";
+import Partner from "./pages/conditions/motivation/Partner";
+import Services from "./pages/conditions/motivation/Services";
+import SubPartner from "./pages/conditions/motivation/SubPartner";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -47,6 +54,11 @@ const App = () => (
           {/* Conditions routes */}
           <Route path="/conditions" element={<ConditionsIndex />} />
           <Route path="/conditions/motivation" element={<Motivation />} />
+          <Route path="/conditions/motivation/fix" element={<Fix />} />
+          <Route path="/conditions/motivation/variable" element={<Variable />} />
+          <Route path="/conditions/motivation/partner" element={<Partner />} />
+          <Route path="/conditions/motivation/services" element={<Services />} />
+          <Route path="/conditions/motivation/subpartner" element={<SubPartner />} />
           <Route path="/conditions/training" element={<Training />} />
           <Route path="/conditions/projects" element={<Projects />} />
           <Route path="/conditions/registration" element={<Registration />} />

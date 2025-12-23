@@ -1,15 +1,15 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
-import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users } from 'lucide-react';
+import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const motivationItems = [
-  { name: 'Фикс', description: 'Фиксированная часть зарплаты — оклад за работу', icon: DollarSign },
-  { name: 'Переменка', description: 'Оплата за результат по итогу месяца, процент с выручки отдела', icon: Percent },
-  { name: 'Партнерка', description: 'Партнерские бонусы за привлечение клиентов', icon: Handshake },
-  { name: 'Услуги', description: 'Дополнительный заработок на консалтинговых услугах', icon: Settings },
-  { name: 'Суб.партнерка', description: 'Бонусы за привлечение новых специалистов', icon: Users },
+  { name: 'Фикс', description: 'Фиксированная часть зарплаты — оклад за работу', icon: DollarSign, path: '/conditions/motivation/fix' },
+  { name: 'Переменка', description: 'Оплата за результат по итогу месяца, процент с выручки отдела', icon: Percent, path: '/conditions/motivation/variable' },
+  { name: 'Партнерка', description: 'Партнерские бонусы за привлечение клиентов', icon: Handshake, path: '/conditions/motivation/partner' },
+  { name: 'Услуги', description: 'Дополнительный заработок на консалтинговых услугах', icon: Settings, path: '/conditions/motivation/services' },
+  { name: 'Суб.партнерка', description: 'Бонусы за привлечение новых специалистов', icon: Users, path: '/conditions/motivation/subpartner' },
 ];
 
 const Motivation = () => {
@@ -37,13 +37,20 @@ const Motivation = () => {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {motivationItems.map((item, i) => (
-                  <div key={i} className="p-4 glass-dark rounded-xl">
-                    <div className="flex items-center gap-3 mb-2">
-                      <item.icon className="w-5 h-5 text-accent" />
-                      <span className="font-semibold text-white">{item.name}</span>
+                  <Link 
+                    key={i} 
+                    to={item.path}
+                    className="p-4 glass-dark rounded-xl hover:bg-white/10 transition-colors group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <item.icon className="w-5 h-5 text-accent" />
+                        <span className="font-semibold text-white">{item.name}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-accent transition-colors" />
                     </div>
                     <p className="text-white/60 text-sm">{item.description}</p>
-                  </div>
+                  </Link>
                 ))}
               </div>
               

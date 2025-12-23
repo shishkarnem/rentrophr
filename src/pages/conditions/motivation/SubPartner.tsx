@@ -16,7 +16,7 @@ const SubPartner = () => {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.5, delay: 0.5 + i * 0.15, type: 'spring', stiffness: 100 }
+      transition: { duration: 0.5, delay: 0.5 + i * 0.15, type: 'spring' as const, stiffness: 100 }
     })
   };
 

@@ -3,8 +3,11 @@ import Footer from '@/components/layout/Footer';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, FileText, Calendar, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Reports = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
@@ -12,12 +15,12 @@ const Reports = () => {
         <div className="container mx-auto px-6">
           <Link to="/work" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
-            Назад к разделу Работа
+            {t('work.backToWork')}
           </Link>
           
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
-              <span className="text-gradient-gold">Отчеты</span>
+              <span className="text-gradient-gold">{t('reports.title')}</span>
             </h1>
             
             <div className="space-y-8">
@@ -26,24 +29,14 @@ const Reports = () => {
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <FileText className="w-5 h-5 text-primary" />
                   </span>
-                  Ежедневная отчетность
+                  {t('reports.daily')}
                 </h2>
                 <div className="space-y-4 text-white/70 leading-relaxed">
-                  <p>
-                    Каждый день РОП отчитывается о проделанной работе в чаты 
-                    (отчетность закреплена в виде ссылки в соответствующем чате).
-                  </p>
-                  <p className="font-semibold text-white">Регулярный отчет в конце рабочего дня:</p>
+                  <p>{t('reports.dailyDesc')}</p>
+                  <p className="font-semibold text-white">{t('reports.regularReport')}</p>
                   <ul className="space-y-2 ml-4">
-                    <li className="flex gap-3">
-                      <span className="text-accent font-bold">а)</span>
-                      описываем задачи на день;
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="text-accent font-bold">б)</span>
-                      результаты работы дня — что получилось и почему не получилось. 
-                      Важны именно результаты за прошедший день.
-                    </li>
+                    <li className="flex gap-3"><span className="text-accent font-bold">а)</span>{t('reports.dailyTasksA')}</li>
+                    <li className="flex gap-3"><span className="text-accent font-bold">б)</span>{t('reports.dailyTasksB')}</li>
                   </ul>
                 </div>
               </CardGlassDark>
@@ -53,20 +46,12 @@ const Reports = () => {
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-primary" />
                   </span>
-                  Еженедельные встречи
+                  {t('reports.weekly')}
                 </h2>
                 <div className="space-y-4 text-white/70 leading-relaxed">
-                  <p>
-                    Есть гугл-документ «проджект-менеджмент». На еженедельных встречах собственник 
-                    видит демонстрацию экрана и заполнение задачи на будущую неделю и принимает задачи прошедшей недели.
-                  </p>
-                  <p>
-                    Принимает работу, вместе проставляйте галочки у выполненных задач.
-                  </p>
-                  <p>
-                    Если на неделе от собственника прилетают новые задачи — прописываем их в проджекте 
-                    и на еженедельных встречах проговариваем, что фрейм сместился из-за этих срочных важных задач.
-                  </p>
+                  <p>{t('reports.weeklyDesc1')}</p>
+                  <p>{t('reports.weeklyDesc2')}</p>
+                  <p>{t('reports.weeklyDesc3')}</p>
                 </div>
               </CardGlassDark>
 
@@ -75,13 +60,10 @@ const Reports = () => {
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <BarChart3 className="w-5 h-5 text-primary" />
                   </span>
-                  Прозрачность результатов
+                  {t('reports.transparency')}
                 </h2>
                 <div className="space-y-4 text-white/70 leading-relaxed">
-                  <p>
-                    Система отчетности позволяет отслеживать прогресс и результаты в реальном времени, 
-                    обеспечивая полную прозрачность работы для всех участников проекта.
-                  </p>
+                  <p>{t('reports.transparencyDesc')}</p>
                 </div>
               </CardGlassDark>
             </div>

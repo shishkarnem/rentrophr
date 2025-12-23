@@ -6,8 +6,11 @@ import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
 import DownloadButton from '@/components/ui/DownloadButton';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Fix = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
@@ -15,15 +18,15 @@ const Fix = () => {
         <div className="container mx-auto px-6">
           <Link to="/conditions/motivation" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
-            Назад к Мотивации
+            {t('common.backToMotivation')}
           </Link>
           
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-4xl sm:text-5xl font-black text-white">
-                <span className="text-gradient-gold">Фикс</span>
+                <span className="text-gradient-gold">{t('fix.title')}</span>
               </h1>
-              <DownloadButton filename="fix" title="Фикс - РентРОП" />
+              <DownloadButton filename="fix" title={`${t('fix.title')} - РентРОП`} />
             </div>
             
             <CardGlassDark className="p-8 space-y-8">
@@ -32,34 +35,33 @@ const Fix = () => {
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <DollarSign className="w-5 h-5 text-primary" />
                   </span>
-                  Фиксированная премия
+                  {t('fix.fixedPremium')}
                 </h2>
                 <p className="text-white/80 leading-relaxed">
-                  Фиксированная премия начисляется ежемесячно. По сути, это является окладом за выход на работу. 
-                  Факт выхода на работу подтверждается <Link to="/work/reports" className="text-accent hover:underline">отчетом за день</Link>.
+                  {t('fix.fixedPremiumDesc')} <Link to="/work/reports" className="text-accent hover:underline">{t('fix.reportForDay')}</Link>.
                 </p>
                 <p className="text-white/80 leading-relaxed mt-4">
-                  Размер премии зависит от времени работы на проекте: <span className="text-accent font-semibold">40-55% от тарифа</span>.
+                  {t('fix.premiumSizeDesc')} <span className="text-accent font-semibold">40-55% {t('fix.fromTariff')}</span>.
                 </p>
               </div>
 
               <div>
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
                   <Clock className="w-5 h-5 text-accent" />
-                  Форматы работы
+                  {t('fix.workFormats')}
                 </h3>
                 <div className="grid gap-3">
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">Онлайн</span>
-                    <p className="text-white/60 text-sm">Полностью удаленно</p>
+                    <span className="font-semibold text-white">{t('fix.online')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.onlineDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">Оффлайн</span>
-                    <p className="text-white/60 text-sm">Обязательно присутствие на территории клиента</p>
+                    <span className="font-semibold text-white">{t('fix.offline')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.offlineDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">Комбинированный</span>
-                    <p className="text-white/60 text-sm">Периодическое появление на территории клиента</p>
+                    <span className="font-semibold text-white">{t('fix.combined')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.combinedDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -67,34 +69,34 @@ const Fix = () => {
               <div>
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
                   <Briefcase className="w-5 h-5 text-accent" />
-                  Занятость
+                  {t('fix.employment')}
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">4 часа</span>
-                    <p className="text-white/60 text-sm">Неполная занятость (90% проектов). Можно брать 2 проекта в работу.</p>
+                    <span className="font-semibold text-white">{t('fix.hours4')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.hours4Desc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">8 часов</span>
-                    <p className="text-white/60 text-sm">Полная занятость (10% проектов)</p>
+                    <span className="font-semibold text-white">{t('fix.hours8')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.hours8Desc')}</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white mb-4">Типы тарифов</h3>
+                <h3 className="text-xl font-bold text-white mb-4">{t('fix.tariffTypes')}</h3>
                 <div className="grid gap-3">
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-accent">Вход</span>
-                    <p className="text-white/60 text-sm">Только входящий трафик заявок</p>
+                    <span className="font-semibold text-accent">{t('fix.entry')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.entryDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-accent">Холод</span>
-                    <p className="text-white/60 text-sm">Присутствует привлечение клиентов через прозвон баз</p>
+                    <span className="font-semibold text-accent">{t('fix.cold')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.coldDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-accent">С нуля</span>
-                    <p className="text-white/60 text-sm">Первый месяц работы или нужно выстроить под ключ отдел продаж</p>
+                    <span className="font-semibold text-accent">{t('fix.fromScratch')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.fromScratchDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -102,65 +104,65 @@ const Fix = () => {
               <div>
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-accent" />
-                  Регионы
+                  {t('fix.regions')}
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">Международ.</span>
-                    <p className="text-white/60 text-sm">Страны мира</p>
+                    <span className="font-semibold text-white">{t('fix.international')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.internationalDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">РФ</span>
-                    <p className="text-white/60 text-sm">Российская Федерация</p>
+                    <span className="font-semibold text-white">{t('fix.rf')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.rfDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">СНГ</span>
-                    <p className="text-white/60 text-sm">Бывшие страны СНГ</p>
+                    <span className="font-semibold text-white">{t('fix.cis')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.cisDesc')}</p>
                   </div>
                   <div className="p-4 glass-dark rounded-xl">
-                    <span className="font-semibold text-white">КЗ</span>
-                    <p className="text-white/60 text-sm">Казахстан</p>
+                    <span className="font-semibold text-white">{t('fix.kz')}</span>
+                    <p className="text-white/60 text-sm">{t('fix.kzDesc')}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Важная информация о НДС */}
+              {/* VAT Info */}
               <div className="p-6 border-2 border-accent/50 rounded-2xl bg-accent/10">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
                   <AlertTriangle className="w-5 h-5 text-accent" />
-                  Важно! С 01.01.2026
+                  {t('fix.vatTitle')}
                 </h3>
                 <div className="space-y-4 text-white/80">
-                  <p className="font-semibold text-accent">Цена в РФ на все услуги +5% к счету</p>
-                  <p>Договора и счета нужно будет переделать на "в стоимость включено 5% НДС"</p>
-                  <p>Мотивация команды и исполнителя берёт расчёт из основной стоимости услуги и не учитывает НДС.</p>
+                  <p className="font-semibold text-accent">{t('fix.vatInfo1')}</p>
+                  <p>{t('fix.vatInfo2')}</p>
+                  <p>{t('fix.vatInfo3')}</p>
                   
                   <div className="p-4 glass-dark rounded-xl">
-                    <p className="font-semibold text-white mb-2">Пример:</p>
+                    <p className="font-semibold text-white mb-2">{t('fix.vatExample')}</p>
                     <ul className="space-y-2 text-sm">
-                      <li>• 120 000 рублей стоит аренда РОПа</li>
-                      <li>• Счёт выставляется на 120 000 + 5% = <span className="text-accent font-semibold">126 000 руб</span></li>
-                      <li>• 6 000 рублей — это НДС, который мы обязаны отдать государству</li>
-                      <li>• Исполнитель получает мотивацию от расчёта тарифа <span className="text-accent font-semibold">120к</span></li>
-                      <li>• ОП получает % с 120к</li>
-                      <li>• ДПР, Аккаунт, Освоение — всё идёт в расчёт от 120к</li>
+                      <li>• {t('fix.vatExampleItem1')}</li>
+                      <li>• {t('fix.vatExampleItem2')} <span className="text-accent font-semibold">126 000 руб</span></li>
+                      <li>• {t('fix.vatExampleItem3')}</li>
+                      <li>• {t('fix.vatExampleItem4')} <span className="text-accent font-semibold">120к</span></li>
+                      <li>• {t('fix.vatExampleItem5')}</li>
+                      <li>• {t('fix.vatExampleItem6')}</li>
                     </ul>
                   </div>
                   
-                  <p className="text-sm italic">И так с абсолютно любой услугой для РФ клиента.</p>
-                  <p className="text-sm text-accent">P.S. Для клиентов, которые хотят оплатить на карту, мы можем НДС не брать.</p>
+                  <p className="text-sm italic">{t('fix.vatNote')}</p>
+                  <p className="text-sm text-accent">{t('fix.vatPs')}</p>
                 </div>
               </div>
 
-              {/* Таблицы тарифов */}
+              {/* Tariff tables */}
               <div>
-                <h3 className="text-xl font-bold text-white mb-4">Тарифная сетка</h3>
+                <h3 className="text-xl font-bold text-white mb-4">{t('fix.tariffGrid')}</h3>
                 <div className="space-y-4">
                   <a href={tariffTable} target="_blank" rel="noopener noreferrer" className="block">
-                    <img src={tariffTable} alt="Тарифная сетка" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                    <img src={tariffTable} alt="Tariff table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
                   </a>
                   <a href={motivationTable} target="_blank" rel="noopener noreferrer" className="block">
-                    <img src={motivationTable} alt="Таблица мотивации" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+                    <img src={motivationTable} alt="Motivation table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
                   </a>
                 </div>
               </div>

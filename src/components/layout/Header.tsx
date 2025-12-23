@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Send, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '@/assets/RR-Logo.png';
 import { SOCIAL_LINKS } from '@/constants/vacancy';
@@ -103,10 +103,6 @@ const Header = ({
           <SmartSearch />
           <LanguageSwitcher />
           <ProfileIcon />
-          
-          <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-accent transition-colors">
-            <Send className="w-5 h-5" />
-          </a>
           
           {/* Mobile menu button */}
           <button className="lg:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

@@ -107,19 +107,16 @@ const getErrorMessages = (language: string) => {
   }
 };
 
-// Функция для поиска релевантных FAQ
+// Функция для поиска и ранжирования релевантных FAQ
 async function findRelevantFAQs(supabase: any, userQuery: string, limit: number = 5): Promise<string> {
   try {
-    // Извлекаем минимум 4 ключевых слова для поиска
-    const keywords = userQuery
+    // Извлекаем ключевые слова для поиска (до 10 слов)
+    const searchKeywords = userQuery
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .split(/\s+/)
       .filter(term => term.length > 2)
-      .slice(0, 8); // Берем до 8 слов
-
-    // Если меньше 4 слов - используем все что есть
-    const searchKeywords = keywords.length >= 4 ? keywords : keywords;
+      .slice(0, 10);
 
     if (searchKeywords.length === 0) {
       console.log("No valid search terms extracted");
@@ -133,11 +130,12 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       .map(term => `search_keywords.ilike.%${term}%,question.ilike.%${term}%`)
       .join(',');
 
+    // Получаем все потенциальные совпадения (с запасом)
     const { data: faqs, error } = await supabase
       .from('faq_knowledge')
-      .select('question, answer')
+      .select('question, answer, search_keywords')
       .or(orConditions)
-      .limit(limit);
+      .limit(50); // Берём больше для ранжирования
 
     if (error) {
       console.error("FAQ search error:", error);
@@ -149,10 +147,54 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       return "";
     }
 
-    console.log(`Found ${faqs.length} relevant FAQs`);
+    console.log(`Found ${faqs.length} potential FAQs, ranking by relevance...`);
+
+    // Тип для ранжированного FAQ
+    interface RankedFaq {
+      question: string;
+      answer: string;
+      search_keywords: string | null;
+      matchCount: number;
+      relevanceScore: number;
+    }
+
+    // Ранжируем FAQ по количеству совпавших ключевых слов
+    const rankedFaqs: RankedFaq[] = faqs
+      .map((faq: { question: string; answer: string; search_keywords: string | null }) => {
+        const faqText = `${faq.question} ${faq.search_keywords || ''}`.toLowerCase();
+        
+        // Подсчитываем количество совпавших ключевых слов
+        const matchCount = searchKeywords.filter(keyword => 
+          faqText.includes(keyword)
+        ).length;
+
+        // Бонус за совпадение в начале вопроса
+        const startsWithBonus = searchKeywords.some(kw => 
+          faq.question.toLowerCase().startsWith(kw)
+        ) ? 1 : 0;
+
+        return { 
+          ...faq, 
+          matchCount,
+          relevanceScore: matchCount + startsWithBonus
+        };
+      })
+      .filter((faq: RankedFaq) => faq.matchCount > 0) // Только FAQ с совпадениями
+      .sort((a: RankedFaq, b: RankedFaq) => b.relevanceScore - a.relevanceScore) // Сортируем по релевантности
+      .slice(0, limit); // Берём топ-N
+
+    if (rankedFaqs.length === 0) {
+      console.log("No FAQs matched after ranking");
+      return "";
+    }
+
+    console.log(`Top ${rankedFaqs.length} FAQs after ranking:`);
+    rankedFaqs.forEach((faq: RankedFaq, i: number) => {
+      console.log(`  ${i + 1}. Score: ${faq.relevanceScore} (${faq.matchCount} matches) - ${faq.question.substring(0, 50)}...`);
+    });
 
     // Форматируем найденные FAQ
-    const faqContext = faqs
+    const faqContext = rankedFaqs
       .map((faq: { question: string; answer: string }) => 
         `Вопрос: ${faq.question}\nОтвет: ${faq.answer}`)
       .join('\n\n---\n\n');

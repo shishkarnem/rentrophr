@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TelegramUser {
@@ -67,11 +67,56 @@ interface TelegramProfile {
   updated_at: string;
 }
 
+// Get the initData from Telegram WebApp
+function getInitData(): string | null {
+  const tg = window.Telegram?.WebApp;
+  return tg?.initData || null;
+}
+
+// Get Supabase functions URL
+function getFunctionsUrl(): string {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  return `${supabaseUrl}/functions/v1`;
+}
+
 export const useTelegramWebApp = () => {
   const [isTelegram, setIsTelegram] = useState(false);
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
   const [profile, setProfile] = useState<TelegramProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Call edge function with Telegram initData
+  const callProfileFunction = useCallback(async (action: string, updates?: Record<string, unknown>) => {
+    const initData = getInitData();
+    if (!initData) {
+      console.error('No Telegram init data available');
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${getFunctionsUrl()}/telegram-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-telegram-init-data': initData,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ action, updates }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Profile function error:', error);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.profile;
+    } catch (error) {
+      console.error('Error calling profile function:', error);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     const initTelegram = async () => {
@@ -88,8 +133,11 @@ export const useTelegramWebApp = () => {
           tg.ready();
           tg.expand();
           
-          // Save or update profile in database
-          await saveOrUpdateProfile(user);
+          // Save or update profile via edge function
+          const profileData = await callProfileFunction('upsert');
+          if (profileData) {
+            setProfile(profileData);
+          }
         } else {
           setIsTelegram(false);
         }
@@ -102,136 +150,78 @@ export const useTelegramWebApp = () => {
     };
 
     initTelegram();
-  }, []);
+  }, [callProfileFunction]);
 
-  const saveOrUpdateProfile = async (user: TelegramUser) => {
-    try {
-      // Check if profile exists
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('telegram_profiles')
-        .select('*')
-        .eq('telegram_id', user.id)
-        .single();
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', fetchError);
-        return;
-      }
-
-      if (existingProfile) {
-        // Update existing profile with new data from Telegram
-        const { data: updatedProfile, error: updateError } = await supabase
-          .from('telegram_profiles')
-          .update({
-            username: user.username || existingProfile.username,
-            first_name: user.first_name || existingProfile.first_name,
-            last_name: user.last_name || existingProfile.last_name,
-            language_code: user.language_code || existingProfile.language_code,
-            photo_url: user.photo_url || existingProfile.photo_url,
-          })
-          .eq('telegram_id', user.id)
-          .select()
-          .single();
-
-        if (updateError) {
-          console.error('Error updating profile:', updateError);
-        } else {
-          setProfile(updatedProfile);
-        }
-      } else {
-        // Create new profile
-        const { data: newProfile, error: insertError } = await supabase
-          .from('telegram_profiles')
-          .insert({
-            telegram_id: user.id,
-            username: user.username,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            language_code: user.language_code || 'ru',
-            photo_url: user.photo_url,
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-        } else {
-          setProfile(newProfile);
-        }
-      }
-    } catch (error) {
-      console.error('Error in saveOrUpdateProfile:', error);
-    }
-  };
-
-  const updateProfile = async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
+  const updateProfile = useCallback(async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
     if (!profile) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('telegram_profiles')
-        .update(updates)
-        .eq('telegram_id', profile.telegram_id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating profile:', error);
-        return null;
+      const updatedProfile = await callProfileFunction('update', updates);
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+        return updatedProfile;
       }
-
-      setProfile(data);
-      return data;
+      return null;
     } catch (error) {
       console.error('Error in updateProfile:', error);
       return null;
     }
-  };
+  }, [profile, callProfileFunction]);
 
-  const uploadPhoto = async (file: File): Promise<string | null> => {
+  const uploadPhoto = useCallback(async (file: File): Promise<string | null> => {
     if (!profile) return null;
 
+    const initData = getInitData();
+    if (!initData) {
+      console.error('No Telegram init data available');
+      return null;
+    }
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.telegram_id}_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const formData = new FormData();
+      formData.append('file', file);
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-photos')
-        .upload(filePath, file, { upsert: true });
+      const response = await fetch(`${getFunctionsUrl()}/telegram-storage`, {
+        method: 'POST',
+        headers: {
+          'x-telegram-init-data': initData,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: formData,
+      });
 
-      if (uploadError) {
-        console.error('Error uploading photo:', uploadError);
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Upload error:', error);
         return null;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-photos')
-        .getPublicUrl(filePath);
+      const data = await response.json();
+      
+      // Update local profile with new photo URL
+      if (data.url) {
+        setProfile(prev => prev ? { ...prev, photo_url: data.url } : null);
+      }
 
-      // Update profile with new photo URL
-      await updateProfile({ photo_url: publicUrl });
-
-      return publicUrl;
+      return data.url;
     } catch (error) {
       console.error('Error in uploadPhoto:', error);
       return null;
     }
-  };
+  }, [profile]);
 
-  const refetchProfile = async () => {
+  const refetchProfile = useCallback(async () => {
     if (!telegramUser) return;
 
-    const { data, error } = await supabase
-      .from('telegram_profiles')
-      .select('*')
-      .eq('telegram_id', telegramUser.id)
-      .single();
-
-    if (!error && data) {
-      setProfile(data);
+    try {
+      const profileData = await callProfileFunction('get');
+      if (profileData) {
+        setProfile(profileData);
+      }
+    } catch (error) {
+      console.error('Error refetching profile:', error);
     }
-  };
+  }, [telegramUser, callProfileFunction]);
 
   return {
     isTelegram,

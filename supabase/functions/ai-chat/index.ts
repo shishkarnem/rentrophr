@@ -110,26 +110,33 @@ const getErrorMessages = (language: string) => {
 // Функция для поиска релевантных FAQ
 async function findRelevantFAQs(supabase: any, userQuery: string, limit: number = 5): Promise<string> {
   try {
-    // Полнотекстовый поиск по search_keywords и question
-    const searchTerms = userQuery
+    // Извлекаем минимум 4 ключевых слова для поиска
+    const keywords = userQuery
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .split(/\s+/)
       .filter(term => term.length > 2)
-      .slice(0, 5)
-      .join(' | ');
+      .slice(0, 8); // Берем до 8 слов
 
-    if (!searchTerms) {
+    // Если меньше 4 слов - используем все что есть
+    const searchKeywords = keywords.length >= 4 ? keywords : keywords;
+
+    if (searchKeywords.length === 0) {
       console.log("No valid search terms extracted");
       return "";
     }
 
-    console.log(`Searching FAQ with terms: ${searchTerms}`);
+    console.log(`Searching FAQ with terms: ${searchKeywords.join(' | ')}`);
+
+    // Формируем OR-условия для каждого ключевого слова
+    const orConditions = searchKeywords
+      .map(term => `search_keywords.ilike.%${term}%,question.ilike.%${term}%`)
+      .join(',');
 
     const { data: faqs, error } = await supabase
       .from('faq_knowledge')
       .select('question, answer')
-      .or(`search_keywords.ilike.%${userQuery.split(' ')[0]}%,question.ilike.%${userQuery.split(' ')[0]}%`)
+      .or(orConditions)
       .limit(limit);
 
     if (error) {

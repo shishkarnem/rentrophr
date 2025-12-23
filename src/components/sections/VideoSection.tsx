@@ -1,4 +1,8 @@
+import { useLanguage } from '@/contexts/LanguageContext';
+
 const VideoSection = () => {
+  const { t } = useLanguage();
+
   return (
     <section className="py-16 hero-gradient">
       <div className="container mx-auto px-6">
@@ -6,7 +10,7 @@ const VideoSection = () => {
           {/* Section header */}
           <div className="mb-10 text-center space-y-4">
             <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
-              Приветствие от команды
+              {t('video.greeting')}
             </h2>
             <div className="h-1 w-24 gradient-gold mx-auto rounded-full" />
           </div>

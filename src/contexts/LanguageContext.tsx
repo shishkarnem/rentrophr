@@ -121,6 +121,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'hero.learnWork': 'Узнать о работе',
     'hero.workConditions': 'Условия работы',
     'hero.careerGrowth': 'Карьерный рост',
+    'hero.title': 'Эксперт / Руководитель Отдела Продаж',
+    'hero.salary': 'от 150 000 до 450 000 ₽',
+    'hero.description': 'РентРОП — инновационная компания, предоставляющая услуги \'РОП в аренду\'. Мы не просто строим отделы продаж, мы внедряем культуру результата и дисциплины в бизнесы наших клиентов.',
+    'hero.location': 'Удаленно / По всему миру',
+    'hero.type': 'Полная занятость',
+    
+    // Video section
+    'video.greeting': 'Приветствие от команды',
     
     // Footer
     'footer.slogan': 'Системно строим отделы продаж с 2017 года.',
@@ -477,6 +485,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'hero.learnWork': 'Learn about work',
     'hero.workConditions': 'Work conditions',
     'hero.careerGrowth': 'Career growth',
+    'hero.title': 'Expert / Head of Sales Department',
+    'hero.salary': 'from 150,000 to 450,000 ₽',
+    'hero.description': 'RentROP is an innovative company providing \'ROP for rent\' services. We don\'t just build sales departments, we implement a culture of results and discipline in our clients\' businesses.',
+    'hero.location': 'Remote / Worldwide',
+    'hero.type': 'Full-time',
+    
+    // Video section
+    'video.greeting': 'Greeting from the team',
     
     // Footer
     'footer.slogan': 'Systematically building sales departments since 2017.',
@@ -833,6 +849,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'hero.learnWork': 'Жұмыс туралы білу',
     'hero.workConditions': 'Жұмыс шарттары',
     'hero.careerGrowth': 'Мансаптық өсу',
+    'hero.title': 'Сарапшы / Сату бөлімінің басшысы',
+    'hero.salary': '150 000-нан 450 000 ₽ дейін',
+    'hero.description': 'РентРОП — \'жалға РОП\' қызметтерін ұсынатын инновациялық компания. Біз тек сату бөлімдерін құрып қоймаймыз, біз клиенттеріміздің бизнестеріне нәтиже мен тәртіп мәдениетін енгіземіз.',
+    'hero.location': 'Қашықтан / Бүкіл әлем бойынша',
+    'hero.type': 'Толық жұмыс күні',
+    
+    // Video section
+    'video.greeting': 'Командадан сәлемдесу',
     
     // Footer
     'footer.slogan': '2017 жылдан бері сату бөлімдерін жүйелі құрамыз.',

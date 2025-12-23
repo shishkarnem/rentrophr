@@ -1,4 +1,3 @@
-import { RENTROP_VACANCY } from '@/constants/vacancy';
 import { Button } from '@/components/ui/button';
 import { MapPin, Briefcase, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -27,28 +26,28 @@ const HeroSection = () => {
 
           {/* Title */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-tight mb-6 opacity-0 animate-fade-in animate-delay-100">
-            {RENTROP_VACANCY.title}
+            {t('hero.title')}
           </h1>
 
           {/* Salary highlight */}
           <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8 opacity-0 animate-fade-in animate-delay-200">
-            <span className="text-gradient-gold">{RENTROP_VACANCY.salary}</span>
+            <span className="text-gradient-gold">{t('hero.salary')}</span>
           </div>
 
           {/* Description */}
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed opacity-0 animate-fade-in animate-delay-300">
-            {RENTROP_VACANCY.description}
+            {t('hero.description')}
           </p>
 
           {/* Meta info */}
           <div className="flex flex-wrap gap-4 mb-12 opacity-0 animate-fade-in animate-delay-400">
             <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
               <MapPin className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">{RENTROP_VACANCY.location}</span>
+              <span className="text-sm text-white/80">{t('hero.location')}</span>
             </div>
             <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
               <Briefcase className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">{RENTROP_VACANCY.type}</span>
+              <span className="text-sm text-white/80">{t('hero.type')}</span>
             </div>
             <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
               <TrendingUp className="w-4 h-4 text-accent" />

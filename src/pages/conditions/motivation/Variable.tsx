@@ -5,7 +5,6 @@ import { ArrowLeft, Percent, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
-import DownloadButton from '@/components/ui/DownloadButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
@@ -42,7 +41,7 @@ const Variable = () => {
             
             <div className="max-w-4xl mx-auto">
               <motion.div 
-                className="flex items-center justify-between mb-8"
+                className="mb-8"
                 initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -50,12 +49,6 @@ const Variable = () => {
                 <h1 className="text-4xl sm:text-5xl font-black text-white">
                   <span className="text-gradient-gold">{t('variable.title')}</span>
                 </h1>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <DownloadButton filename="variable" title={`${t('variable.title')} - РентРОП`} />
-                </motion.div>
               </motion.div>
               
               <motion.div

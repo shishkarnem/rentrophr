@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, X } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SearchItem {
@@ -17,6 +16,7 @@ const SmartSearch = () => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -62,13 +62,28 @@ const SmartSearch = () => {
       const keywordMatch = item.keywords.some(kw => kw.toLowerCase().includes(lowerQuery));
       
       return titleMatch || categoryMatch || keywordMatch;
-    }).slice(0, 8); // Limit to 8 results
+    }).slice(0, 6);
   }, [query, searchItems]);
+
+  // Handle click outside to close
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+        setQuery('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
 
@@ -76,7 +91,6 @@ const SmartSearch = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) {
-        // Open search with Ctrl+K or Cmd+K
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
           e.preventDefault();
           setIsOpen(true);
@@ -123,115 +137,105 @@ const SmartSearch = () => {
   };
 
   return (
-    <>
-      {/* Search trigger button - only icon */}
+    <div ref={containerRef} className="relative">
+      {/* Search trigger button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-center text-white/60 hover:text-accent transition-colors p-2 rounded-lg hover:bg-white/5"
         aria-label="Поиск"
       >
         <Search className="w-5 h-5" />
       </button>
 
-      {/* Search modal */}
+      {/* Search dropdown */}
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
-              onClick={() => {
-                setIsOpen(false);
-                setQuery('');
-              }}
-            />
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute right-0 top-full mt-2 w-80 md:w-96 glass-dark rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-[100]"
+          >
+            {/* Search input */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+              <Search className="w-4 h-4 text-accent flex-shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Поиск по сайту..."
+                className="flex-1 bg-transparent text-white placeholder:text-white/40 outline-none text-sm"
+              />
+              {query ? (
+                <button
+                  onClick={() => setQuery('')}
+                  className="text-white/40 hover:text-white/60 transition-colors flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              ) : (
+                <kbd className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 flex-shrink-0">
+                  ESC
+                </kbd>
+              )}
+            </div>
 
-            {/* Search container */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg z-[101]"
-            >
-              <div className="bg-[#1a1a2e] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                {/* Search input */}
-                <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
-                  <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Поиск по сайту..."
-                    className="flex-1 bg-transparent text-white placeholder:text-white/40 outline-none text-base"
-                  />
-                  {query && (
+            {/* Results */}
+            <div className="max-h-72 overflow-y-auto custom-scrollbar">
+              {!query.trim() ? (
+                <div className="px-4 py-6 text-center text-white/40 text-sm">
+                  Начните вводить для поиска...
+                </div>
+              ) : filteredResults.length === 0 ? (
+                <div className="px-4 py-6 text-center text-white/40 text-sm">
+                  Ничего не найдено
+                </div>
+              ) : (
+                <div className="py-1">
+                  {filteredResults.map((item, index) => (
                     <button
-                      onClick={() => setQuery('')}
-                      className="text-white/40 hover:text-white/60 transition-colors flex-shrink-0"
+                      key={item.path}
+                      onClick={() => handleResultClick(item.path)}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                        index === selectedIndex
+                          ? 'bg-accent/20 text-white'
+                          : 'text-white/70 hover:bg-white/5'
+                      }`}
                     >
-                      <X className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                        <Search className="w-3.5 h-3.5 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{item.title}</div>
+                        <div className="text-xs text-white/40 truncate">{item.category}</div>
+                      </div>
+                      {index === selectedIndex && (
+                        <span className="text-xs text-accent">↵</span>
+                      )}
                     </button>
-                  )}
-                  <kbd className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 flex-shrink-0">
-                    ESC
-                  </kbd>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Results */}
-                <div className="max-h-80 overflow-y-auto">
-                  {query && filteredResults.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-white/40 text-sm">
-                      Ничего не найдено
-                    </div>
-                  ) : (
-                    <div className="py-2">
-                      {filteredResults.map((item, index) => (
-                        <button
-                          key={item.path}
-                          onClick={() => handleResultClick(item.path)}
-                          onMouseEnter={() => setSelectedIndex(index)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                            index === selectedIndex
-                              ? 'bg-accent/20 text-white'
-                              : 'text-white/70 hover:bg-white/5'
-                          }`}
-                        >
-                          <Search className="w-4 h-4 text-white/40 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">{item.title}</div>
-                            <div className="text-xs text-white/40 truncate">{item.category}</div>
-                          </div>
-                          {index === selectedIndex && (
-                            <span className="text-xs text-white/40">↵</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer hint */}
-                {filteredResults.length > 0 && (
-                  <div className="px-4 py-2 border-t border-white/10 flex items-center gap-4 text-[10px] text-white/30">
-                    <span className="flex items-center gap-1">
-                      <kbd className="bg-white/10 px-1 rounded">↑↓</kbd> навигация
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <kbd className="bg-white/10 px-1 rounded">↵</kbd> выбрать
-                    </span>
-                  </div>
-                )}
+            {/* Footer hint */}
+            {filteredResults.length > 0 && (
+              <div className="px-4 py-2 border-t border-white/10 flex items-center gap-4 text-[10px] text-white/30">
+                <span className="flex items-center gap-1">
+                  <kbd className="bg-white/10 px-1 rounded">↑↓</kbd> навигация
+                </span>
+                <span className="flex items-center gap-1">
+                  <kbd className="bg-white/10 px-1 rounded">↵</kbd> выбрать
+                </span>
               </div>
-            </motion.div>
-          </>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

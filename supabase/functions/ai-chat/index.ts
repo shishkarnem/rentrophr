@@ -213,9 +213,21 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, language = 'ru' } = await req.json();
+    const body = await req.json();
+    const messages = body.messages;
+    const language = body.language || 'ru';
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const errorMessages = getErrorMessages(language);
+    
+    // Валидация messages
+    if (!messages || !Array.isArray(messages)) {
+      console.error("Invalid request: messages is missing or not an array");
+      return new Response(JSON.stringify({ error: "Invalid request: messages array is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -231,9 +243,8 @@ serve(async (req) => {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
       // Получаем последнее сообщение пользователя для поиска
-      const lastUserMessage = messages
-        .filter((m: { role: string }) => m.role === 'user')
-        .pop();
+      const userMessages = messages.filter((m: { role: string }) => m.role === 'user');
+      const lastUserMessage = userMessages.length > 0 ? userMessages[userMessages.length - 1] : null;
       
       if (lastUserMessage?.content) {
         faqContext = await findRelevantFAQs(supabase, lastUserMessage.content);

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AIAssistant from "./components/AIAssistant";
+import P5Background from "./components/P5Background";
 
 // Work pages
 import WorkIndex from "./pages/work/index";
@@ -67,6 +68,9 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        
+        {/* P5.js Background Animation */}
+        <P5Background />
         
         {/* AI Assistant - available on all pages */}
         <AIAssistant />

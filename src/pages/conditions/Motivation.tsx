@@ -5,6 +5,7 @@ import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users, ChevronRigh
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const motivationItems = [
   { name: 'Фикс', description: 'Фиксированная часть зарплаты — оклад за работу', icon: DollarSign, path: '/conditions/motivation/fix' },
@@ -26,9 +27,12 @@ const Motivation = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
-              <span className="text-gradient-gold">Мотивация</span>
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-4xl sm:text-5xl font-black text-white">
+                <span className="text-gradient-gold">Мотивация</span>
+              </h1>
+              <DownloadButton filename="motivation" title="Мотивация - РентРОП" />
+            </div>
             
             <CardGlassDark className="p-8">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">

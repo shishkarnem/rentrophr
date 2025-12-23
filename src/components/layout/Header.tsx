@@ -5,6 +5,7 @@ import logo from '@/assets/RR-Logo.png';
 import { SOCIAL_LINKS } from '@/constants/vacancy';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import SmartSearch from '@/components/SmartSearch';
 interface HeaderProps {
   onNavigate: (section: string) => void;
 }
@@ -97,6 +98,7 @@ const Header = ({
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+          <SmartSearch />
           <LanguageSwitcher />
           
           <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-accent transition-colors">

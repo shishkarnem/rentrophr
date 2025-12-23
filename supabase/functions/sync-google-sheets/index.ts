@@ -121,18 +121,35 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Подготавливаем данные для upsert
+    // Колонки: A(0) - Вопрос RU, B(1) - Ответ RU, C(2) - Ключевые слова, D(3) - Категория
+    // E(4) - Вопрос EN, F(5) - Ответ EN, G(6) - пропуск, H(7) - Вопрос KZ, I(8) - Ответ KZ
     const faqData = dataRows
       .filter(row => row[0] && row[1]) // Фильтруем строки без вопроса или ответа
       .map(row => {
         const question = row[0] || "";
         const answer = row[1] || "";
         const searchKeywords = row[2] || "";
+        const category = row[3] || "Общее";
+        
+        // Английский перевод (колонки E и F)
+        const questionEn = row[4] || "";
+        const answerEn = row[5] || "";
+        
+        // Казахский перевод (колонки H и I)
+        const questionKz = row[7] || "";
+        const answerKz = row[8] || "";
+        
         const rowHash = createRowHash(question, answer, searchKeywords);
         
         return {
           question,
           answer,
           search_keywords: searchKeywords,
+          category,
+          question_en: questionEn,
+          answer_en: answerEn,
+          question_kz: questionKz,
+          answer_kz: answerKz,
           row_hash: rowHash,
           updated_at: new Date().toISOString()
         };

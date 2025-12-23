@@ -5,6 +5,7 @@ import { ArrowLeft, DollarSign, Clock, MapPin, Briefcase, AlertTriangle } from '
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const Fix = () => {
   return (
@@ -18,9 +19,12 @@ const Fix = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
-              <span className="text-gradient-gold">Фикс</span>
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-4xl sm:text-5xl font-black text-white">
+                <span className="text-gradient-gold">Фикс</span>
+              </h1>
+              <DownloadButton filename="fix" title="Фикс - РентРОП" />
+            </div>
             
             <CardGlassDark className="p-8 space-y-8">
               <div>

@@ -5,6 +5,7 @@ import { ArrowLeft, Percent, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
 import motivationTable from '@/assets/motivation-table.jpg';
+import DownloadButton from '@/components/ui/DownloadButton';
 
 const Variable = () => {
   return (
@@ -18,9 +19,12 @@ const Variable = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
-              <span className="text-gradient-gold">Переменка</span>
-            </h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-4xl sm:text-5xl font-black text-white">
+                <span className="text-gradient-gold">Переменка</span>
+              </h1>
+              <DownloadButton filename="variable" title="Переменка - РентРОП" />
+            </div>
             
             <CardGlassDark className="p-8 space-y-8">
               <div>

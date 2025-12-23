@@ -32,6 +32,23 @@ const SmartSearch = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
 
+  // FAQ items from database
+  const [faqItems, setFaqItems] = useState<{ question: string; answer: string; search_keywords: string | null }[]>([]);
+
+  useEffect(() => {
+    const fetchFaq = async () => {
+      try {
+        const { data } = await supabase
+          .from('faq_knowledge')
+          .select('question, answer, search_keywords');
+        if (data) setFaqItems(data);
+      } catch (error) {
+        console.error('Error fetching FAQ for search:', error);
+      }
+    };
+    fetchFaq();
+  }, []);
+
   // Local search items for instant results
   const searchItems: SearchItem[] = useMemo(() => [
     { title: t('work.arendaRopov'), path: '/work/arenda-ropov', category: t('nav.work'), keywords: ['аренда', 'ропы', 'rent', 'ropes', 'жалдау'] },
@@ -53,7 +70,15 @@ const SmartSearch = () => {
     { title: t('nav.home'), path: '/', category: t('nav.home'), keywords: ['главная', 'home', 'main', 'басты'] },
     { title: t('nav.work'), path: '/work', category: t('nav.work'), keywords: ['работа', 'work', 'job', 'жұмыс'] },
     { title: t('nav.conditions'), path: '/conditions', category: t('nav.conditions'), keywords: ['условия', 'conditions', 'terms', 'шарттар'] },
-  ], [t]);
+    { title: 'Вики / FAQ', path: '/wiki', category: 'База знаний', keywords: ['вики', 'wiki', 'faq', 'вопросы', 'ответы', 'база знаний'] },
+    // Add FAQ items dynamically
+    ...faqItems.map(faq => ({
+      title: faq.question,
+      path: '/wiki',
+      category: 'FAQ',
+      keywords: faq.search_keywords ? faq.search_keywords.split(',').map(k => k.trim()) : [faq.question.toLowerCase()]
+    }))
+  ], [t, faqItems]);
 
   // Local search for instant results
   const localResults = useMemo(() => {

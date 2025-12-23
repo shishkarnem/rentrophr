@@ -6,9 +6,21 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
+import { useOptimizedAnimations } from '@/hooks/useOptimizedAnimations';
 
 const Employees = () => {
   const { t } = useLanguage();
+  const { 
+    cardVariants, 
+    containerVariants, 
+    itemVariants, 
+    iconHover,
+    hoverScale,
+    shouldAnimate,
+    isMobile,
+    duration,
+    ease
+  } = useOptimizedAnimations();
 
   const departments = [
     { nameKey: 'employees.trainingDept', icon: GraduationCap },
@@ -20,24 +32,6 @@ const Employees = () => {
     { nameKey: 'employees.marketingDept', icon: Megaphone },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.2 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -30, filter: 'blur(10px)' },
-    visible: { 
-      opacity: 1, 
-      x: 0, 
-      filter: 'blur(0px)',
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const }
-    }
-  };
-
   return (
     <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
@@ -45,9 +39,9 @@ const Employees = () => {
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-6">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: duration * 0.8 }}
             >
               <Link to="/work" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
                 <ArrowLeft className="w-4 h-4" />
@@ -58,28 +52,29 @@ const Employees = () => {
             <div className="max-w-4xl mx-auto">
               <motion.h1 
                 className="text-4xl sm:text-5xl font-black text-white mb-8"
-                initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+                initial={shouldAnimate ? { opacity: 0, y: 30 } : undefined}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration, ease }}
               >
                 <span className="text-gradient-gold">{t('employees.title')}</span>
               </motion.h1>
               
               <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                custom={0}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
               >
                 <CardGlassDark className="p-8">
                   <motion.h2 
                     className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
+                    transition={{ duration, delay: 0.3 }}
                   >
                     <motion.span 
                       className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileHover={iconHover}
                       transition={{ type: 'spring', stiffness: 400 }}
                     >
                       <Users className="w-5 h-5 text-primary" />
@@ -97,14 +92,11 @@ const Employees = () => {
                         key={i} 
                         className="flex items-center gap-4 p-4 glass-dark rounded-xl"
                         variants={itemVariants}
-                        whileHover={{ 
-                          scale: 1.02, 
-                          x: 5,
-                          transition: { type: 'spring', stiffness: 400 }
-                        }}
+                        whileHover={isMobile ? undefined : { ...hoverScale, x: 5 }}
+                        transition={{ type: 'spring', stiffness: 400 }}
                       >
                         <motion.div
-                          whileHover={{ rotate: 360 }}
+                          whileHover={isMobile ? undefined : { rotate: 360 }}
                           transition={{ duration: 0.5 }}
                         >
                           <dept.icon className="w-6 h-6 text-accent flex-shrink-0" />

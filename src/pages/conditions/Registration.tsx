@@ -1,12 +1,12 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CardGlass } from '@/components/ui/card';
+import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, FileCheck, Download, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Registration = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen hero-gradient">
       <Header onNavigate={() => {}} />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
@@ -16,19 +16,19 @@ const Registration = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-8">
+            <h1 className="text-4xl sm:text-5xl font-black text-white mb-8">
               <span className="text-gradient-gold">Оформление</span>
             </h1>
             
             <div className="space-y-8">
-              <CardGlass className="p-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <CardGlassDark className="p-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <FileCheck className="w-5 h-5 text-primary" />
                   </span>
                   Условия договора
                 </h2>
-                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <div className="space-y-4 text-white/70 leading-relaxed">
                   <p>
                     Договор заключается на реквизиты России или Казахстана. 
                     Заключается как для самозанятых физ.лиц, так и для ИП.
@@ -36,8 +36,8 @@ const Registration = () => {
                   <p>
                     Налоговая нагрузка в таком формате распределяется поровну, половину компенсирует компания.
                   </p>
-                  <div className="p-4 glass rounded-xl">
-                    <p className="font-semibold text-foreground mb-2">
+                  <div className="p-4 glass-dark rounded-xl">
+                    <p className="font-semibold text-white mb-2">
                       Также мы можем заключить договор с физ.лицом по ТК.
                     </p>
                     <p>Тогда налоговую нагрузку вы оплачиваете самостоятельно:</p>
@@ -53,20 +53,20 @@ const Registration = () => {
                     </ul>
                   </div>
                 </div>
-              </CardGlass>
+              </CardGlassDark>
 
-              <CardGlass className="p-8">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <CardGlassDark className="p-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                   <span className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
                     <Download className="w-5 h-5 text-primary" />
                   </span>
                   Скачать договора
                 </h2>
                 <div className="space-y-4">
-                  <div className="p-4 glass rounded-xl">
+                  <div className="p-4 glass-dark rounded-xl">
                     <div className="flex items-center gap-3 mb-3">
                       <Globe className="w-5 h-5 text-accent" />
-                      <span className="font-semibold text-foreground">Казахстан</span>
+                      <span className="font-semibold text-white">Казахстан</span>
                     </div>
                     <a 
                       href="https://docs.google.com/document/d/1xZ4DUBOOdOegt4UTHmMP1oe9ZsC23ZoRjrHTFqlPyLw/export?format=pdf"
@@ -79,10 +79,10 @@ const Registration = () => {
                     </a>
                   </div>
 
-                  <div className="p-4 glass rounded-xl">
+                  <div className="p-4 glass-dark rounded-xl">
                     <div className="flex items-center gap-3 mb-3">
                       <Globe className="w-5 h-5 text-accent" />
-                      <span className="font-semibold text-foreground">Россия</span>
+                      <span className="font-semibold text-white">Россия</span>
                     </div>
                     <div className="space-y-2">
                       <a 
@@ -106,11 +106,11 @@ const Registration = () => {
                     </div>
                   </div>
                 </div>
-              </CardGlass>
+              </CardGlassDark>
 
-              <CardGlass className="p-8">
-                <h2 className="text-xl font-bold mb-4 text-foreground">Порядок оформления:</h2>
-                <ul className="space-y-3 text-muted-foreground">
+              <CardGlassDark className="p-8">
+                <h2 className="text-xl font-bold mb-4 text-white">Порядок оформления:</h2>
+                <ul className="space-y-3 text-white/70">
                   <li className="flex gap-3">
                     <span className="text-accent font-bold">1.</span>
                     Ознакомиться с договором
@@ -128,7 +128,7 @@ const Registration = () => {
                     Договор скачать, подписать и отправить сотруднику, который проводил собеседование
                   </li>
                 </ul>
-              </CardGlass>
+              </CardGlassDark>
             </div>
           </div>
         </div>

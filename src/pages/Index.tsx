@@ -9,7 +9,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen hero-gradient">
       <Header onNavigate={handleNavigate} />
       <main>
         <HeroSection />

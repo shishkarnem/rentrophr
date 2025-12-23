@@ -105,7 +105,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen relative z-10">
+    <div 
+      className="min-h-screen relative z-10"
+      style={{
+        background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+      }}
+    >
       {/* Header */}
       <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">

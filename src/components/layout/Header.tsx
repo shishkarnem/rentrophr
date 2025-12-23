@@ -71,6 +71,10 @@ const Header = ({
             {t('nav.home')}
           </Link>
 
+          <Link to="/wiki" className="hover:text-accent transition-colors">
+            Вики
+          </Link>
+
           {/* Работа Dropdown */}
           <div className="relative" onMouseEnter={() => setActiveDropdown('work')} onMouseLeave={() => setActiveDropdown(null)}>
             <Link to="/work" className="hover:text-accent transition-colors flex items-center gap-1">
@@ -116,6 +120,9 @@ const Header = ({
           <nav className="flex flex-col gap-4">
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.home')}
+            </Link>
+            <Link to="/wiki" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
+              Вики
             </Link>
             <Link to="/work" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-accent transition-colors text-left py-2">
               {t('nav.work')}

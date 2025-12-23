@@ -8,6 +8,7 @@ import { TelegramProvider } from "@/contexts/TelegramContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import Wiki from "./pages/Wiki";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
 // Work pages
@@ -47,6 +48,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/wiki" element={<Wiki />} />
               
               {/* Work routes */}
               <Route path="/work" element={<WorkIndex />} />

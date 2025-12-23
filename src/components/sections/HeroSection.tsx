@@ -2,8 +2,11 @@ import { RENTROP_VACANCY } from '@/constants/vacancy';
 import { Button } from '@/components/ui/button';
 import { MapPin, Briefcase, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const HeroSection = () => {
+  const { t } = useLanguage();
+
   return (
     <section id="hero" className="relative min-h-screen hero-gradient overflow-hidden">
       {/* Decorative elements */}
@@ -19,7 +22,7 @@ const HeroSection = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 glass-dark px-4 py-2 rounded-full mb-8 opacity-0 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-sm text-white/80 font-medium">Активный набор</span>
+            <span className="text-sm text-white/80 font-medium">{t('hero.badge')}</span>
           </div>
 
           {/* Title */}
@@ -49,7 +52,7 @@ const HeroSection = () => {
             </div>
             <div className="flex items-center gap-2 glass-dark px-4 py-2 rounded-xl">
               <TrendingUp className="w-4 h-4 text-accent" />
-              <span className="text-sm text-white/80">Карьерный рост</span>
+              <span className="text-sm text-white/80">{t('hero.careerGrowth')}</span>
             </div>
           </div>
 
@@ -61,7 +64,7 @@ const HeroSection = () => {
                 size="xl"
                 className="group"
               >
-                Узнать о работе
+                {t('hero.learnWork')}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -70,7 +73,7 @@ const HeroSection = () => {
                 variant="glassDark" 
                 size="xl"
               >
-                Условия работы
+                {t('hero.workConditions')}
               </Button>
             </Link>
           </div>
@@ -78,7 +81,7 @@ const HeroSection = () => {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-0 animate-fade-in animate-delay-500">
-          <span className="text-white/40 text-xs uppercase tracking-widest">Листайте вниз</span>
+          <span className="text-white/40 text-xs uppercase tracking-widest">{t('hero.scrollDown')}</span>
           <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
             <div className="w-1 h-2 bg-accent rounded-full animate-bounce" />
           </div>

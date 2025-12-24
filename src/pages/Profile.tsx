@@ -2,12 +2,51 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Camera, Save, ArrowLeft, Edit2 } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
+
+// Inline language switcher for profile with DB sync
+const ProfileLanguageSwitcher = () => {
+  const { language, setLanguage } = useLanguage();
+  const { profile, updateProfile } = useTelegram();
+  
+  const languages: { code: Language; label: string }[] = [
+    { code: 'ru', label: 'RU' },
+    { code: 'en', label: 'EN' },
+    { code: 'kz', label: 'KZ' },
+  ];
+
+  const handleLanguageChange = async (lang: Language) => {
+    setLanguage(lang);
+    
+    // Sync to database if profile exists
+    if (profile) {
+      const langCode = lang === 'kz' ? 'kk' : lang; // Convert back for DB
+      await updateProfile({ language_code: langCode });
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1 bg-white/10 rounded-full p-1">
+      {languages.map((lang) => (
+        <button
+          key={lang.code}
+          onClick={() => handleLanguageChange(lang.code)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            language === lang.code
+              ? 'bg-accent text-primary'
+              : 'text-white/70 hover:text-white hover:bg-white/10'
+          }`}
+        >
+          {lang.label}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -64,7 +103,7 @@ const Profile = () => {
               </button>
               <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
             </div>
-            <LanguageSwitcher />
+            <ProfileLanguageSwitcher />
           </div>
         </div>
 
@@ -168,7 +207,7 @@ const Profile = () => {
               </button>
               <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
             </div>
-            <LanguageSwitcher />
+            <ProfileLanguageSwitcher />
           </div>
         </div>
 

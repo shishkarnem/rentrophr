@@ -179,7 +179,7 @@ const MessageContent = ({ content, isAssistant }: { content: string; isAssistant
 };
 
 const AIAssistant = () => {
-  const { language, t } = useLanguage();
+  const { language, t, loading: translationsLoading } = useLanguage();
   const { isTelegram, profile } = useTelegram();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -189,35 +189,40 @@ const AIAssistant = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
+  const lastGreetingRef = useRef<string>('');
 
   const telegramId = isTelegram && profile ? profile.telegram_id : undefined;
   const quickReplies = getQuickReplies(language);
-  const greetingRef = useRef<string>(t('ai.greeting'));
 
-  // Load chat history from localStorage on mount
+  // Load chat history from localStorage on mount (only after translations loaded)
   useEffect(() => {
-    if (initializedRef.current) return;
+    if (translationsLoading || initializedRef.current) return;
     initializedRef.current = true;
+    
+    const greeting = t('ai.greeting');
+    lastGreetingRef.current = greeting;
     
     const savedMessages = loadFromLocalStorage(telegramId);
     if (savedMessages && savedMessages.length > 0) {
       setMessages(savedMessages);
       setShowQuickReplies(false);
     } else {
-      greetingRef.current = t('ai.greeting');
-      setMessages([{ role: 'assistant', content: greetingRef.current }]);
+      setMessages([{ role: 'assistant', content: greeting }]);
       setShowQuickReplies(true);
     }
-  }, [telegramId]);
+  }, [telegramId, translationsLoading, t]);
 
   // Update greeting when language changes (only if it's the first/only message)
   useEffect(() => {
+    if (translationsLoading || !initializedRef.current) return;
+    
     const newGreeting = t('ai.greeting');
-    if (messages.length === 1 && messages[0].role === 'assistant' && messages[0].content === greetingRef.current) {
-      greetingRef.current = newGreeting;
+    // Only update if greeting changed and we have only the initial message
+    if (messages.length === 1 && messages[0].role === 'assistant' && newGreeting !== lastGreetingRef.current) {
+      lastGreetingRef.current = newGreeting;
       setMessages([{ role: 'assistant', content: newGreeting }]);
     }
-  }, [language, t]);
+  }, [language, t, translationsLoading, messages]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {

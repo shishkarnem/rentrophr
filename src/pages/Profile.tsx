@@ -60,15 +60,15 @@ const Profile = () => {
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-lg font-semibold text-white">Профиль</h1>
+            <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
           </div>
         </div>
 
         <main className="container mx-auto px-4 py-10 max-w-md">
           <section className="glass-dark rounded-2xl p-6">
-            <h2 className="text-white font-semibold text-lg">Откройте профиль через бота</h2>
+            <h2 className="text-white font-semibold text-lg">{t('profile.openViaBot')}</h2>
             <p className="text-white/70 mt-2">
-              Для автозаполнения данных откройте мини‑приложение из Telegram.
+              {t('profile.autofillHint')}
             </p>
             <Button
               className="w-full mt-6 bg-accent hover:bg-accent/80 text-primary"
@@ -79,7 +79,7 @@ const Profile = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                Открыть через бота
+                {t('profile.openButton')}
               </a>
             </Button>
           </section>
@@ -98,13 +98,13 @@ const Profile = () => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Пожалуйста, выберите изображение');
+      toast.error(t('profile.selectImage'));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Размер файла не должен превышать 5MB');
+      toast.error(t('profile.fileTooLarge'));
       return;
     }
 
@@ -112,12 +112,12 @@ const Profile = () => {
     try {
       const photoUrl = await uploadPhoto(file);
       if (photoUrl) {
-        toast.success('Фото обновлено');
+        toast.success(t('profile.photoUpdated'));
       } else {
-        toast.error('Ошибка при загрузке фото');
+        toast.error(t('profile.photoError'));
       }
     } catch (error) {
-      toast.error('Ошибка при загрузке фото');
+      toast.error(t('profile.photoError'));
     } finally {
       setIsUploading(false);
     }
@@ -133,13 +133,13 @@ const Profile = () => {
       });
 
       if (result) {
-        toast.success('Профиль сохранен');
+        toast.success(t('profile.saved'));
         setIsEditing(false);
       } else {
-        toast.error('Ошибка при сохранении');
+        toast.error(t('profile.saveError'));
       }
     } catch (error) {
-      toast.error('Ошибка при сохранении');
+      toast.error(t('profile.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -161,7 +161,7 @@ const Profile = () => {
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="text-lg font-semibold text-white">Профиль</h1>
+          <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
         </div>
       </div>
 
@@ -213,7 +213,7 @@ const Profile = () => {
         {/* Profile Info */}
         <div className="glass-dark rounded-2xl p-6 space-y-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Личные данные</h3>
+            <h3 className="text-lg font-semibold text-white">{t('profile.personalData')}</h3>
             <button
               onClick={() => setIsEditing(!isEditing)}
               className="p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -225,7 +225,7 @@ const Profile = () => {
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="first_name" className="text-muted-foreground">Имя</Label>
+                <Label htmlFor="first_name" className="text-muted-foreground">{t('profile.firstName')}</Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
@@ -235,7 +235,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <Label htmlFor="last_name" className="text-muted-foreground">Фамилия</Label>
+                <Label htmlFor="last_name" className="text-muted-foreground">{t('profile.lastName')}</Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
@@ -245,7 +245,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <Label htmlFor="username" className="text-muted-foreground">Username</Label>
+                <Label htmlFor="username" className="text-muted-foreground">{t('profile.username')}</Label>
                 <Input
                   id="username"
                   value={formData.username}
@@ -264,7 +264,7 @@ const Profile = () => {
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Сохранить
+                    {t('profile.save')}
                   </>
                 )}
               </Button>
@@ -277,22 +277,22 @@ const Profile = () => {
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-muted-foreground">Имя</span>
+                <span className="text-muted-foreground">{t('profile.firstName')}</span>
                 <span className="text-white">{profile?.first_name || '—'}</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-muted-foreground">Фамилия</span>
+                <span className="text-muted-foreground">{t('profile.lastName')}</span>
                 <span className="text-white">{profile?.last_name || '—'}</span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-muted-foreground">Username</span>
+                <span className="text-muted-foreground">{t('profile.username')}</span>
                 <span className="text-white">{profile?.username ? `@${profile.username}` : '—'}</span>
               </div>
               
               <div className="flex justify-between items-center py-2">
-                <span className="text-muted-foreground">Язык</span>
+                <span className="text-muted-foreground">{t('profile.language')}</span>
                 <span className="text-white uppercase">{profile?.language_code || 'ru'}</span>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useTelegram } from '@/contexts/TelegramContext';
 import { Globe } from 'lucide-react';
 import { useState } from 'react';
 
@@ -10,9 +11,24 @@ const languages: { code: Language; label: string; flag: string }[] = [
 
 const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
+  const { profile, updateProfile } = useTelegram();
   const [isOpen, setIsOpen] = useState(false);
 
   const currentLang = languages.find(l => l.code === language);
+
+  const handleLanguageChange = async (langCode: Language) => {
+    // Update app language
+    setLanguage(langCode);
+    setIsOpen(false);
+    
+    // Map to database format (kz -> kk for Telegram compatibility)
+    const dbLanguageCode = langCode === 'kz' ? 'kk' : langCode;
+    
+    // Update database if user has a profile
+    if (profile) {
+      await updateProfile({ language_code: dbLanguageCode });
+    }
+  };
 
   return (
     <div className="relative">
@@ -34,10 +50,7 @@ const LanguageSwitcher = () => {
             {languages.map((lang) => (
               <button
                 key={lang.code}
-                onClick={() => {
-                  setLanguage(lang.code);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleLanguageChange(lang.code)}
                 className={`w-full text-left px-4 py-2 text-sm flex items-center gap-3 hover:bg-white/10 transition-colors ${
                   language === lang.code ? 'text-accent' : 'text-white/80'
                 }`}

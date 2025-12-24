@@ -25,7 +25,7 @@ const Profile = () => {
   });
 
   // Update form when profile loads
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setFormData({
         first_name: profile.first_name || '',
@@ -33,7 +33,7 @@ const Profile = () => {
         username: profile.username || '',
       });
     }
-  });
+  }, [profile]);
 
   if (isLoading) {
     return (

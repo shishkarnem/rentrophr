@@ -78,27 +78,45 @@ export const useTelegramWebApp = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initTelegram = async () => {
+    let canceled = false;
+    let intervalId: number | undefined;
+
+    const finalize = (tgDetected: boolean) => {
+      if (canceled) return;
+      setIsTelegram(tgDetected);
+      setIsLoading(false);
+      if (intervalId) window.clearInterval(intervalId);
+    };
+
+    const tryInit = () => {
       try {
-        // Check if Telegram WebApp is available
         const tg = window.Telegram?.WebApp;
-        
-        if (tg && tg.initDataUnsafe?.user) {
+
+        // Telegram WebApp detected
+        if (tg) {
+          const user = tg.initDataUnsafe?.user;
+
+          // In some environments Telegram injects user slightly позже — ждём чуть-чуть
+          if (user) {
+            if (canceled) return;
+            setIsTelegram(true);
+            setTelegramUser(user);
+            tg.ready();
+            tg.expand();
+            void saveOrUpdateProfile(user);
+            finalize(true);
+            return;
+          }
+
+          // Telegram есть, но user пока нет — продолжаем попытки
+          return;
+        }
+
+        // Dev-mode fallback (only in dev builds)
+        if (DEV_MODE) {
+          if (canceled) return;
           setIsTelegram(true);
-          const user = tg.initDataUnsafe.user;
-          setTelegramUser(user);
-          
-          // Tell Telegram that the app is ready
-          tg.ready();
-          tg.expand();
-          
-          // Save or update profile in database
-          await saveOrUpdateProfile(user);
-        } else if (DEV_MODE) {
-          // Development mode: simulate Telegram user
-          console.log('🔧 Dev mode: Simulating Telegram user');
-          setIsTelegram(true);
-          
+
           const mockUser: TelegramUser = {
             id: DEV_TELEGRAM_ID,
             first_name: 'Dev',
@@ -106,22 +124,40 @@ export const useTelegramWebApp = () => {
             username: 'dev_user',
             language_code: 'ru',
           };
+
           setTelegramUser(mockUser);
-          
-          // Try to load or create dev profile
-          await saveOrUpdateProfile(mockUser);
-        } else {
-          setIsTelegram(false);
+          void saveOrUpdateProfile(mockUser);
+          finalize(true);
+          return;
         }
+
+        // Not Telegram
+        finalize(false);
       } catch (error) {
         console.error('Error initializing Telegram WebApp:', error);
-        setIsTelegram(false);
-      } finally {
-        setIsLoading(false);
+        finalize(false);
       }
     };
 
-    initTelegram();
+    // Retry for a short time to avoid missing late Telegram injection
+    let attempts = 0;
+    const maxAttempts = 25; // ~5s @ 200ms
+
+    intervalId = window.setInterval(() => {
+      attempts += 1;
+      tryInit();
+      if (attempts >= maxAttempts) {
+        finalize(!!window.Telegram?.WebApp);
+      }
+    }, 200);
+
+    // Do an immediate attempt
+    tryInit();
+
+    return () => {
+      canceled = true;
+      if (intervalId) window.clearInterval(intervalId);
+    };
   }, []);
 
   const saveOrUpdateProfile = async (user: TelegramUser) => {

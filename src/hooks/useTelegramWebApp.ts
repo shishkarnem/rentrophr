@@ -67,6 +67,10 @@ interface TelegramProfile {
   updated_at: string;
 }
 
+// Development mode - set to true to test profile without Telegram
+const DEV_MODE = import.meta.env.DEV;
+const DEV_TELEGRAM_ID = 123456789; // Mock Telegram ID for development
+
 export const useTelegramWebApp = () => {
   const [isTelegram, setIsTelegram] = useState(false);
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
@@ -90,6 +94,22 @@ export const useTelegramWebApp = () => {
           
           // Save or update profile in database
           await saveOrUpdateProfile(user);
+        } else if (DEV_MODE) {
+          // Development mode: simulate Telegram user
+          console.log('🔧 Dev mode: Simulating Telegram user');
+          setIsTelegram(true);
+          
+          const mockUser: TelegramUser = {
+            id: DEV_TELEGRAM_ID,
+            first_name: 'Dev',
+            last_name: 'User',
+            username: 'dev_user',
+            language_code: 'ru',
+          };
+          setTelegramUser(mockUser);
+          
+          // Try to load or create dev profile
+          await saveOrUpdateProfile(mockUser);
         } else {
           setIsTelegram(false);
         }

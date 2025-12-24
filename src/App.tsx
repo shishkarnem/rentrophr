@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { TelegramProvider } from "@/contexts/TelegramContext";
+import { TelegramProvider, useTelegram } from "@/contexts/TelegramContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -12,6 +12,7 @@ import Wiki from "./pages/Wiki";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
 import ScrollToTop from "./components/ScrollToTop";
+import TelegramLoader from "./components/TelegramLoader";
 // Work pages
 import WorkIndex from "./pages/work/index";
 import ArendaRopov from "./pages/work/ArendaRopov";
@@ -38,6 +39,58 @@ import SubPartner from "./pages/conditions/motivation/SubPartner";
 
 const queryClient = new QueryClient();
 
+// Inner component that has access to Telegram context
+const AppContent = () => {
+  const { isLoading } = useTelegram();
+
+  // Show loader while Telegram is initializing (only in first ~5 seconds)
+  if (isLoading) {
+    return <TelegramLoader />;
+  }
+
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/wiki" element={<Wiki />} />
+        
+        {/* Work routes */}
+        <Route path="/work" element={<WorkIndex />} />
+        <Route path="/work/arenda-ropov" element={<ArendaRopov />} />
+        <Route path="/work/about" element={<AboutCompany />} />
+        <Route path="/work/community" element={<Community />} />
+        <Route path="/work/reports" element={<Reports />} />
+        <Route path="/work/dpr" element={<DPR />} />
+        <Route path="/work/employees" element={<Employees />} />
+        
+        {/* Conditions routes */}
+        <Route path="/conditions" element={<ConditionsIndex />} />
+        <Route path="/conditions/motivation" element={<Motivation />} />
+        <Route path="/conditions/motivation/fix" element={<Fix />} />
+        <Route path="/conditions/motivation/variable" element={<Variable />} />
+        <Route path="/conditions/motivation/partner" element={<Partner />} />
+        <Route path="/conditions/motivation/services" element={<Services />} />
+        <Route path="/conditions/motivation/subpartner" element={<SubPartner />} />
+        <Route path="/conditions/training" element={<Training />} />
+        <Route path="/conditions/projects" element={<Projects />} />
+        <Route path="/conditions/registration" element={<Registration />} />
+        <Route path="/conditions/payments" element={<Payments />} />
+        
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      
+      {/* P5.js Background Animation */}
+      <P5Background />
+      
+      {/* AI Assistant - available on all pages */}
+      <AIAssistant />
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -46,43 +99,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/wiki" element={<Wiki />} />
-              
-              {/* Work routes */}
-              <Route path="/work" element={<WorkIndex />} />
-              <Route path="/work/arenda-ropov" element={<ArendaRopov />} />
-              <Route path="/work/about" element={<AboutCompany />} />
-              <Route path="/work/community" element={<Community />} />
-              <Route path="/work/reports" element={<Reports />} />
-              <Route path="/work/dpr" element={<DPR />} />
-              <Route path="/work/employees" element={<Employees />} />
-              
-              {/* Conditions routes */}
-              <Route path="/conditions" element={<ConditionsIndex />} />
-              <Route path="/conditions/motivation" element={<Motivation />} />
-              <Route path="/conditions/motivation/fix" element={<Fix />} />
-              <Route path="/conditions/motivation/variable" element={<Variable />} />
-              <Route path="/conditions/motivation/partner" element={<Partner />} />
-              <Route path="/conditions/motivation/services" element={<Services />} />
-              <Route path="/conditions/motivation/subpartner" element={<SubPartner />} />
-              <Route path="/conditions/training" element={<Training />} />
-              <Route path="/conditions/projects" element={<Projects />} />
-              <Route path="/conditions/registration" element={<Registration />} />
-              <Route path="/conditions/payments" element={<Payments />} />
-              
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            
-            {/* P5.js Background Animation */}
-            <P5Background />
-            
-            {/* AI Assistant - available on all pages */}
-            <AIAssistant />
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </TelegramProvider>

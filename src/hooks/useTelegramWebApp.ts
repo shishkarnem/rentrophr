@@ -97,28 +97,49 @@ export const useTelegramWebApp = () => {
       }
 
       if (existingProfile) {
-        console.log('[Telegram] Profile exists, updating...');
-        // Update existing profile with new data from Telegram
-        const { data: updatedProfile, error: updateError } = await supabase
-          .from('telegram_profiles')
-          .update({
-            username: user.username || existingProfile.username,
-            first_name: user.first_name || existingProfile.first_name,
-            last_name: user.last_name || existingProfile.last_name,
-            language_code: user.language_code || existingProfile.language_code,
-            photo_url: user.photo_url || existingProfile.photo_url,
-          })
-          .eq('telegram_id', user.id)
-          .select()
-          .maybeSingle();
-
-        if (updateError) {
-          console.error('[Telegram] Error updating profile:', updateError);
-          return null;
+        console.log('[Telegram] Profile exists, checking for updates...');
+        
+        // Always update with fresh data from Telegram (overwrite if different)
+        const updates: Record<string, string | null> = {};
+        
+        // Check each field and update if Telegram provides new value
+        if (user.username !== undefined && user.username !== existingProfile.username) {
+          updates.username = user.username || null;
+        }
+        if (user.first_name !== undefined && user.first_name !== existingProfile.first_name) {
+          updates.first_name = user.first_name || null;
+        }
+        if (user.last_name !== undefined && user.last_name !== existingProfile.last_name) {
+          updates.last_name = user.last_name || null;
+        }
+        if (user.language_code !== undefined && user.language_code !== existingProfile.language_code) {
+          updates.language_code = user.language_code || null;
+        }
+        if (user.photo_url !== undefined && user.photo_url !== existingProfile.photo_url) {
+          updates.photo_url = user.photo_url || null;
         }
         
-        console.log('[Telegram] Profile updated:', updatedProfile);
-        return updatedProfile;
+        // Only update if there are changes
+        if (Object.keys(updates).length > 0) {
+          console.log('[Telegram] Updating profile with:', updates);
+          const { data: updatedProfile, error: updateError } = await supabase
+            .from('telegram_profiles')
+            .update(updates)
+            .eq('telegram_id', user.id)
+            .select()
+            .maybeSingle();
+
+          if (updateError) {
+            console.error('[Telegram] Error updating profile:', updateError);
+            return existingProfile;
+          }
+          
+          console.log('[Telegram] Profile updated:', updatedProfile);
+          return updatedProfile;
+        }
+        
+        console.log('[Telegram] No changes detected, using existing profile');
+        return existingProfile;
       } else {
         console.log('[Telegram] Creating new profile...');
         // Create new profile
@@ -126,11 +147,11 @@ export const useTelegramWebApp = () => {
           .from('telegram_profiles')
           .insert({
             telegram_id: user.id,
-            username: user.username,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            username: user.username || null,
+            first_name: user.first_name || null,
+            last_name: user.last_name || null,
             language_code: user.language_code || 'ru',
-            photo_url: user.photo_url,
+            photo_url: user.photo_url || null,
           })
           .select()
           .maybeSingle();

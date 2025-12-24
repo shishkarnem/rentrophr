@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { mapTelegramLanguage, Language } from '@/contexts/LanguageContext';
 
 interface TelegramUser {
   id: number;
@@ -76,6 +77,8 @@ export const useTelegramWebApp = () => {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
   const [profile, setProfile] = useState<TelegramProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [detectedLanguage, setDetectedLanguage] = useState<Language | null>(null);
+  const languageSetRef = useRef(false);
 
   const saveOrUpdateProfile = async (user: TelegramUser): Promise<TelegramProfile | null> => {
     try {
@@ -156,6 +159,14 @@ export const useTelegramWebApp = () => {
       console.log('[Telegram] Initializing with user:', user);
       setIsTelegram(true);
       setTelegramUser(user);
+      
+      // Set language from Telegram (only once)
+      if (!languageSetRef.current && user.language_code) {
+        const mappedLang = mapTelegramLanguage(user.language_code);
+        console.log('[Telegram] Setting language from Telegram:', user.language_code, '->', mappedLang);
+        setDetectedLanguage(mappedLang);
+        languageSetRef.current = true;
+      }
       
       // Wait for profile to be saved/updated before finishing loading
       const savedProfile = await saveOrUpdateProfile(user);
@@ -320,6 +331,7 @@ export const useTelegramWebApp = () => {
     telegramUser,
     profile,
     isLoading,
+    detectedLanguage,
     updateProfile,
     uploadPhoto,
     refetchProfile,

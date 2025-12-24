@@ -1,7 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ru' | 'en' | 'kz';
+
+// Map Telegram language_code to app Language
+export const mapTelegramLanguage = (telegramLang: string | null | undefined): Language => {
+  if (!telegramLang) return 'ru';
+  const code = telegramLang.toLowerCase();
+  if (code === 'ru') return 'ru';
+  if (code === 'en') return 'en';
+  if (code === 'kk') return 'kz'; // Kazakh in Telegram is 'kk'
+  return 'ru'; // Default to Russian for all other languages
+};
 
 interface Translation {
   key: string;
@@ -13,6 +23,7 @@ interface Translation {
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  setLanguageFromTelegram: (telegramLangCode: string | null | undefined) => void;
   t: (key: string) => string;
   loading: boolean;
 }
@@ -1203,6 +1214,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('language', language);
   }, [language]);
 
+  const setLanguageFromTelegram = useCallback((telegramLangCode: string | null | undefined) => {
+    const mappedLang = mapTelegramLanguage(telegramLangCode);
+    setLanguage(mappedLang);
+  }, []);
+
   const t = (key: string): string => {
     // First try to get from database
     const dbTranslation = dbTranslations[key];
@@ -1225,7 +1241,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, loading }}>
+    <LanguageContext.Provider value={{ language, setLanguage, setLanguageFromTelegram, t, loading }}>
       {children}
     </LanguageContext.Provider>
   );

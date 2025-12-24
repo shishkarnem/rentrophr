@@ -1,5 +1,6 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useTelegramWebApp } from '@/hooks/useTelegramWebApp';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 interface TelegramProfile {
   id: string;
@@ -34,6 +35,15 @@ const TelegramContext = createContext<TelegramContextType | undefined>(undefined
 
 export const TelegramProvider = ({ children }: { children: ReactNode }) => {
   const telegram = useTelegramWebApp();
+  const { setLanguage } = useLanguage();
+
+  // Auto-set language from Telegram when detected
+  useEffect(() => {
+    if (telegram.detectedLanguage) {
+      console.log('[TelegramProvider] Auto-setting language:', telegram.detectedLanguage);
+      setLanguage(telegram.detectedLanguage);
+    }
+  }, [telegram.detectedLanguage, setLanguage]);
 
   return (
     <TelegramContext.Provider value={telegram}>

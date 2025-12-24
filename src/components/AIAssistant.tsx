@@ -192,6 +192,7 @@ const AIAssistant = () => {
 
   const telegramId = isTelegram && profile ? profile.telegram_id : undefined;
   const quickReplies = getQuickReplies(language);
+  const greetingRef = useRef<string>(t('ai.greeting'));
 
   // Load chat history from localStorage on mount
   useEffect(() => {
@@ -203,10 +204,20 @@ const AIAssistant = () => {
       setMessages(savedMessages);
       setShowQuickReplies(false);
     } else {
-      setMessages([{ role: 'assistant', content: t('ai.greeting') }]);
+      greetingRef.current = t('ai.greeting');
+      setMessages([{ role: 'assistant', content: greetingRef.current }]);
       setShowQuickReplies(true);
     }
-  }, [t, telegramId]);
+  }, [telegramId]);
+
+  // Update greeting when language changes (only if it's the first/only message)
+  useEffect(() => {
+    const newGreeting = t('ai.greeting');
+    if (messages.length === 1 && messages[0].role === 'assistant' && messages[0].content === greetingRef.current) {
+      greetingRef.current = newGreeting;
+      setMessages([{ role: 'assistant', content: newGreeting }]);
+    }
+  }, [language, t]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {

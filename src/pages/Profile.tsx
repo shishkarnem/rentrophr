@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -53,14 +54,17 @@ const Profile = () => {
       >
         {/* Header */}
         <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+            </div>
+            <LanguageSwitcher />
           </div>
         </div>
 
@@ -153,17 +157,20 @@ const Profile = () => {
       }}
     >
       {/* Header */}
-      <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+        <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+            </div>
+            <LanguageSwitcher />
+          </div>
         </div>
-      </div>
 
       <div className="container mx-auto px-4 py-8 max-w-md">
         {/* Profile Photo */}

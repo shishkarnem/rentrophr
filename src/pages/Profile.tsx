@@ -44,7 +44,48 @@ const Profile = () => {
   }
 
   if (!isTelegram) {
-    return null;
+    return (
+      <div 
+        className="min-h-screen relative z-10"
+        style={{
+          background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+        }}
+      >
+        {/* Header */}
+        <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <h1 className="text-lg font-semibold text-white">Профиль</h1>
+          </div>
+        </div>
+
+        <main className="container mx-auto px-4 py-10 max-w-md">
+          <section className="glass-dark rounded-2xl p-6">
+            <h2 className="text-white font-semibold text-lg">Откройте профиль через бота</h2>
+            <p className="text-white/70 mt-2">
+              Для автозаполнения данных откройте мини‑приложение из Telegram.
+            </p>
+            <Button
+              className="w-full mt-6 bg-accent hover:bg-accent/80 text-primary"
+              asChild
+            >
+              <a
+                href="https://t.me/RentROP_HR_bot/app"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Открыть через бота
+              </a>
+            </Button>
+          </section>
+        </main>
+      </div>
+    );
   }
 
   const handlePhotoClick = () => {

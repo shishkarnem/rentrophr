@@ -77,104 +77,24 @@ export const useTelegramWebApp = () => {
   const [profile, setProfile] = useState<TelegramProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let canceled = false;
-    let intervalId: number | undefined;
-
-    const finalize = (tgDetected: boolean) => {
-      if (canceled) return;
-      setIsTelegram(tgDetected);
-      setIsLoading(false);
-      if (intervalId) window.clearInterval(intervalId);
-    };
-
-    const tryInit = () => {
-      try {
-        const tg = window.Telegram?.WebApp;
-
-        // Telegram WebApp detected
-        if (tg) {
-          const user = tg.initDataUnsafe?.user;
-
-          // In some environments Telegram injects user slightly позже — ждём чуть-чуть
-          if (user) {
-            if (canceled) return;
-            setIsTelegram(true);
-            setTelegramUser(user);
-            tg.ready();
-            tg.expand();
-            void saveOrUpdateProfile(user);
-            finalize(true);
-            return;
-          }
-
-          // Telegram есть, но user пока нет — продолжаем попытки
-          return;
-        }
-
-        // Dev-mode fallback (only in dev builds)
-        if (DEV_MODE) {
-          if (canceled) return;
-          setIsTelegram(true);
-
-          const mockUser: TelegramUser = {
-            id: DEV_TELEGRAM_ID,
-            first_name: 'Dev',
-            last_name: 'User',
-            username: 'dev_user',
-            language_code: 'ru',
-          };
-
-          setTelegramUser(mockUser);
-          void saveOrUpdateProfile(mockUser);
-          finalize(true);
-          return;
-        }
-
-        // Not Telegram
-        finalize(false);
-      } catch (error) {
-        console.error('Error initializing Telegram WebApp:', error);
-        finalize(false);
-      }
-    };
-
-    // Retry for a short time to avoid missing late Telegram injection
-    let attempts = 0;
-    const maxAttempts = 25; // ~5s @ 200ms
-
-    intervalId = window.setInterval(() => {
-      attempts += 1;
-      tryInit();
-      if (attempts >= maxAttempts) {
-        finalize(!!window.Telegram?.WebApp);
-      }
-    }, 200);
-
-    // Do an immediate attempt
-    tryInit();
-
-    return () => {
-      canceled = true;
-      if (intervalId) window.clearInterval(intervalId);
-    };
-  }, []);
-
-  const saveOrUpdateProfile = async (user: TelegramUser) => {
+  const saveOrUpdateProfile = async (user: TelegramUser): Promise<TelegramProfile | null> => {
     try {
-      // Check if profile exists
+      console.log('[Telegram] Saving/updating profile for user:', user.id);
+      
+      // Check if profile exists using maybeSingle
       const { data: existingProfile, error: fetchError } = await supabase
         .from('telegram_profiles')
         .select('*')
         .eq('telegram_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', fetchError);
-        return;
+      if (fetchError) {
+        console.error('[Telegram] Error fetching profile:', fetchError);
+        return null;
       }
 
       if (existingProfile) {
+        console.log('[Telegram] Profile exists, updating...');
         // Update existing profile with new data from Telegram
         const { data: updatedProfile, error: updateError } = await supabase
           .from('telegram_profiles')
@@ -187,14 +107,17 @@ export const useTelegramWebApp = () => {
           })
           .eq('telegram_id', user.id)
           .select()
-          .single();
+          .maybeSingle();
 
         if (updateError) {
-          console.error('Error updating profile:', updateError);
-        } else {
-          setProfile(updatedProfile);
+          console.error('[Telegram] Error updating profile:', updateError);
+          return null;
         }
+        
+        console.log('[Telegram] Profile updated:', updatedProfile);
+        return updatedProfile;
       } else {
+        console.log('[Telegram] Creating new profile...');
         // Create new profile
         const { data: newProfile, error: insertError } = await supabase
           .from('telegram_profiles')
@@ -207,18 +130,121 @@ export const useTelegramWebApp = () => {
             photo_url: user.photo_url,
           })
           .select()
-          .single();
+          .maybeSingle();
 
         if (insertError) {
-          console.error('Error creating profile:', insertError);
-        } else {
-          setProfile(newProfile);
+          console.error('[Telegram] Error creating profile:', insertError);
+          return null;
         }
+        
+        console.log('[Telegram] Profile created:', newProfile);
+        return newProfile;
       }
     } catch (error) {
-      console.error('Error in saveOrUpdateProfile:', error);
+      console.error('[Telegram] Error in saveOrUpdateProfile:', error);
+      return null;
     }
   };
+
+  useEffect(() => {
+    let canceled = false;
+    let intervalId: number | undefined;
+
+    const initTelegram = async (user: TelegramUser) => {
+      if (canceled) return;
+      
+      console.log('[Telegram] Initializing with user:', user);
+      setIsTelegram(true);
+      setTelegramUser(user);
+      
+      // Wait for profile to be saved/updated before finishing loading
+      const savedProfile = await saveOrUpdateProfile(user);
+      
+      if (canceled) return;
+      
+      if (savedProfile) {
+        console.log('[Telegram] Setting profile:', savedProfile);
+        setProfile(savedProfile);
+      }
+      
+      setIsLoading(false);
+      if (intervalId) window.clearInterval(intervalId);
+    };
+
+    const tryInit = () => {
+      try {
+        const tg = window.Telegram?.WebApp;
+
+        // Telegram WebApp detected
+        if (tg) {
+          const user = tg.initDataUnsafe?.user;
+          console.log('[Telegram] WebApp detected, user:', user);
+
+          if (user) {
+            tg.ready();
+            tg.expand();
+            void initTelegram(user);
+            return true; // Found user, stop polling
+          }
+
+          // Telegram есть, но user пока нет — продолжаем попытки
+          return false;
+        }
+
+        // Dev-mode fallback (only in dev builds)
+        if (DEV_MODE) {
+          console.log('[Telegram] DEV_MODE: using mock user');
+          const mockUser: TelegramUser = {
+            id: DEV_TELEGRAM_ID,
+            first_name: 'Dev',
+            last_name: 'User',
+            username: 'dev_user',
+            language_code: 'ru',
+          };
+
+          void initTelegram(mockUser);
+          return true;
+        }
+
+        return false;
+      } catch (error) {
+        console.error('[Telegram] Error initializing WebApp:', error);
+        return false;
+      }
+    };
+
+    // Do an immediate attempt
+    if (tryInit()) {
+      return;
+    }
+
+    // Retry for a short time to avoid missing late Telegram injection
+    let attempts = 0;
+    const maxAttempts = 25; // ~5s @ 200ms
+
+    intervalId = window.setInterval(() => {
+      attempts += 1;
+      
+      if (tryInit()) {
+        return;
+      }
+      
+      if (attempts >= maxAttempts) {
+        console.log('[Telegram] Max attempts reached, not a Telegram WebApp');
+        if (!canceled) {
+          setIsTelegram(false);
+          setIsLoading(false);
+        }
+        window.clearInterval(intervalId);
+      }
+    }, 200);
+
+    return () => {
+      canceled = true;
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, []);
+
 
   const updateProfile = async (updates: Partial<Omit<TelegramProfile, 'id' | 'telegram_id' | 'created_at' | 'updated_at'>>) => {
     if (!profile) return null;
@@ -229,7 +255,7 @@ export const useTelegramWebApp = () => {
         .update(updates)
         .eq('telegram_id', profile.telegram_id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -282,7 +308,7 @@ export const useTelegramWebApp = () => {
       .from('telegram_profiles')
       .select('*')
       .eq('telegram_id', telegramUser.id)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       setProfile(data);

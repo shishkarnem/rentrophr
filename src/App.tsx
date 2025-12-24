@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import Wiki from "./pages/Wiki";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
+import ScrollToTop from "./components/ScrollToTop";
 // Work pages
 import WorkIndex from "./pages/work/index";
 import ArendaRopov from "./pages/work/ArendaRopov";
@@ -45,6 +46,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<Profile />} />

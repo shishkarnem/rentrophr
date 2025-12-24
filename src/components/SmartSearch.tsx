@@ -251,7 +251,7 @@ const SmartSearch = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-2 w-80 md:w-[420px] glass-dark rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-[100]"
+            className="absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-[420px] glass-dark rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-[100]"
           >
             {/* Search input */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">

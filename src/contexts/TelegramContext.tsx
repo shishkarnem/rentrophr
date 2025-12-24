@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useTelegramWebApp } from '@/hooks/useTelegramWebApp';
-import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useLanguage, mapTelegramLanguage } from '@/contexts/LanguageContext';
 
 interface TelegramProfile {
   id: string;
@@ -37,13 +37,20 @@ export const TelegramProvider = ({ children }: { children: ReactNode }) => {
   const telegram = useTelegramWebApp();
   const { setLanguage } = useLanguage();
 
-  // Auto-set language from Telegram when detected
+  // Auto-set language from Telegram when profile is loaded
   useEffect(() => {
-    if (telegram.detectedLanguage) {
-      console.log('[TelegramProvider] Auto-setting language:', telegram.detectedLanguage);
+    // Priority: use profile language_code from database (most up-to-date)
+    // This ensures language is set AFTER loading completes
+    if (!telegram.isLoading && telegram.profile?.language_code) {
+      const profileLang = mapTelegramLanguage(telegram.profile.language_code);
+      console.log('[TelegramProvider] Setting language from profile:', telegram.profile.language_code, '->', profileLang);
+      setLanguage(profileLang);
+    } else if (telegram.detectedLanguage && !telegram.profile) {
+      // Fallback to detected language if no profile yet
+      console.log('[TelegramProvider] Setting language from detection:', telegram.detectedLanguage);
       setLanguage(telegram.detectedLanguage);
     }
-  }, [telegram.detectedLanguage, setLanguage]);
+  }, [telegram.isLoading, telegram.profile, telegram.detectedLanguage, setLanguage]);
 
   return (
     <TelegramContext.Provider value={telegram}>

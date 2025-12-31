@@ -52,6 +52,249 @@ export type Database = {
           },
         ]
       }
+      crm_data: {
+        Row: {
+          add_to_experts: string | null
+          available_skills: string | null
+          birth_date: string | null
+          birth_date_manual: string | null
+          birthday_enabled: boolean | null
+          birthday_enabled_manual: boolean | null
+          block_id: string | null
+          business_card_link: string | null
+          code: string | null
+          conditions: string | null
+          contract_date: string | null
+          contract_date_manual: string | null
+          contract_link: string | null
+          contract_link_chat: string | null
+          contract_signing: string | null
+          created_at: string
+          days_worked: number | null
+          disabled_aa: boolean | null
+          disabled_ac: boolean | null
+          disabled_ae: boolean | null
+          disabled_n: boolean | null
+          disabled_y: boolean | null
+          dismissal_date: string | null
+          feedback_date: string | null
+          full_info: string | null
+          full_info_manual: string | null
+          hr: string | null
+          hr_comment: string | null
+          hr_manual: string | null
+          hr_robot: string | null
+          id: string
+          in_app: boolean | null
+          interview: string | null
+          interview_date: string | null
+          language: string | null
+          language_choice: string | null
+          level: string | null
+          level_manual: string | null
+          phone: string | null
+          photo_link: string | null
+          portal: string | null
+          progress: string | null
+          projects_in_work: number | null
+          projects_mailing: string | null
+          protalk_id: string | null
+          rating: string | null
+          rejection_date: string | null
+          rejection_date_manual: string | null
+          rejection_id: string | null
+          reminders_disabled: boolean | null
+          reporting: string | null
+          result: string | null
+          result_manual: string | null
+          resume_link: string | null
+          resume_link_chat: string | null
+          resume_text: string | null
+          rf_phone: string | null
+          row_hash: string | null
+          sending: string | null
+          start_date: string | null
+          status: string | null
+          status_manual: string | null
+          telegram_id: number | null
+          telegram_name: string | null
+          test_conditions: string | null
+          test_portal: string | null
+          test_report: string | null
+          test_robot: string | null
+          tests_manual: string | null
+          tests_passed: string | null
+          to_experts: string | null
+          to_experts_manual: string | null
+          training_completed: string | null
+          updated_at: string
+          video_card: string | null
+          waiting_period: string | null
+          work_start: string | null
+          work_start_date: string | null
+        }
+        Insert: {
+          add_to_experts?: string | null
+          available_skills?: string | null
+          birth_date?: string | null
+          birth_date_manual?: string | null
+          birthday_enabled?: boolean | null
+          birthday_enabled_manual?: boolean | null
+          block_id?: string | null
+          business_card_link?: string | null
+          code?: string | null
+          conditions?: string | null
+          contract_date?: string | null
+          contract_date_manual?: string | null
+          contract_link?: string | null
+          contract_link_chat?: string | null
+          contract_signing?: string | null
+          created_at?: string
+          days_worked?: number | null
+          disabled_aa?: boolean | null
+          disabled_ac?: boolean | null
+          disabled_ae?: boolean | null
+          disabled_n?: boolean | null
+          disabled_y?: boolean | null
+          dismissal_date?: string | null
+          feedback_date?: string | null
+          full_info?: string | null
+          full_info_manual?: string | null
+          hr?: string | null
+          hr_comment?: string | null
+          hr_manual?: string | null
+          hr_robot?: string | null
+          id?: string
+          in_app?: boolean | null
+          interview?: string | null
+          interview_date?: string | null
+          language?: string | null
+          language_choice?: string | null
+          level?: string | null
+          level_manual?: string | null
+          phone?: string | null
+          photo_link?: string | null
+          portal?: string | null
+          progress?: string | null
+          projects_in_work?: number | null
+          projects_mailing?: string | null
+          protalk_id?: string | null
+          rating?: string | null
+          rejection_date?: string | null
+          rejection_date_manual?: string | null
+          rejection_id?: string | null
+          reminders_disabled?: boolean | null
+          reporting?: string | null
+          result?: string | null
+          result_manual?: string | null
+          resume_link?: string | null
+          resume_link_chat?: string | null
+          resume_text?: string | null
+          rf_phone?: string | null
+          row_hash?: string | null
+          sending?: string | null
+          start_date?: string | null
+          status?: string | null
+          status_manual?: string | null
+          telegram_id?: number | null
+          telegram_name?: string | null
+          test_conditions?: string | null
+          test_portal?: string | null
+          test_report?: string | null
+          test_robot?: string | null
+          tests_manual?: string | null
+          tests_passed?: string | null
+          to_experts?: string | null
+          to_experts_manual?: string | null
+          training_completed?: string | null
+          updated_at?: string
+          video_card?: string | null
+          waiting_period?: string | null
+          work_start?: string | null
+          work_start_date?: string | null
+        }
+        Update: {
+          add_to_experts?: string | null
+          available_skills?: string | null
+          birth_date?: string | null
+          birth_date_manual?: string | null
+          birthday_enabled?: boolean | null
+          birthday_enabled_manual?: boolean | null
+          block_id?: string | null
+          business_card_link?: string | null
+          code?: string | null
+          conditions?: string | null
+          contract_date?: string | null
+          contract_date_manual?: string | null
+          contract_link?: string | null
+          contract_link_chat?: string | null
+          contract_signing?: string | null
+          created_at?: string
+          days_worked?: number | null
+          disabled_aa?: boolean | null
+          disabled_ac?: boolean | null
+          disabled_ae?: boolean | null
+          disabled_n?: boolean | null
+          disabled_y?: boolean | null
+          dismissal_date?: string | null
+          feedback_date?: string | null
+          full_info?: string | null
+          full_info_manual?: string | null
+          hr?: string | null
+          hr_comment?: string | null
+          hr_manual?: string | null
+          hr_robot?: string | null
+          id?: string
+          in_app?: boolean | null
+          interview?: string | null
+          interview_date?: string | null
+          language?: string | null
+          language_choice?: string | null
+          level?: string | null
+          level_manual?: string | null
+          phone?: string | null
+          photo_link?: string | null
+          portal?: string | null
+          progress?: string | null
+          projects_in_work?: number | null
+          projects_mailing?: string | null
+          protalk_id?: string | null
+          rating?: string | null
+          rejection_date?: string | null
+          rejection_date_manual?: string | null
+          rejection_id?: string | null
+          reminders_disabled?: boolean | null
+          reporting?: string | null
+          result?: string | null
+          result_manual?: string | null
+          resume_link?: string | null
+          resume_link_chat?: string | null
+          resume_text?: string | null
+          rf_phone?: string | null
+          row_hash?: string | null
+          sending?: string | null
+          start_date?: string | null
+          status?: string | null
+          status_manual?: string | null
+          telegram_id?: number | null
+          telegram_name?: string | null
+          test_conditions?: string | null
+          test_portal?: string | null
+          test_report?: string | null
+          test_robot?: string | null
+          tests_manual?: string | null
+          tests_passed?: string | null
+          to_experts?: string | null
+          to_experts_manual?: string | null
+          training_completed?: string | null
+          updated_at?: string
+          video_card?: string | null
+          waiting_period?: string | null
+          work_start?: string | null
+          work_start_date?: string | null
+        }
+        Relationships: []
+      }
       faq_knowledge: {
         Row: {
           answer: string

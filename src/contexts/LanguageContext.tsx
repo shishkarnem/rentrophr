@@ -36,6 +36,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Главная',
     'nav.work': 'Работа',
     'nav.conditions': 'Условия',
+    'nav.wiki': 'Вики',
+    'nav.menu': 'Меню',
+    'nav.profile': 'Профиль',
+    'nav.projects': 'Проекты',
+    'nav.aiChat': 'ИИ Чат',
     
     // Work pages
     'work.title': 'Работа',
@@ -315,7 +320,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'training.accessNote': 'Доступ ко всей Базе Знаний компании пришлем по итогу прохождения всего обучения.',
     
     // Projects page
-    'projects.title': 'Проекты',
+    'projects.title': 'Страница в разработке',
+    'projects.description': 'Проекты можно посмотреть в телеграм канале',
+    'projects.viewInTelegram': 'Смотреть проекты',
     'projects.selection': 'Подбор проектов',
     'projects.selectionDesc1': 'Подбор проектов открытый. В',
     'projects.telegramChannel': 'телеграм канале',
@@ -403,6 +410,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Home',
     'nav.work': 'Work',
     'nav.conditions': 'Conditions',
+    'nav.wiki': 'Wiki',
+    'nav.menu': 'Menu',
+    'nav.profile': 'Profile',
+    'nav.projects': 'Projects',
+    'nav.aiChat': 'AI Chat',
     
     // Work pages
     'work.title': 'Work',
@@ -682,7 +694,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'training.accessNote': 'We will send access to the entire company Knowledge Base after completing all training.',
     
     // Projects page
-    'projects.title': 'Projects',
+    'projects.title': 'Page Under Development',
+    'projects.description': 'Projects are available in the Telegram channel',
+    'projects.viewInTelegram': 'View Projects',
     'projects.selection': 'Project Selection',
     'projects.selectionDesc1': 'Project selection is open. In the',
     'projects.telegramChannel': 'Telegram channel',
@@ -770,6 +784,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.home': 'Басты бет',
     'nav.work': 'Жұмыс',
     'nav.conditions': 'Шарттар',
+    'nav.wiki': 'Вики',
+    'nav.menu': 'Мәзір',
+    'nav.profile': 'Профиль',
+    'nav.projects': 'Жобалар',
+    'nav.aiChat': 'AI Чат',
     
     // Work pages
     'work.title': 'Жұмыс',
@@ -1049,7 +1068,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'training.accessNote': 'Барлық оқытуды аяқтағаннан кейін компанияның бүкіл Білім базасына қол жеткізуді жібереміз.',
     
     // Projects page
-    'projects.title': 'Жобалар',
+    'projects.title': 'Бет әзірленуде',
+    'projects.description': 'Жобаларды Telegram арнасында көруге болады',
+    'projects.viewInTelegram': 'Жобаларды көру',
     'projects.selection': 'Жобаларды таңдау',
     'projects.selectionDesc1': 'Жобаларды таңдау ашық.',
     'projects.telegramChannel': 'Telegram арнасында',

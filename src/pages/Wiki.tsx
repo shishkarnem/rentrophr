@@ -1,10 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ChevronDown, ChevronUp, BookOpen, Search, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTelegram } from '@/contexts/TelegramContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileNavbar from '@/components/MobileNavbar';
+import MobileHeader from '@/components/MobileHeader';
+import AIAssistant from '@/components/AIAssistant';
+
 interface FaqItem {
   id: string;
   question: string;
@@ -31,7 +38,14 @@ const renderTextWithLinks = (text: string) => {
     return part;
   });
 };
+
 const Wiki = () => {
+  const [searchParams] = useSearchParams();
+  const { isTelegram } = useTelegram();
+  const isMobile = useIsMobile();
+  const showMobileNav = isTelegram || isMobile;
+  const openChatOnLoad = searchParams.get('openChat') === 'true';
+  
   const [faqItems, setFaqItems] = useState<FaqItem[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +53,7 @@ const Wiki = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [aiSearchResult, setAiSearchResult] = useState<string | null>(null);
   const [isAiSearching, setIsAiSearching] = useState(false);
+  const [showAiChat, setShowAiChat] = useState(openChatOnLoad);
   const {
     language,
     t
@@ -185,9 +200,9 @@ const Wiki = () => {
     return cat;
   };
   return <div className="min-h-screen bg-gradient-to-b from-primary to-primary/90">
-      <Header onNavigate={handleNavigate} />
+      {showMobileNav ? <MobileHeader /> : <Header onNavigate={handleNavigate} />}
       
-      <main className="pt-24 pb-16">
+      <main className={`pt-24 ${showMobileNav ? 'pb-24' : 'pb-16'}`}>
         <div className="container mx-auto px-4 md:px-6">
           {/* Page Header */}
           <motion.div initial={{
@@ -337,7 +352,10 @@ const Wiki = () => {
         </div>
       </main>
       
-      <Footer />
+      {showMobileNav ? <MobileNavbar /> : <Footer />}
+      
+      {/* AI Assistant - show on mobile when openChat param is set */}
+      {showMobileNav && showAiChat && <AIAssistant defaultOpen={true} />}
     </div>;
 };
 export default Wiki;

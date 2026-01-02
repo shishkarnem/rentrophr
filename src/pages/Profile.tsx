@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useCrmData } from '@/hooks/useCrmData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import MobileNavbar from '@/components/MobileNavbar';
+import MobileHeader from '@/components/MobileHeader';
 
 // Inline language switcher for profile with DB sync
 const ProfileLanguageSwitcher = () => {
@@ -94,6 +97,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const { isTelegram, profile, isLoading, updateProfile, uploadPhoto } = useTelegram();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
+  const showMobileNav = isTelegram || isMobile;
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get telegram_id from profile
@@ -273,28 +278,32 @@ const Profile = () => {
 
   return (
     <div 
-      className="min-h-screen relative z-10 pb-8"
+      className="min-h-screen relative z-10"
       style={{
         background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
       }}
     >
       {/* Header */}
-      <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+      {showMobileNav ? (
+        <MobileHeader />
+      ) : (
+        <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-lg font-semibold text-white">{t('profile.title')}</h1>
+            </div>
+            <ProfileLanguageSwitcher />
           </div>
-          <ProfileLanguageSwitcher />
         </div>
-      </div>
+      )}
 
-      <div className="container mx-auto px-4 py-8 max-w-md space-y-6">
+      <div className={`container mx-auto px-4 py-8 max-w-md space-y-6 ${showMobileNav ? 'pt-20 pb-24' : ''}`}>
         {/* Profile Photo */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative">
@@ -560,6 +569,8 @@ const Profile = () => {
           </div>
         )}
       </div>
+      
+      {showMobileNav && <MobileNavbar />}
     </div>
   );
 };

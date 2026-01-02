@@ -5,10 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TelegramProvider, useTelegram } from "@/contexts/TelegramContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Wiki from "./pages/Wiki";
+import ProjectsPage from "./pages/ProjectsPage";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
 import ScrollToTop from "./components/ScrollToTop";
@@ -41,7 +43,9 @@ const queryClient = new QueryClient();
 
 // Inner component that has access to Telegram context
 const AppContent = () => {
-  const { isLoading } = useTelegram();
+  const { isLoading, isTelegram } = useTelegram();
+  const isMobile = useIsMobile();
+  const showMobileNav = isTelegram || isMobile;
 
   // Show loader while Telegram is initializing (only in first ~5 seconds)
   if (isLoading) {
@@ -55,6 +59,7 @@ const AppContent = () => {
         <Route path="/" element={<Index />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/wiki" element={<Wiki />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         
         {/* Work routes */}
         <Route path="/work" element={<WorkIndex />} />
@@ -85,8 +90,8 @@ const AppContent = () => {
       {/* P5.js Background Animation */}
       <P5Background />
       
-      {/* AI Assistant - available on all pages */}
-      <AIAssistant />
+      {/* AI Assistant - hide on mobile/telegram, using bottom navbar instead */}
+      {!showMobileNav && <AIAssistant />}
     </>
   );
 };

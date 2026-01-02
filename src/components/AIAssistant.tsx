@@ -178,10 +178,14 @@ const MessageContent = ({ content, isAssistant }: { content: string; isAssistant
   );
 };
 
-const AIAssistant = () => {
+interface AIAssistantProps {
+  defaultOpen?: boolean;
+}
+
+const AIAssistant = ({ defaultOpen = false }: AIAssistantProps) => {
   const { language, t, loading: translationsLoading } = useLanguage();
   const { isTelegram, profile } = useTelegram();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

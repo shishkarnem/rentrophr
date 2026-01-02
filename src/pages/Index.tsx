@@ -3,21 +3,29 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/sections/HeroSection';
 import VideoSection from '@/components/sections/VideoSection';
 import VacancySection from '@/components/sections/VacancySection';
+import MobileNavbar from '@/components/MobileNavbar';
+import MobileHeader from '@/components/MobileHeader';
+import { useTelegram } from '@/contexts/TelegramContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
+  const { isTelegram } = useTelegram();
+  const isMobile = useIsMobile();
+  const showMobileNav = isTelegram || isMobile;
+
   const handleNavigate = (section: string) => {
     console.log('Navigate to:', section);
   };
 
   return (
     <div className="min-h-screen hero-gradient">
-      <Header onNavigate={handleNavigate} />
-      <main>
+      {showMobileNav ? <MobileHeader /> : <Header onNavigate={handleNavigate} />}
+      <main className={showMobileNav ? 'pb-20' : ''}>
         <HeroSection />
         <VideoSection />
         <VacancySection />
       </main>
-      <Footer />
+      {showMobileNav ? <MobileNavbar /> : <Footer />}
     </div>
   );
 };

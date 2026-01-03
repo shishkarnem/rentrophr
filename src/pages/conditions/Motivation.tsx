@@ -1,5 +1,4 @@
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import MobileLayout from '@/components/layout/MobileLayout';
 import { CardGlassDark } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -9,8 +8,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { AnimatedSection, AnimatedText, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedSection';
+import { useTelegram } from '@/contexts/TelegramContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Motivation = () => {
+  const { isTelegram } = useTelegram();
+  const isMobile = useIsMobile();
+  const showMobileNav = isTelegram || isMobile;
   const { t } = useLanguage();
 
   const motivationItems = [
@@ -23,15 +27,15 @@ const Motivation = () => {
 
   return (
     <PageTransition className="min-h-screen hero-gradient">
-      <Header onNavigate={() => {}} />
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-6">
-          <AnimatedSection variant="fadeLeft">
-            <Link to="/conditions" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
-              <ArrowLeft className="w-4 h-4" />
-              {t('conditions.backToConditions')}
-            </Link>
-          </AnimatedSection>
+      <MobileLayout>
+        <main className={showMobileNav ? "pt-32 pb-24" : "pt-24 pb-16"}>
+          <div className="container mx-auto px-6">
+            <AnimatedSection variant="fadeLeft">
+              <Link to="/conditions" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
+                <ArrowLeft className="w-4 h-4" />
+                {t('conditions.backToConditions')}
+              </Link>
+            </AnimatedSection>
           
           <div className="max-w-4xl mx-auto">
             <AnimatedSection variant="blurIn" className="mb-8">
@@ -126,9 +130,9 @@ const Motivation = () => {
           </div>
         </div>
       </main>
-      <Footer />
-    </PageTransition>
-  );
+    </MobileLayout>
+  </PageTransition>
+);
 };
 
 export default Motivation;

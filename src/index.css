@@ -287,4 +287,19 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Mobile optimized - disable heavy effects */
+  .mobile-optimized .glass,
+  .mobile-optimized .glass-dark {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .mobile-optimized .glass-dark {
+    background: linear-gradient(
+      135deg,
+      hsl(207 55% 15% / 0.95),
+      hsl(207 55% 20% / 0.9)
+    );
+  }
 }

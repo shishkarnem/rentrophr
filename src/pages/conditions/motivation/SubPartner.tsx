@@ -14,6 +14,9 @@ const SubPartner = () => {
   const { isTelegram } = useTelegram();
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
+  
+  // Отключаем backdrop-filter на мобильной версии для лучшей производительности
+  const mobileOptimizedClass = showMobileNav ? 'mobile-optimized' : '';
   const { 
     cardVariants, 
     scaleVariants, 
@@ -32,7 +35,7 @@ const SubPartner = () => {
   ];
 
   return (
-    <div className="min-h-screen hero-gradient">
+    <div className={`min-h-screen hero-gradient ${mobileOptimizedClass}`}>
       <MobileLayout>
         <PageTransition>
           <main className={showMobileNav ? "pt-32 pb-24" : "pt-24 pb-16"}>

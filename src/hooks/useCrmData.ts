@@ -35,6 +35,9 @@ export interface CrmData {
   video_card: string | null;
   work_start: string | null;
   projects_mailing: string | null;
+  hr: string | null;
+  photo_link: string | null;
+  resume_link_chat: string | null;
 }
 
 export const useCrmData = (telegramId: number | null) => {

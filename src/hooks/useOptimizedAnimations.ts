@@ -38,30 +38,28 @@ export const useOptimizedAnimations = () => {
       : { opacity: 1, y: 0 }
   };
 
-  // Card variants - no blur on mobile (expensive)
+  // Card variants - avoid CSS filter blur (Telegram WebView can render it permanently blurred)
   const cardVariants = {
-    hidden: shouldAnimate 
-      ? { opacity: 0, y: isMobile ? 20 : 40, ...(isMobile ? {} : { filter: 'blur(10px)' }) }
+    hidden: shouldAnimate
+      ? { opacity: 0, y: isMobile ? 20 : 40 }
       : { opacity: 1, y: 0 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      ...(isMobile ? {} : { filter: 'blur(0px)' }),
-      transition: { duration, delay: i * staggerDelay, ease }
-    })
+      transition: { duration, delay: i * staggerDelay, ease },
+    }),
   };
 
-  // Item variants for lists - simplified on mobile
+  // Item variants for lists - avoid CSS filter blur
   const itemVariants = {
-    hidden: shouldAnimate 
-      ? { opacity: 0, x: isMobile ? -10 : -30, ...(isMobile ? {} : { filter: 'blur(5px)' }) }
+    hidden: shouldAnimate
+      ? { opacity: 0, x: isMobile ? -10 : -30 }
       : { opacity: 1, x: 0 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
-      ...(isMobile ? {} : { filter: 'blur(0px)' }),
-      transition: { duration, ease }
-    }
+      transition: { duration, ease },
+    },
   };
 
   // Stagger container - faster stagger on mobile

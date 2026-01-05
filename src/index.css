@@ -287,12 +287,13 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   /* Mobile optimized - disable backdrop blur (causes WebView rendering blur/artifacts) */
   .mobile-optimized .glass,
   .mobile-optimized .glass-dark {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    filter: none !important;
   }
 
   /* Make surfaces more opaque on mobile since we removed backdrop blur */
@@ -311,4 +312,31 @@
       hsl(207 55% 20% / 0.92)
     );
   }
+
+  /* Hard fallback: on small screens disable backdrop-filter everywhere (even if wrapper class is missing) */
+  @media (max-width: 768px) {
+    .glass,
+    .glass-dark {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      filter: none !important;
+    }
+
+    .glass {
+      background: linear-gradient(
+        135deg,
+        hsl(0 0% 100% / 0.92),
+        hsl(0 0% 100% / 0.82)
+      );
+    }
+
+    .glass-dark {
+      background: linear-gradient(
+        135deg,
+        hsl(207 55% 15% / 0.96),
+        hsl(207 55% 20% / 0.92)
+      );
+    }
+  }
 }
+

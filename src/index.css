@@ -288,18 +288,27 @@
     text-wrap: balance;
   }
   
-  /* Mobile optimized - disable heavy effects */
+  /* Mobile optimized - disable backdrop blur (causes WebView rendering blur/artifacts) */
   .mobile-optimized .glass,
   .mobile-optimized .glass-dark {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
-  
+
+  /* Make surfaces more opaque on mobile since we removed backdrop blur */
+  .mobile-optimized .glass {
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.92),
+      hsl(0 0% 100% / 0.82)
+    );
+  }
+
   .mobile-optimized .glass-dark {
     background: linear-gradient(
       135deg,
-      hsl(207 55% 15% / 0.95),
-      hsl(207 55% 20% / 0.9)
+      hsl(207 55% 15% / 0.96),
+      hsl(207 55% 20% / 0.92)
     );
   }
 }

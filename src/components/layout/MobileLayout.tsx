@@ -3,7 +3,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileHeader from '@/components/MobileHeader';
-import MobileNavbar from '@/components/MobileNavbar';
+import CircularCarouselNavbar from '@/components/CircularCarouselNavbar';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ const MobileLayout = ({ children, onNavigate = () => {} }: MobileLayoutProps) =>
     <>
       {showMobileNav ? <MobileHeader /> : <Header onNavigate={onNavigate} />}
       {children}
-      {showMobileNav ? <MobileNavbar /> : <Footer />}
+      {showMobileNav ? <CircularCarouselNavbar /> : <Footer />}
     </>
   );
 };

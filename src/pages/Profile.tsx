@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -528,6 +528,23 @@ const Profile = () => {
               <ProgressItem label={t('profile.videoCard') || 'Видео-визитка'} value={crmData.video_card} />
               <ProgressItem label={t('profile.workStartProgress') || 'Выход на работу'} value={crmData.work_start} />
               <ProgressItem label={t('profile.projectsMailing') || 'Рассылка проектов'} value={crmData.projects_mailing} />
+            </div>
+          </div>
+        )}
+
+        {/* Interview Block (read-only) */}
+        {crmData && (crmData.rop_name || crmData.city || crmData.region || crmData.checklist_answers) && (
+          <div className="glass-dark rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageCircle className="w-5 h-5 text-accent" />
+              <h3 className="text-lg font-semibold text-white">{t('profile.interviewSection') || 'Интервью'}</h3>
+            </div>
+            
+            <div className="space-y-2">
+              <InfoRow label={t('profile.ropName') || 'РОП (ФИО)'} value={crmData.rop_name} />
+              <InfoRow label={t('profile.city') || 'Город'} value={crmData.city} />
+              <InfoRow label={t('profile.region') || 'Регион'} value={crmData.region} />
+              <ResumeTextRow label={t('profile.checklistAnswers') || 'Ответы на чек-лист'} value={crmData.checklist_answers} />
             </div>
           </div>
         )}

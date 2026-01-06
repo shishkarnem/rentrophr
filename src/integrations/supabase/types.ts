@@ -62,6 +62,8 @@ export type Database = {
           birthday_enabled_manual: boolean | null
           block_id: string | null
           business_card_link: string | null
+          checklist_answers: string | null
+          city: string | null
           code: string | null
           conditions: string | null
           contract_date: string | null
@@ -81,6 +83,7 @@ export type Database = {
           full_info: string | null
           full_info_manual: string | null
           hr: string | null
+          hr_chat_id: string | null
           hr_comment: string | null
           hr_manual: string | null
           hr_robot: string | null
@@ -100,6 +103,7 @@ export type Database = {
           projects_mailing: string | null
           protalk_id: string | null
           rating: string | null
+          region: string | null
           rejection_date: string | null
           rejection_date_manual: string | null
           rejection_id: string | null
@@ -111,6 +115,7 @@ export type Database = {
           resume_link_chat: string | null
           resume_text: string | null
           rf_phone: string | null
+          rop_name: string | null
           row_hash: string | null
           sending: string | null
           start_date: string | null
@@ -142,6 +147,8 @@ export type Database = {
           birthday_enabled_manual?: boolean | null
           block_id?: string | null
           business_card_link?: string | null
+          checklist_answers?: string | null
+          city?: string | null
           code?: string | null
           conditions?: string | null
           contract_date?: string | null
@@ -161,6 +168,7 @@ export type Database = {
           full_info?: string | null
           full_info_manual?: string | null
           hr?: string | null
+          hr_chat_id?: string | null
           hr_comment?: string | null
           hr_manual?: string | null
           hr_robot?: string | null
@@ -180,6 +188,7 @@ export type Database = {
           projects_mailing?: string | null
           protalk_id?: string | null
           rating?: string | null
+          region?: string | null
           rejection_date?: string | null
           rejection_date_manual?: string | null
           rejection_id?: string | null
@@ -191,6 +200,7 @@ export type Database = {
           resume_link_chat?: string | null
           resume_text?: string | null
           rf_phone?: string | null
+          rop_name?: string | null
           row_hash?: string | null
           sending?: string | null
           start_date?: string | null
@@ -222,6 +232,8 @@ export type Database = {
           birthday_enabled_manual?: boolean | null
           block_id?: string | null
           business_card_link?: string | null
+          checklist_answers?: string | null
+          city?: string | null
           code?: string | null
           conditions?: string | null
           contract_date?: string | null
@@ -241,6 +253,7 @@ export type Database = {
           full_info?: string | null
           full_info_manual?: string | null
           hr?: string | null
+          hr_chat_id?: string | null
           hr_comment?: string | null
           hr_manual?: string | null
           hr_robot?: string | null
@@ -260,6 +273,7 @@ export type Database = {
           projects_mailing?: string | null
           protalk_id?: string | null
           rating?: string | null
+          region?: string | null
           rejection_date?: string | null
           rejection_date_manual?: string | null
           rejection_id?: string | null
@@ -271,6 +285,7 @@ export type Database = {
           resume_link_chat?: string | null
           resume_text?: string | null
           rf_phone?: string | null
+          rop_name?: string | null
           row_hash?: string | null
           sending?: string | null
           start_date?: string | null

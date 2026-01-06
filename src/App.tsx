@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Wiki from "./pages/Wiki";
 import ProjectsPage from "./pages/ProjectsPage";
+import AdminCRM from "./pages/AdminCRM";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
 import ScrollToTop from "./components/ScrollToTop";
@@ -58,6 +59,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin/crm" element={<AdminCRM />} />
         <Route path="/wiki" element={<Wiki />} />
         <Route path="/projects" element={<ProjectsPage />} />
         

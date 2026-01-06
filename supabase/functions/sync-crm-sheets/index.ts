@@ -266,6 +266,11 @@ Deno.serve(async (req) => {
           protalk_id: row[72] || null,
           in_app: parseBoolean(row[73]),
           block_id: row[74] || null,
+          rop_name: row[75] || null, // BX - РОП (ФИО)
+          city: row[76] || null, // BY - Город
+          region: row[77] || null, // BZ - Регион
+          checklist_answers: row[78] || null, // CA - Ответы на чек-лист
+          hr_chat_id: row[79] || null, // CB - ID чата HR
           row_hash: createRowHash(telegramId),
         };
       })

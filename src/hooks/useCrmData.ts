@@ -38,6 +38,12 @@ export interface CrmData {
   hr: string | null;
   photo_link: string | null;
   resume_link_chat: string | null;
+  // New interview fields
+  rop_name: string | null;
+  city: string | null;
+  region: string | null;
+  checklist_answers: string | null;
+  hr_chat_id: string | null;
 }
 
 export const useCrmData = (telegramId: number | null) => {

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -493,7 +493,22 @@ const Profile = () => {
               <InfoRow label={t('profile.code') || 'Код'} value={crmData.code} />
               <InfoRow label={t('profile.fullInfo') || 'ФИО, Код и Телеграм'} value={crmData.full_info} />
               <InfoRow label={t('profile.hr') || 'HR'} value={crmData.hr} />
-              <InfoRow label={t('profile.status') || 'Статус'} value={crmData.status} />
+              {/* Status row with admin button */}
+              <div className="flex justify-between items-center py-2 border-b border-white/10">
+                <span className="text-muted-foreground text-sm">{t('profile.status') || 'Статус'}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-white text-sm">{crmData.status || '—'}</span>
+                  {crmData.status && ['ДПР', 'HR', 'Чат или канал', 'Менеджер'].includes(crmData.status) && (
+                    <button
+                      onClick={() => navigate('/admin/crm')}
+                      className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+                      title={t('admin.title') || 'Админ-панель CRM'}
+                    >
+                      <Settings className="w-4 h-4 text-accent" />
+                    </button>
+                  )}
+                </div>
+              </div>
               <InfoRow label={t('profile.rating') || 'Рейтинг'} value={crmData.rating} />
               <InfoRow label={t('profile.contractDate') || 'Дата подписания договора'} value={crmData.contract_date} />
               <InfoRow label={t('profile.contractLink') || 'Ссылка на договор'} value={crmData.contract_link} isLink />

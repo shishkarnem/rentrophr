@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, filters, language = 'ru' } = await req.json();
+    const { query, filters, language = 'ru', priorityFields = [] } = await req.json();
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -29,12 +29,18 @@ serve(async (req) => {
     if (filters?.hr) {
       dbQuery = dbQuery.eq('hr', filters.hr);
     }
+    if (filters?.city) {
+      dbQuery = dbQuery.eq('city', filters.city);
+    }
+    if (filters?.region) {
+      dbQuery = dbQuery.eq('region', filters.region);
+    }
     if (filters?.result) {
       dbQuery = dbQuery.eq('result', filters.result);
     }
 
     // Limit results for performance
-    dbQuery = dbQuery.limit(100);
+    dbQuery = dbQuery.limit(500);
 
     const { data: crmRecords, error: dbError } = await dbQuery;
 
@@ -59,19 +65,32 @@ serve(async (req) => {
 
     const lowerQuery = query.toLowerCase();
 
-    // Search through all records
+    // Priority fields for AI search (resume_text, checklist_answers first)
+    const defaultPriorityFields = ['resume_text', 'checklist_answers'];
+    const activePriorityFields = priorityFields.length > 0 ? priorityFields : defaultPriorityFields;
+
+    // Search through all records with priority scoring
     const searchResults = crmRecords
       .map((record) => {
         let score = 0;
+        let matchedInPriority = false;
         
-        // Search in key fields
-        const searchableFields = [
+        // Priority fields get higher score
+        for (const field of activePriorityFields) {
+          const value = record[field];
+          if (value && typeof value === 'string' && value.toLowerCase().includes(lowerQuery)) {
+            score += 20; // High priority fields
+            matchedInPriority = true;
+          }
+        }
+        
+        // Other searchable fields
+        const otherFields = [
           'code', 'telegram_name', 'full_info', 'status', 'hr', 'result',
-          'phone', 'city', 'region', 'rop_name', 'resume_text', 'checklist_answers',
-          'available_skills', 'rating'
+          'phone', 'city', 'region', 'rop_name', 'available_skills', 'rating'
         ];
 
-        for (const field of searchableFields) {
+        for (const field of otherFields) {
           const value = record[field];
           if (value && typeof value === 'string') {
             if (value.toLowerCase().includes(lowerQuery)) {
@@ -85,26 +104,46 @@ serve(async (req) => {
           score += 10;
         }
 
-        return { ...record, score, matched: score > 0 };
+        return { ...record, score, matched: score > 0, matchedInPriority };
       })
       .filter(record => record.matched)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
+      .sort((a, b) => {
+        // Priority matches first, then by score
+        if (a.matchedInPriority && !b.matchedInPriority) return -1;
+        if (!a.matchedInPriority && b.matchedInPriority) return 1;
+        return b.score - a.score;
+      })
+      .slice(0, 50);
 
     // Generate AI summary using Lovable AI
     let aiSummary = null;
 
     if (searchResults.length > 0 && query.trim().length >= 3) {
       try {
-        const contextText = searchResults.slice(0, 5).map(r => 
-          `Имя: ${r.telegram_name || r.full_info || 'Неизвестно'}, ` +
-          `Код: ${r.code || '-'}, ` +
-          `Статус: ${r.status || '-'}, ` +
-          `HR: ${r.hr || '-'}, ` +
-          `Город: ${r.city || '-'}, ` +
-          `Регион: ${r.region || '-'}, ` +
-          `Рейтинг: ${r.rating || '-'}`
-        ).join('\n');
+        // Include priority field content in context
+        const contextText = searchResults.slice(0, 5).map(r => {
+          let text = `Имя: ${r.telegram_name || r.full_info || 'Неизвестно'}, ` +
+            `Код: ${r.code || '-'}, ` +
+            `Статус: ${r.status || '-'}, ` +
+            `HR: ${r.hr || '-'}, ` +
+            `Город: ${r.city || '-'}, ` +
+            `Регион: ${r.region || '-'}, ` +
+            `Рейтинг: ${r.rating || '-'}`;
+          
+          // Add resume snippet if matched
+          if (r.resume_text && r.resume_text.toLowerCase().includes(lowerQuery)) {
+            const snippet = r.resume_text.substring(0, 200);
+            text += `, Резюме: "${snippet}..."`;
+          }
+          
+          // Add checklist snippet if matched
+          if (r.checklist_answers && r.checklist_answers.toLowerCase().includes(lowerQuery)) {
+            const snippet = r.checklist_answers.substring(0, 200);
+            text += `, Ответы: "${snippet}..."`;
+          }
+          
+          return text;
+        }).join('\n');
 
         const langNames: Record<string, string> = {
           'ru': 'русском',
@@ -123,14 +162,14 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `Ты помощник для поиска по CRM данным. Отвечай кратко на ${langNames[language] || 'русском'} языке. Максимум 3 предложения. Подытожь найденные результаты.`
+                content: `Ты помощник для поиска по CRM данным. Отвечай кратко на ${langNames[language] || 'русском'} языке. Максимум 3 предложения. Подытожь найденные результаты, особенно обращая внимание на содержимое резюме и ответов на чек-лист.`
               },
               {
                 role: 'user',
-                content: `Поиск: "${query}"\n\nНайдено ${searchResults.length} записей:\n${contextText}\n\nКратко опиши найденных сотрудников.`
+                content: `Поиск: "${query}"\n\nНайдено ${searchResults.length} записей:\n${contextText}\n\nКратко опиши найденных сотрудников и что нашлось по запросу.`
               }
             ],
-            max_tokens: 200,
+            max_tokens: 300,
             temperature: 0.7,
           }),
         });
@@ -148,8 +187,8 @@ serve(async (req) => {
       }
     }
 
-    // Remove score from response
-    const cleanResults = searchResults.map(({ score, matched, ...rest }) => rest);
+    // Remove internal fields from response
+    const cleanResults = searchResults.map(({ score, matched, matchedInPriority, ...rest }) => rest);
 
     return new Response(
       JSON.stringify({

@@ -113,18 +113,52 @@ const AdminCRM = () => {
   const [allRecords, setAllRecords] = useState<CrmData[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(true);
   
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<Set<keyof CrmData>>(
-    new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key))
-  );
+  // Column visibility - persist to localStorage
+  const [visibleColumns, setVisibleColumns] = useState<Set<keyof CrmData>>(() => {
+    const saved = localStorage.getItem('admin-crm-visible-columns');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as string[];
+        return new Set(parsed as (keyof CrmData)[]);
+      } catch {
+        // fallback to defaults
+      }
+    }
+    return new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key));
+  });
   
-  // Pagination
-  const [pageSize, setPageSize] = useState(25);
+  // Pagination - persist to localStorage
+  const [pageSize, setPageSize] = useState(() => {
+    const saved = localStorage.getItem('admin-crm-page-size');
+    return saved ? Number(saved) : 25;
+  });
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Sorting - default by start_date descending (newest first)
-  const [sortColumn, setSortColumn] = useState<keyof CrmData | null>('start_date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  // Sorting - persist to localStorage, default by start_date descending (newest first)
+  const [sortColumn, setSortColumn] = useState<keyof CrmData | null>(() => {
+    const saved = localStorage.getItem('admin-crm-sort-column');
+    return saved ? (saved as keyof CrmData) : 'start_date';
+  });
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(() => {
+    const saved = localStorage.getItem('admin-crm-sort-direction');
+    return saved === 'asc' ? 'asc' : 'desc';
+  });
+  
+  // Persist settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('admin-crm-visible-columns', JSON.stringify([...visibleColumns]));
+  }, [visibleColumns]);
+  
+  useEffect(() => {
+    localStorage.setItem('admin-crm-page-size', String(pageSize));
+  }, [pageSize]);
+  
+  useEffect(() => {
+    if (sortColumn) {
+      localStorage.setItem('admin-crm-sort-column', sortColumn);
+    }
+    localStorage.setItem('admin-crm-sort-direction', sortDirection);
+  }, [sortColumn, sortDirection]);
 
   // Check preview mode or admin access
   const isPreview = !isTelegram;

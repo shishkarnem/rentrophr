@@ -313,28 +313,55 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Upsert in batches
-    const batchSize = 100;
+    // Upsert in batches with parallel processing for better performance
+    const batchSize = 500; // Increased batch size for fewer requests
     let upsertedCount = 0;
+    let errorCount = 0;
+    
+    // Process in parallel batches (up to 5 concurrent)
+    const parallelBatches = 5;
+    const batches: typeof crmData[] = [];
     
     for (let i = 0; i < crmData.length; i += batchSize) {
-      const batch = crmData.slice(i, i + batchSize);
+      batches.push(crmData.slice(i, i + batchSize));
+    }
+    
+    console.log('[sync-crm-sheets] Processing', batches.length, 'batches of', batchSize, 'records each');
+    
+    // Process batches in parallel groups
+    for (let i = 0; i < batches.length; i += parallelBatches) {
+      const batchGroup = batches.slice(i, i + parallelBatches);
       
-      const { error: upsertError } = await supabase
-        .from('crm_data')
-        .upsert(batch, { 
-          onConflict: 'telegram_id',
-          ignoreDuplicates: false 
-        });
+      const results = await Promise.allSettled(
+        batchGroup.map(async (batch, index) => {
+          const { error: upsertError } = await supabase
+            .from('crm_data')
+            .upsert(batch, { 
+              onConflict: 'telegram_id',
+              ignoreDuplicates: false 
+            });
+          
+          if (upsertError) {
+            console.error('[sync-crm-sheets] Upsert error for batch:', i + index, upsertError);
+            throw upsertError;
+          }
+          
+          return batch.length;
+        })
+      );
       
-      if (upsertError) {
-        console.error('[sync-crm-sheets] Upsert error for batch:', i, upsertError);
-      } else {
-        upsertedCount += batch.length;
-      }
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          upsertedCount += result.value;
+        } else {
+          errorCount++;
+        }
+      });
+      
+      console.log('[sync-crm-sheets] Progress:', Math.min((i + parallelBatches), batches.length), '/', batches.length, 'batch groups');
     }
 
-    console.log('[sync-crm-sheets] Sync complete. Upserted:', upsertedCount, 'Deleted:', deletedCount);
+    console.log('[sync-crm-sheets] Sync complete. Upserted:', upsertedCount, 'Deleted:', deletedCount, 'Errors:', errorCount);
 
     return new Response(JSON.stringify({
       success: true,
@@ -342,7 +369,8 @@ Deno.serve(async (req) => {
       stats: {
         total: crmData.length,
         upserted: upsertedCount,
-        deleted: deletedCount
+        deleted: deletedCount,
+        errors: errorCount
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

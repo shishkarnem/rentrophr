@@ -59,7 +59,11 @@ const ALL_COLUMNS: { key: keyof CrmData; label: string; defaultVisible: boolean 
   { key: 'birth_date', label: 'Дата рождения', defaultVisible: false },
   { key: 'contract_date', label: 'Дата договора', defaultVisible: false },
   { key: 'work_start_date', label: 'Старт работы', defaultVisible: false },
+  { key: 'start_date', label: 'Дата добавления', defaultVisible: true },
+  { key: 'interview_date', label: 'Дата интервью', defaultVisible: false },
   { key: 'dismissal_date', label: 'Увольнение', defaultVisible: false },
+  { key: 'rejection_date', label: 'Дата отказа', defaultVisible: false },
+  { key: 'feedback_date', label: 'Дата обратной связи', defaultVisible: false },
   { key: 'days_worked', label: 'Дней работы', defaultVisible: false },
   { key: 'tests_passed', label: 'Тесты', defaultVisible: false },
   { key: 'waiting_period', label: 'Ожидание', defaultVisible: false },
@@ -68,10 +72,12 @@ const ALL_COLUMNS: { key: keyof CrmData; label: string; defaultVisible: boolean 
   { key: 'language_choice', label: 'Язык', defaultVisible: false },
   { key: 'interview', label: 'Интервью', defaultVisible: false },
   { key: 'telegram_id', label: 'Telegram ID', defaultVisible: false },
+  { key: 'created_at', label: 'Создано', defaultVisible: false },
+  { key: 'updated_at', label: 'Обновлено', defaultVisible: false },
 ];
 
-// Page size options
-const PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 200];
+// Page size options - including "all" option
+const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500, 1000, -1]; // -1 means all
 
 const AdminCRM = () => {
   const navigate = useNavigate();
@@ -116,9 +122,9 @@ const AdminCRM = () => {
   const [pageSize, setPageSize] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Sorting
-  const [sortColumn, setSortColumn] = useState<keyof CrmData | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  // Sorting - default by start_date descending (newest first)
+  const [sortColumn, setSortColumn] = useState<keyof CrmData | null>('start_date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Check preview mode or admin access
   const isPreview = !isTelegram;
@@ -131,25 +137,46 @@ const AdminCRM = () => {
   const [uniqueRops, setUniqueRops] = useState<string[]>([]);
   const [uniqueRatings, setUniqueRatings] = useState<string[]>([]);
 
-  // Load all CRM records on mount
+  // Load ALL CRM records on mount - no limit
   useEffect(() => {
     const loadAllRecords = async () => {
       try {
         setIsLoadingAll(true);
-        const { data, error } = await supabase
+        
+        // First get count to know how many records
+        const { count, error: countError } = await supabase
           .from('crm_data')
-          .select('*')
-          .limit(1000);
+          .select('*', { count: 'exact', head: true });
+        
+        if (countError) throw countError;
+        
+        console.log('[AdminCRM] Total records in DB:', count);
+        
+        // Fetch all records in batches to avoid limit
+        const allData: CrmData[] = [];
+        const batchSize = 1000;
+        const totalBatches = Math.ceil((count || 0) / batchSize);
+        
+        for (let i = 0; i < totalBatches; i++) {
+          const { data, error } = await supabase
+            .from('crm_data')
+            .select('*')
+            .range(i * batchSize, (i + 1) * batchSize - 1)
+            .order('start_date', { ascending: false, nullsFirst: false });
 
-        if (error) throw error;
-        setAllRecords(data || []);
+          if (error) throw error;
+          if (data) allData.push(...(data as CrmData[]));
+        }
+        
+        console.log('[AdminCRM] Loaded records:', allData.length);
+        setAllRecords(allData);
         
         // Extract unique values for filters
-        const hrs = [...new Set(data?.filter(r => r.hr).map(r => r.hr!) || [])].sort();
-        const cities = [...new Set(data?.filter(r => r.city).map(r => r.city!) || [])].sort();
-        const regions = [...new Set(data?.filter(r => r.region).map(r => r.region!) || [])].sort();
-        const rops = [...new Set(data?.filter(r => r.rop_name).map(r => r.rop_name!) || [])].sort();
-        const ratings = [...new Set(data?.filter(r => r.rating).map(r => r.rating!) || [])].sort();
+        const hrs = [...new Set(allData.filter(r => r.hr).map(r => r.hr!) || [])].sort();
+        const cities = [...new Set(allData.filter(r => r.city).map(r => r.city!) || [])].sort();
+        const regions = [...new Set(allData.filter(r => r.region).map(r => r.region!) || [])].sort();
+        const rops = [...new Set(allData.filter(r => r.rop_name).map(r => r.rop_name!) || [])].sort();
+        const ratings = [...new Set(allData.filter(r => r.rating).map(r => r.rating!) || [])].sort();
         
         setUniqueHrs(hrs);
         setUniqueCities(cities);
@@ -256,13 +283,14 @@ const AdminCRM = () => {
     return filtered;
   }, [allRecords, statusFilter, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, sortColumn, sortDirection]);
 
-  // Paginated records
+  // Paginated records - pageSize -1 means show all
   const paginatedRecords = useMemo(() => {
+    if (pageSize === -1) return filteredRecords;
     const start = (currentPage - 1) * pageSize;
     return filteredRecords.slice(start, start + pageSize);
   }, [filteredRecords, currentPage, pageSize]);
 
-  const totalPages = Math.ceil(filteredRecords.length / pageSize);
+  const totalPages = pageSize === -1 ? 1 : Math.ceil(filteredRecords.length / pageSize);
 
   // Reset page when filters change
   useEffect(() => {
@@ -653,13 +681,13 @@ const AdminCRM = () => {
                 <span className="text-white/50 text-sm">|</span>
                 <span className="text-white/70 text-sm">{t('admin.pageSize') || 'На странице'}:</span>
                 <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                  <SelectTrigger className="w-20 bg-white/5 border-white/10 text-white h-8 text-sm">
+                  <SelectTrigger className="w-24 bg-white/5 border-white/10 text-white h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-primary border-white/10">
                     {PAGE_SIZE_OPTIONS.map(size => (
                       <SelectItem key={size} value={String(size)} className="text-white hover:bg-white/10 text-sm">
-                        {size}
+                        {size === -1 ? (t('admin.allRecords') || 'Все') : size}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -911,44 +939,103 @@ const ProfileDialog = ({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Photos Section */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Telegram Photo placeholder - would need separate fetch */}
-            {profile.photo_link && (
-              <div>
-                <p className="text-white/50 text-xs mb-2">{t('profile.photoLink') || 'Фото'}</p>
-                <div className="aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                  <img 
-                    src={profile.photo_link} 
-                    alt="Photo" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
+          {/* Telegram Section */}
+          <div className="space-y-3">
+            <h4 className="text-accent font-medium text-sm">{t('admin.telegramInfo') || 'Telegram'}</h4>
+            <div className="flex items-start gap-4">
+              {/* Telegram photo from telegram_profiles table or photo_link */}
+              {profile.photo_link && (
+                <div className="shrink-0">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                    <img 
+                      src={profile.photo_link} 
+                      alt="Telegram Photo" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-            
-            {/* Resume photo - if resume_link is an image */}
-            {profile.resume_link && (profile.resume_link.includes('.jpg') || profile.resume_link.includes('.png') || profile.resume_link.includes('.jpeg') || profile.resume_link.includes('drive.google.com')) && (
-              <div>
-                <p className="text-white/50 text-xs mb-2">{t('profile.resumePhoto') || 'Фото резюме'}</p>
-                <div className="aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                  <img 
-                    src={profile.resume_link} 
-                    alt="Resume" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
+              )}
+              
+              <div className="flex-1 space-y-2">
+                <div>
+                  <p className="text-white/50 text-xs">Telegram ID</p>
+                  <p className="text-white text-sm">{profile.telegram_id || '—'}</p>
                 </div>
+                
+                {/* Telegram link - try to extract username from full_info or telegram_name */}
+                {(() => {
+                  // Extract username from full_info (format: "@username" or "(@username)")
+                  const usernameMatch = profile.full_info?.match(/@(\w+)/) || 
+                                        profile.full_info?.match(/\((@?\w+)\)/);
+                  const username = usernameMatch ? usernameMatch[1].replace('@', '') : 
+                                   (profile.telegram_name?.startsWith('@') ? profile.telegram_name.slice(1) : null);
+                  
+                  if (username) {
+                    return (
+                      <div>
+                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
+                        <a 
+                          href={`https://t.me/${username}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
+                        >
+                          @{username}
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
+                    );
+                  } else if (profile.telegram_id) {
+                    return (
+                      <div>
+                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
+                        <a 
+                          href={`tg://user?id=${profile.telegram_id}`}
+                          className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
+                        >
+                          {t('admin.openTelegram') || 'Открыть в Telegram'}
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {profile.telegram_name && (
+                  <div>
+                    <p className="text-white/50 text-xs">{t('admin.telegramName') || 'Имя в Telegram'}</p>
+                    <p className="text-white text-sm">{profile.telegram_name}</p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
+          
+          {/* Resume photo */}
+          {profile.resume_link && (profile.resume_link.includes('.jpg') || profile.resume_link.includes('.png') || profile.resume_link.includes('.jpeg') || profile.resume_link.includes('drive.google.com')) && (
+            <div>
+              <p className="text-white/50 text-xs mb-2">{t('profile.resumePhoto') || 'Фото резюме'}</p>
+              <div className="w-40 aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                <img 
+                  src={profile.resume_link} 
+                  alt="Resume" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Basic Info */}
           <div className="space-y-3">
             <h4 className="text-accent font-medium text-sm">{t('profile.workData') || 'Рабочие данные'}</h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoItem label="Telegram ID" value={profile.telegram_id?.toString()} />
               <InfoItem label={t('profile.code') || 'Код'} value={profile.code} />
               <InfoItem label={t('profile.fullInfo') || 'ФИО'} value={profile.full_info} />
               <InfoItem label={t('profile.status') || 'Статус'} value={profile.status} />
@@ -957,6 +1044,7 @@ const ProfileDialog = ({
               <InfoItem label={t('profile.result') || 'Результат'} value={profile.result} />
               <InfoItem label={t('profile.contractDate') || 'Дата договора'} value={profile.contract_date} />
               <InfoItem label={t('profile.workStart') || 'Старт работы'} value={profile.work_start_date} />
+              <InfoItem label={t('admin.startDate') || 'Дата добавления'} value={profile.start_date} />
               <InfoItem label={t('profile.dismissalDate') || 'Дата увольнения'} value={profile.dismissal_date} />
               <InfoItem label={t('profile.daysWorked') || 'Дней работы'} value={profile.days_worked?.toString()} />
               <InfoItem label={t('profile.testsPassed') || 'Тесты'} value={profile.tests_passed} />

@@ -134,10 +134,10 @@ const AdminCRM = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Sorting - persist to localStorage, default by start_date descending (newest first)
+  // Sorting - persist to localStorage, default by created_at descending (newest first)
   const [sortColumn, setSortColumn] = useState<keyof CrmData | null>(() => {
     const saved = localStorage.getItem('admin-crm-sort-column');
-    return saved ? (saved as keyof CrmData) : 'start_date';
+    return saved ? (saved as keyof CrmData) : 'created_at';
   });
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(() => {
     const saved = localStorage.getItem('admin-crm-sort-direction');

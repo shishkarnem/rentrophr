@@ -38,12 +38,19 @@ export interface CrmData {
   hr: string | null;
   photo_link: string | null;
   resume_link_chat: string | null;
-  // New interview fields
+  // Interview fields
   rop_name: string | null;
   city: string | null;
   region: string | null;
   checklist_answers: string | null;
   hr_chat_id: string | null;
+  // Date fields for filtering
+  start_date: string | null;
+  interview_date: string | null;
+  rejection_date: string | null;
+  feedback_date: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export const useCrmData = (telegramId: number | null) => {

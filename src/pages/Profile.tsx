@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCrmData } from '@/hooks/useCrmData';
+import { useSyncCrm } from '@/hooks/useSyncCrm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -148,7 +149,29 @@ const Profile = () => {
   
   // Get telegram_id from profile
   const telegramId = profile?.telegram_id ? Number(profile.telegram_id) : null;
-  const { crmData, isLoading: isCrmLoading, updateCrmData } = useCrmData(telegramId);
+  const { crmData, isLoading: isCrmLoading, updateCrmData, refetch: refetchCrmData } = useCrmData(telegramId);
+  
+  // Sync functionality
+  const { isSyncing, syncNow, syncOnAppLoad, formatLastSyncTime, canSync } = useSyncCrm();
+  
+  // Auto-sync on app load
+  useEffect(() => {
+    if (isTelegram && telegramId) {
+      syncOnAppLoad();
+    }
+  }, [isTelegram, telegramId, syncOnAppLoad]);
+  
+  // Handle manual sync
+  const handleSync = async () => {
+    const result = await syncNow(false);
+    if (result.success) {
+      toast.success(`${result.message} (обновлено: ${result.synced || 0})`);
+      // Refetch CRM data after sync
+      refetchCrmData();
+    } else {
+      toast.error(result.message);
+    }
+  };
   
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingResume, setIsEditingResume] = useState(false);
@@ -484,9 +507,28 @@ const Profile = () => {
         {/* Work Info (from CRM, read-only) */}
         {crmData && (
           <div className="glass-dark rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Briefcase className="w-5 h-5 text-accent" />
-              <h3 className="text-lg font-semibold text-white">{t('profile.workData') || 'Рабочие данные'}</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-accent" />
+                <h3 className="text-lg font-semibold text-white">{t('profile.workData') || 'Рабочие данные'}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {formatLastSyncTime() && (
+                  <span className="text-xs text-white/50">{formatLastSyncTime()}</span>
+                )}
+                <button
+                  onClick={handleSync}
+                  disabled={isSyncing || !canSync}
+                  className={`p-2 rounded-full transition-colors ${
+                    isSyncing || !canSync 
+                      ? 'text-white/30 cursor-not-allowed' 
+                      : 'text-accent hover:bg-white/10'
+                  }`}
+                  title={canSync ? (t('profile.syncData') || 'Обновить данные') : 'Подождите 5 минут'}
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
             </div>
             
             <div className="space-y-2">

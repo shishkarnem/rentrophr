@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown, RefreshCw } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCrmData, CrmData } from '@/hooks/useCrmData';
+import { useSyncCrm } from '@/hooks/useSyncCrm';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,6 +89,71 @@ const AdminCRM = () => {
   
   const telegramId = profile?.telegram_id ? Number(profile.telegram_id) : null;
   const { crmData: currentUserCrm, isLoading: isUserLoading } = useCrmData(telegramId);
+  
+  // Sync functionality
+  const { isSyncing, syncNow, formatLastSyncTime, canSync } = useSyncCrm();
+  
+  // Handle manual sync with data reload
+  const loadAllRecords = useCallback(async () => {
+    try {
+      setIsLoadingAll(true);
+      
+      const { count, error: countError } = await supabase
+        .from('crm_data')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      console.log('[AdminCRM] Total records in DB:', count);
+      
+      const allData: CrmData[] = [];
+      const batchSize = 1000;
+      const totalBatches = Math.ceil((count || 0) / batchSize);
+      
+      for (let i = 0; i < totalBatches; i++) {
+        const { data, error } = await supabase
+          .from('crm_data')
+          .select('*')
+          .range(i * batchSize, (i + 1) * batchSize - 1)
+          .order('start_date', { ascending: false, nullsFirst: false });
+
+        if (error) throw error;
+        if (data) allData.push(...(data as CrmData[]));
+      }
+      
+      console.log('[AdminCRM] Loaded records:', allData.length);
+      setAllRecords(allData);
+      
+      // Extract unique values for filters
+      const hrs = [...new Set(allData.filter(r => r.hr).map(r => r.hr!) || [])].sort();
+      const cities = [...new Set(allData.filter(r => r.city).map(r => r.city!) || [])].sort();
+      const regions = [...new Set(allData.filter(r => r.region).map(r => r.region!) || [])].sort();
+      const rops = [...new Set(allData.filter(r => r.rop_name).map(r => r.rop_name!) || [])].sort();
+      const ratings = [...new Set(allData.filter(r => r.rating).map(r => r.rating!) || [])].sort();
+      
+      setUniqueHrs(hrs);
+      setUniqueCities(cities);
+      setUniqueRegions(regions);
+      setUniqueRops(rops);
+      setUniqueRatings(ratings);
+    } catch (err) {
+      console.error('Error loading CRM records:', err);
+      toast.error(t('admin.loadError') || 'Ошибка загрузки данных');
+    } finally {
+      setIsLoadingAll(false);
+    }
+  }, [t]);
+  
+  const handleSync = async () => {
+    const result = await syncNow(false);
+    if (result.success) {
+      toast.success(`${result.message} (обновлено: ${result.synced || 0})`);
+      // Reload all records after sync
+      await loadAllRecords();
+    } else {
+      toast.error(result.message);
+    }
+  };
   
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -173,62 +239,10 @@ const AdminCRM = () => {
 
   // Load ALL CRM records on mount - no limit
   useEffect(() => {
-    const loadAllRecords = async () => {
-      try {
-        setIsLoadingAll(true);
-        
-        // First get count to know how many records
-        const { count, error: countError } = await supabase
-          .from('crm_data')
-          .select('*', { count: 'exact', head: true });
-        
-        if (countError) throw countError;
-        
-        console.log('[AdminCRM] Total records in DB:', count);
-        
-        // Fetch all records in batches to avoid limit
-        const allData: CrmData[] = [];
-        const batchSize = 1000;
-        const totalBatches = Math.ceil((count || 0) / batchSize);
-        
-        for (let i = 0; i < totalBatches; i++) {
-          const { data, error } = await supabase
-            .from('crm_data')
-            .select('*')
-            .range(i * batchSize, (i + 1) * batchSize - 1)
-            .order('start_date', { ascending: false, nullsFirst: false });
-
-          if (error) throw error;
-          if (data) allData.push(...(data as CrmData[]));
-        }
-        
-        console.log('[AdminCRM] Loaded records:', allData.length);
-        setAllRecords(allData);
-        
-        // Extract unique values for filters
-        const hrs = [...new Set(allData.filter(r => r.hr).map(r => r.hr!) || [])].sort();
-        const cities = [...new Set(allData.filter(r => r.city).map(r => r.city!) || [])].sort();
-        const regions = [...new Set(allData.filter(r => r.region).map(r => r.region!) || [])].sort();
-        const rops = [...new Set(allData.filter(r => r.rop_name).map(r => r.rop_name!) || [])].sort();
-        const ratings = [...new Set(allData.filter(r => r.rating).map(r => r.rating!) || [])].sort();
-        
-        setUniqueHrs(hrs);
-        setUniqueCities(cities);
-        setUniqueRegions(regions);
-        setUniqueRops(rops);
-        setUniqueRatings(ratings);
-      } catch (err) {
-        console.error('Error loading CRM records:', err);
-        toast.error(t('admin.loadError') || 'Ошибка загрузки данных');
-      } finally {
-        setIsLoadingAll(false);
-      }
-    };
-
     if (hasAdminAccess) {
       loadAllRecords();
     }
-  }, [hasAdminAccess, t]);
+  }, [hasAdminAccess, loadAllRecords]);
 
   // Filter and sort records
   const filteredRecords = useMemo(() => {
@@ -564,6 +578,20 @@ const AdminCRM = () => {
                 >
                   <X className="w-4 h-4" />
                   {t('admin.clearFilters') || 'Сбросить'}
+                </button>
+                
+                <button
+                  onClick={handleSync}
+                  disabled={isSyncing || !canSync}
+                  className={`flex items-center gap-2 text-sm transition-colors px-3 py-1.5 rounded-lg ${
+                    isSyncing || !canSync 
+                      ? 'text-white/30 bg-white/5 cursor-not-allowed' 
+                      : 'text-accent bg-accent/10 hover:bg-accent/20'
+                  }`}
+                  title={canSync ? 'Синхронизировать с Google Sheets' : 'Подождите 5 минут'}
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Обновление...' : (formatLastSyncTime() || 'Обновить')}
                 </button>
               </div>
 

@@ -210,6 +210,24 @@ const AdminCRM = () => {
     return saved === 'asc' ? 'asc' : 'desc';
   });
   
+  // Column widths - persist to localStorage
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('admin-crm-column-widths');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  });
+  
+  // Column resize state
+  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
+  const [resizeStartX, setResizeStartX] = useState(0);
+  const [resizeStartWidth, setResizeStartWidth] = useState(0);
+  
   // Persist settings to localStorage
   useEffect(() => {
     localStorage.setItem('admin-crm-visible-columns', JSON.stringify([...visibleColumns]));
@@ -225,6 +243,41 @@ const AdminCRM = () => {
     }
     localStorage.setItem('admin-crm-sort-direction', sortDirection);
   }, [sortColumn, sortDirection]);
+  
+  useEffect(() => {
+    localStorage.setItem('admin-crm-column-widths', JSON.stringify(columnWidths));
+  }, [columnWidths]);
+  
+  // Handle column resize
+  const handleResizeStart = (e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizingColumn(columnKey);
+    setResizeStartX(e.clientX);
+    setResizeStartWidth(columnWidths[columnKey] || 150);
+  };
+  
+  useEffect(() => {
+    if (!resizingColumn) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const diff = e.clientX - resizeStartX;
+      const newWidth = Math.max(80, resizeStartWidth + diff);
+      setColumnWidths(prev => ({ ...prev, [resizingColumn]: newWidth }));
+    };
+    
+    const handleMouseUp = () => {
+      setResizingColumn(null);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [resizingColumn, resizeStartX, resizeStartWidth]);
 
   // Check preview mode or admin access
   const isPreview = !isTelegram;
@@ -397,6 +450,12 @@ const AdminCRM = () => {
     setColumnSearches({});
     setAiSummary(null);
     setSortColumn(null);
+  };
+  
+  const resetColumnWidths = () => {
+    setColumnWidths({});
+    localStorage.removeItem('admin-crm-column-widths');
+    toast.success('Ширина колонок сброшена');
   };
 
   const toggleColumn = (column: keyof CrmData) => {
@@ -704,7 +763,7 @@ const AdminCRM = () => {
               {/* Column Settings Panel */}
               {showColumnSettings && (
                 <div className="pt-2 border-t border-white/10">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {ALL_COLUMNS.map(col => (
                       <label
                         key={col.key}
@@ -719,6 +778,12 @@ const AdminCRM = () => {
                       </label>
                     ))}
                   </div>
+                  <button
+                    onClick={resetColumnWidths}
+                    className="text-xs text-white/50 hover:text-white transition-colors underline"
+                  >
+                    {t('admin.resetColumnWidths') || 'Сбросить ширину колонок'}
+                  </button>
                 </div>
               )}
 
@@ -787,27 +852,33 @@ const AdminCRM = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-accent" />
               </div>
             ) : (
-              <div className="glass-dark rounded-2xl overflow-hidden">
+              <div className={`glass-dark rounded-2xl overflow-hidden ${resizingColumn ? 'select-none' : ''}`}>
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table style={{ tableLayout: 'fixed' }}>
                     <TableHeader>
                       <TableRow className="border-white/10 hover:bg-transparent">
                         {/* Profile button column - always first */}
-                        <TableHead className="text-white/70 w-16 sticky left-0 bg-primary/90">{t('admin.colActions') || ''}</TableHead>
+                        <TableHead className="text-white/70 sticky left-0 bg-primary/90" style={{ width: 50 }}>
+                          {t('admin.colActions') || ''}
+                        </TableHead>
                         
-                        {/* Dynamic columns */}
+                        {/* Dynamic columns with resize handles */}
                         {ALL_COLUMNS.filter(c => visibleColumns.has(c.key)).map(col => (
-                          <TableHead key={col.key} className="text-white/70">
-                            <div className="space-y-1">
+                          <TableHead 
+                            key={col.key} 
+                            className="text-white/70 relative group"
+                            style={{ width: columnWidths[col.key] || 150, minWidth: 80 }}
+                          >
+                            <div className="space-y-1 pr-2">
                               <button
                                 onClick={() => handleSort(col.key)}
-                                className="flex items-center gap-1 hover:text-white transition-colors"
+                                className="flex items-center gap-1 hover:text-white transition-colors text-left w-full"
                               >
-                                {col.label}
+                                <span className="truncate">{col.label}</span>
                                 {sortColumn === col.key ? (
-                                  sortDirection === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                                  sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 shrink-0" /> : <ChevronDown className="w-3 h-3 shrink-0" />
                                 ) : (
-                                  <ArrowUpDown className="w-3 h-3 opacity-30" />
+                                  <ArrowUpDown className="w-3 h-3 opacity-30 shrink-0" />
                                 )}
                               </button>
                               <Input
@@ -817,6 +888,12 @@ const AdminCRM = () => {
                                 className="h-6 text-xs bg-white/5 border-white/10 text-white placeholder:text-white/30"
                               />
                             </div>
+                            {/* Resize handle */}
+                            <div
+                              className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent hover:bg-accent/50 transition-colors group-hover:bg-white/20"
+                              onMouseDown={(e) => handleResizeStart(e, col.key)}
+                              style={{ touchAction: 'none' }}
+                            />
                           </TableHead>
                         ))}
                       </TableRow>
@@ -832,7 +909,7 @@ const AdminCRM = () => {
                         paginatedRecords.map((record) => (
                           <TableRow key={record.id} className="border-white/10 hover:bg-white/5">
                             {/* Profile button - always first */}
-                            <TableCell className="sticky left-0 bg-primary/90">
+                            <TableCell className="sticky left-0 bg-primary/90" style={{ width: 50 }}>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -845,9 +922,13 @@ const AdminCRM = () => {
                             
                             {/* Dynamic columns */}
                             {ALL_COLUMNS.filter(c => visibleColumns.has(c.key)).map(col => (
-                              <TableCell key={col.key} className="text-white/80 text-sm">
+                              <TableCell 
+                                key={col.key} 
+                                className="text-white/80 text-sm overflow-hidden"
+                                style={{ width: columnWidths[col.key] || 150, maxWidth: columnWidths[col.key] || 150 }}
+                              >
                                 {col.key === 'status' ? (
-                                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                  <span className={`px-2 py-0.5 rounded-full text-xs whitespace-nowrap ${
                                     record.status === 'Работает' ? 'bg-green-500/20 text-green-400' :
                                     record.status === 'Ожидает проект' ? 'bg-yellow-500/20 text-yellow-400' :
                                     record.status === 'Уволен(а)' ? 'bg-red-500/20 text-red-400' :
@@ -857,7 +938,9 @@ const AdminCRM = () => {
                                     {record[col.key] || '—'}
                                   </span>
                                 ) : (
-                                  <span className="truncate max-w-[150px] block">{String(record[col.key] ?? '—')}</span>
+                                  <span className="truncate block" title={String(record[col.key] ?? '')}>
+                                    {String(record[col.key] ?? '—')}
+                                  </span>
                                 )}
                               </TableCell>
                             ))}

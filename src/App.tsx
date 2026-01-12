@@ -40,6 +40,10 @@ import Partner from "./pages/conditions/motivation/Partner";
 import Services from "./pages/conditions/motivation/Services";
 import SubPartner from "./pages/conditions/motivation/SubPartner";
 
+// Interview pages
+import InterviewIntro from "./pages/interview/InterviewIntro";
+import InterviewForm from "./pages/interview/InterviewForm";
+
 const queryClient = new QueryClient();
 
 // Inner component that has access to Telegram context
@@ -84,6 +88,10 @@ const AppContent = () => {
         <Route path="/conditions/projects" element={<Projects />} />
         <Route path="/conditions/registration" element={<Registration />} />
         <Route path="/conditions/payments" element={<Payments />} />
+        
+        {/* Interview routes */}
+        <Route path="/interview" element={<InterviewIntro />} />
+        <Route path="/interview/form" element={<InterviewForm />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

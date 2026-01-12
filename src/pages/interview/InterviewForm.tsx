@@ -3,24 +3,72 @@ import { ArrowLeft } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useCrmData } from '@/hooks/useCrmData';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 import MobileNavbar from '@/components/MobileNavbar';
 import MobileHeader from '@/components/MobileHeader';
+
+// Form configurations for each language
+const formConfigs: Record<Language, {
+  formId: string;
+  hrDefault: string;
+}> = {
+  ru: {
+    formId: '1FAIpQLSdMnCbSdaQBVjOsVBHYCstiL4mZsF5HQPSV9gFdhmHzQwxCxA',
+    hrDefault: 'Тимошенко Денис @shishkarnem',
+  },
+  en: {
+    formId: '1FAIpQLSfGIeDZF072Gua6dP-Gv6qPaPgXQF1iz1osno7kCD6pKxOYJw',
+    hrDefault: 'Timoshenko Denis @shishkarnem',
+  },
+  kz: {
+    formId: '1FAIpQLSeL9N_FkXlKdJG-kv2Yu4b7nVyWGgMAaonNIScLsM_eU-_4Yg',
+    hrDefault: 'Тимошенко Денис @shishkarnem',
+  },
+};
+
+// Translations
+const translations: Record<Language, {
+  headerTitle: string;
+  back: string;
+  loading: string;
+}> = {
+  ru: {
+    headerTitle: 'Интервью',
+    back: 'Назад',
+    loading: 'Загрузка…',
+  },
+  en: {
+    headerTitle: 'Interview',
+    back: 'Back',
+    loading: 'Loading…',
+  },
+  kz: {
+    headerTitle: 'Сұхбат',
+    back: 'Артқа',
+    loading: 'Жүктелуде…',
+  },
+};
 
 const InterviewForm = () => {
   const navigate = useNavigate();
   const { isTelegram, profile } = useTelegram();
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
   const showMobileNav = isTelegram || isMobile;
 
   // Get telegram_id from profile
   const telegramId = profile?.telegram_id ? Number(profile.telegram_id) : null;
   const { crmData } = useCrmData(telegramId);
 
+  // Get form config and translations for current language
+  const config = formConfigs[language];
+  const t = translations[language];
+
   // Build Google Form URL with prefilled fields
   const buildFormUrl = () => {
-    const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdMnCbSdaQBVjOsVBHYCstiL4mZsF5HQPSV9gFdhmHzQwxCxA/viewform';
+    const baseUrl = `https://docs.google.com/forms/d/e/${config.formId}/viewform`;
     
-    // Field IDs from Google Form
+    // Field IDs from Google Form (same across all languages)
     const params = new URLSearchParams();
     params.set('embedded', 'true');
     
@@ -34,9 +82,8 @@ const InterviewForm = () => {
       params.set('entry.1890080826', `@${profile.username}`);
     }
     
-    // 416402807 - HR, по умолчанию "Тимошенко Денис @shishkarnem"
-    const hrValue = 'Тимошенко Денис @shishkarnem';
-    params.set('entry.416402807', hrValue);
+    // 416402807 - HR, по умолчанию зависит от языка
+    params.set('entry.416402807', config.hrDefault);
     
     return `${baseUrl}?${params.toString()}`;
   };
@@ -62,7 +109,7 @@ const InterviewForm = () => {
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-lg font-semibold text-white ml-4">Интервью</h1>
+            <h1 className="text-lg font-semibold text-white ml-4">{t.headerTitle}</h1>
           </div>
         </div>
       )}
@@ -75,7 +122,7 @@ const InterviewForm = () => {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Назад</span>
+            <span>{t.back}</span>
           </button>
         </div>
       )}
@@ -90,10 +137,10 @@ const InterviewForm = () => {
             margin: 0,
             padding: 0,
           }}
-          title="Интервью"
+          title={t.headerTitle}
           allowFullScreen
         >
-          Загрузка…
+          {t.loading}
         </iframe>
       </div>
 

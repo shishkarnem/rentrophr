@@ -529,23 +529,17 @@ const Profile = () => {
                 <Briefcase className="w-5 h-5 text-accent" />
                 <h3 className="text-lg font-semibold text-white">{t('profile.workData') || 'Рабочие данные'}</h3>
               </div>
-              <div className="flex items-center gap-2">
-                {formatLastSyncTime() && (
-                  <span className="text-xs text-white/50">{formatLastSyncTime()}</span>
-                )}
-                <button
-                  onClick={handleSync}
-                  disabled={isSyncing || !canSync}
-                  className={`p-2 rounded-full transition-colors ${
-                    isSyncing || !canSync 
-                      ? 'text-white/30 cursor-not-allowed' 
-                      : 'text-accent hover:bg-white/10'
-                  }`}
-                  title={canSync ? (t('profile.syncData') || 'Обновить данные') : 'Подождите 5 минут'}
-                >
-                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
+              <Button
+                onClick={handleSync}
+                disabled={isSyncing || !canSync}
+                variant="cta"
+                size="sm"
+                className="gap-1.5"
+                title={canSync ? (t('profile.syncData') || 'Обновить данные') : 'Подождите 5 минут'}
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                {t('profile.refresh') || 'Обновить'}
+              </Button>
             </div>
             
             <div className="space-y-2">
@@ -593,11 +587,23 @@ const Profile = () => {
             <div className="space-y-1">
               <ProgressItem label={t('profile.availableSkills') || 'Доступные навыки'} value={crmData.available_skills} />
               <ProgressItem label={t('profile.languageChoice') || 'Выбор языка'} value={crmData.language_choice} />
-              <ProgressItem 
-                label={t('profile.interview') || 'Интервью'} 
-                value={crmData.interview} 
-                onClick={() => navigate('/interview')}
-              />
+              
+              {/* Interview CTA Button */}
+              <div className="py-3">
+                <Button
+                  onClick={() => navigate('/interview')}
+                  variant="cta"
+                  size="lg"
+                  className="w-full gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {t('profile.interview') || 'Интервью'}
+                  {crmData.interview && crmData.interview.toLowerCase() !== 'нет' && crmData.interview !== '0' && crmData.interview !== '' && (
+                    <CheckCircle2 className="w-5 h-5 text-green-300" />
+                  )}
+                </Button>
+              </div>
+              
               <ProgressItem label={t('profile.testConditions') || 'Тест Условия'} value={crmData.test_conditions} />
               <ProgressItem label={t('profile.testPortal') || 'Тест Портал'} value={crmData.test_portal} />
               <ProgressItem label={t('profile.testReport') || 'Тест Отчет'} value={crmData.test_report} />

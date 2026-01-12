@@ -56,12 +56,29 @@ const ProfileLanguageSwitcher = () => {
 };
 
 // Progress item component
-const ProgressItem = ({ label, value }: { label: string; value: string | null }) => {
+const ProgressItem = ({ 
+  label, 
+  value, 
+  onClick 
+}: { 
+  label: string; 
+  value: string | null; 
+  onClick?: () => void;
+}) => {
   const isCompleted = value && value.toLowerCase() !== 'нет' && value !== '0' && value !== '';
+  const isClickable = !!onClick;
   
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/10 last:border-b-0">
-      <span className="text-muted-foreground text-sm">{label}</span>
+    <div 
+      className={`flex items-center justify-between py-2 border-b border-white/10 last:border-b-0 ${
+        isClickable ? 'cursor-pointer hover:bg-white/5 -mx-2 px-2 rounded transition-colors' : ''
+      }`}
+      onClick={onClick}
+    >
+      <span className={`text-sm ${isClickable ? 'text-accent' : 'text-muted-foreground'}`}>
+        {label}
+        {isClickable && ' →'}
+      </span>
       <div className="flex items-center gap-2">
         {isCompleted ? (
           <CheckCircle2 className="w-4 h-4 text-green-400" />
@@ -576,7 +593,11 @@ const Profile = () => {
             <div className="space-y-1">
               <ProgressItem label={t('profile.availableSkills') || 'Доступные навыки'} value={crmData.available_skills} />
               <ProgressItem label={t('profile.languageChoice') || 'Выбор языка'} value={crmData.language_choice} />
-              <ProgressItem label={t('profile.interview') || 'Интервью'} value={crmData.interview} />
+              <ProgressItem 
+                label={t('profile.interview') || 'Интервью'} 
+                value={crmData.interview} 
+                onClick={() => navigate('/interview')}
+              />
               <ProgressItem label={t('profile.testConditions') || 'Тест Условия'} value={crmData.test_conditions} />
               <ProgressItem label={t('profile.testPortal') || 'Тест Портал'} value={crmData.test_portal} />
               <ProgressItem label={t('profile.testReport') || 'Тест Отчет'} value={crmData.test_report} />

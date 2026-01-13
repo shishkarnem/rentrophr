@@ -94,7 +94,12 @@ const TestConditionsIntro = () => {
   };
 
   const content = (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+      }}
+    >
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">

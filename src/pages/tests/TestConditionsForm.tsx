@@ -8,15 +8,18 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import MobileLayout from "@/components/layout/MobileLayout";
 
 // Form configurations per language
-const formConfigs: Record<Language, { formId: string }> = {
+const formConfigs: Record<Language, { formId: string; minHeight: string }> = {
   ru: {
-    formId: "1FAIpQLScvBBdK83g2h9GEih-CgXurIswQJJ6sZrgHsglP9L3UC_fjNw"
+    formId: "1FAIpQLScvBBdK83g2h9GEih-CgXurIswQJJ6sZrgHsglP9L3UC_fjNw",
+    minHeight: "4311px"
   },
   en: {
-    formId: "1FAIpQLScvBBdK83g2h9GEih-CgXurIswQJJ6sZrgHsglP9L3UC_fjNw" // Same form for now, can be updated
+    formId: "1FAIpQLSeGj-d5sN-l0TEbjPOxioPsK4sQZJn0lc4y89aaFc7eL0ZrLw",
+    minHeight: "4443px"
   },
   kz: {
-    formId: "1FAIpQLScvBBdK83g2h9GEih-CgXurIswQJJ6sZrgHsglP9L3UC_fjNw" // Same form for now, can be updated
+    formId: "1FAIpQLSeJh3In0mdahv0oivoaEMuAMdk3r2qZgn9VSwFFBRhi3J38MQ",
+    minHeight: "4397px"
   }
 };
 
@@ -52,7 +55,12 @@ const TestConditionsForm = () => {
   };
 
   const content = (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{
+        background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+      }}
+    >
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -81,7 +89,7 @@ const TestConditionsForm = () => {
             className="w-full border-0"
             style={{ 
               height: 'calc(100vh - 80px)',
-              minHeight: '4500px'
+              minHeight: config.minHeight
             }}
             title="Conditions Test Form"
           >

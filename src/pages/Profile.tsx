@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -604,7 +604,23 @@ const Profile = () => {
                 </Button>
               </div>
               
-              <ProgressItem label={t('profile.testConditions') || 'Тест Условия'} value={crmData.test_conditions} />
+              {/* Test Conditions CTA Button - only show if available in skills */}
+              {crmData.available_skills && crmData.available_skills.toLowerCase().includes('тест условия') && (
+                <div className="py-3">
+                  <Button
+                    onClick={() => navigate('/tests/conditions')}
+                    variant="cta"
+                    size="lg"
+                    className="w-full gap-2"
+                  >
+                    <FileCheck className="w-5 h-5" />
+                    {t('profile.testConditions') || 'Тест Условия'}
+                    {crmData.test_conditions && crmData.test_conditions.toLowerCase() !== 'нет' && crmData.test_conditions !== '0' && crmData.test_conditions !== '' && (
+                      <CheckCircle2 className="w-5 h-5 text-green-300" />
+                    )}
+                  </Button>
+                </div>
+              )}
               <ProgressItem label={t('profile.testPortal') || 'Тест Портал'} value={crmData.test_portal} />
               <ProgressItem label={t('profile.testReport') || 'Тест Отчет'} value={crmData.test_report} />
               <ProgressItem label={t('profile.testRobot') || 'Тест Робот'} value={crmData.test_robot} />

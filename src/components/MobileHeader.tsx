@@ -64,10 +64,10 @@ const MobileHeader = () => {
           <span className="text-white font-bold text-lg">RentROP</span>
         </div>
         
-        {/* Second row: Back button, Search and Language */}
-        <div className="flex items-center justify-between px-4 py-3">
-          {/* Back button on the left */}
-          <div className="flex-1 flex justify-start">
+        {/* Second row: Back button on left, Search and Language centered */}
+        <div className="flex items-center px-4 py-3">
+          {/* Back button on the left - fixed width for balance */}
+          <div className="w-10">
             {showBackButton && (
               <button
                 onClick={() => navigate(-1)}
@@ -78,11 +78,14 @@ const MobileHeader = () => {
             )}
           </div>
           
-          {/* Search and Language in center-right */}
-          <div className="flex items-center gap-6">
+          {/* Search and Language centered */}
+          <div className="flex-1 flex justify-center items-center gap-6">
             <SmartSearch />
             <LanguageSwitcher />
           </div>
+          
+          {/* Empty spacer for balance */}
+          <div className="w-10"></div>
         </div>
       </header>
 

@@ -666,6 +666,22 @@ const Profile = () => {
                 </div>
               )}
               <ProgressItem label={t('profile.testPortal') || 'Тест Портал'} value={crmData.test_portal} />
+              {crmData.available_skills && crmData.available_skills.toLowerCase().includes('тест портал') && (
+                <div className="py-2">
+                  <Button
+                    onClick={() => navigate('/tests/portal')}
+                    variant="gold"
+                    size="lg"
+                    className="w-full gap-2"
+                  >
+                    <FileCheck className="w-5 h-5" />
+                    {t('profile.testPortalButton') || 'Пройти Тест Портал'}
+                    {crmData.test_portal && crmData.test_portal.toLowerCase() !== 'нет' && crmData.test_portal !== '0' && crmData.test_portal !== '' && (
+                      <CheckCircle2 className="w-5 h-5 text-green-300" />
+                    )}
+                  </Button>
+                </div>
+              )}
               <ProgressItem label={t('profile.testReport') || 'Тест Отчет'} value={crmData.test_report} />
               <ProgressItem label={t('profile.testRobot') || 'Тест Робот'} value={crmData.test_robot} />
               <ProgressItem label={t('profile.contractSigning') || 'Подписание договора'} value={crmData.contract_signing} />

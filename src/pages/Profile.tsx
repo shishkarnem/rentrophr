@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -66,8 +66,19 @@ const ProgressItem = ({
   value: string | null; 
   onClick?: () => void;
 }) => {
-  const isCompleted = value && value.toLowerCase() !== 'нет' && value !== '0' && value !== '';
+  const { language } = useLanguage();
+
+  const pendingLabels: Record<Language, string> = {
+    ru: 'Ожидает',
+    en: 'Pending',
+    kz: 'Күтілуде',
+  };
+
+  const isPending = !!value && (value.includes('⌛') || value.includes('⌛️') || value.includes('⏳'));
+  const isCompleted = !!value && value.toLowerCase() !== 'нет' && value !== '0' && value !== '' && !isPending;
   const isClickable = !!onClick;
+
+  const displayValue = isPending ? pendingLabels[language] : (value || '—');
   
   return (
     <div 
@@ -83,11 +94,13 @@ const ProgressItem = ({
       <div className="flex items-center gap-2">
         {isCompleted ? (
           <CheckCircle2 className="w-4 h-4 text-green-400" />
+        ) : isPending ? (
+          <Hourglass className="w-4 h-4 text-accent" />
         ) : (
           <div className="w-4 h-4 rounded-full border border-white/30" />
         )}
-        <span className={`text-sm ${isCompleted ? 'text-green-400' : 'text-white/50'}`}>
-          {value || '—'}
+        <span className={`text-sm ${isCompleted ? 'text-green-400' : isPending ? 'text-accent' : 'text-white/50'}`}>
+          {displayValue}
         </span>
       </div>
     </div>
@@ -593,9 +606,13 @@ const Profile = () => {
                 { key: 'report', value: crmData.test_report },
                 { key: 'robot', value: crmData.test_robot },
               ];
-              const passedCount = tests.filter(test => 
-                test.value && test.value.toLowerCase() !== 'нет' && test.value !== '0' && test.value !== ''
-              ).length;
+              const passedCount = tests.filter(test => {
+                const v = test.value;
+                if (!v || v === '' || v === '0') return false;
+                const lower = v.toLowerCase();
+                if (lower === 'нет' || v.includes('⌛') || v.includes('⌛️') || v.includes('⏳')) return false;
+                return true;
+              }).length;
               const progressPercent = (passedCount / tests.length) * 100;
               
               return (
@@ -607,7 +624,7 @@ const Profile = () => {
                   <Progress value={progressPercent} className="h-3" />
                   <div className="flex justify-between mt-2">
                     {tests.map((test, idx) => {
-                      const isPassed = test.value && test.value.toLowerCase() !== 'нет' && test.value !== '0' && test.value !== '';
+                      const isPassed = test.value && test.value.toLowerCase() !== 'нет' && test.value !== '0' && test.value !== '' && !test.value.includes('⌛') && !test.value.includes('⌛️') && !test.value.includes('⏳');
                       return (
                         <div 
                           key={test.key} 
@@ -641,7 +658,7 @@ const Profile = () => {
                 >
                   <MessageCircle className="w-5 h-5" />
                   {t('profile.interviewButton') || 'Пройти Интервью'}
-                  {crmData.interview && crmData.interview.toLowerCase() !== 'нет' && crmData.interview !== '0' && crmData.interview !== '' && (
+                  {crmData.interview && crmData.interview.toLowerCase() !== 'нет' && crmData.interview !== '0' && crmData.interview !== '' && !crmData.interview.includes('⌛') && !crmData.interview.includes('⌛️') && !crmData.interview.includes('⏳') && (
                     <CheckCircle2 className="w-5 h-5 text-green-300" />
                   )}
                 </Button>
@@ -672,7 +689,7 @@ const Profile = () => {
                   >
                     <FileCheck className="w-5 h-5" />
                     {t('profile.testConditionsButton') || 'Пройти Тест Условия'}
-                    {crmData.test_conditions && crmData.test_conditions.toLowerCase() !== 'нет' && crmData.test_conditions !== '0' && crmData.test_conditions !== '' && (
+                    {crmData.test_conditions && crmData.test_conditions.toLowerCase() !== 'нет' && crmData.test_conditions !== '0' && crmData.test_conditions !== '' && !crmData.test_conditions.includes('⌛') && !crmData.test_conditions.includes('⌛️') && !crmData.test_conditions.includes('⏳') && (
                       <CheckCircle2 className="w-5 h-5 text-green-300" />
                     )}
                   </Button>
@@ -689,7 +706,7 @@ const Profile = () => {
                   >
                     <FileCheck className="w-5 h-5" />
                     {t('profile.testPortalButton') || 'Пройти Тест Портал'}
-                    {crmData.test_portal && crmData.test_portal.toLowerCase() !== 'нет' && crmData.test_portal !== '0' && crmData.test_portal !== '' && (
+                    {crmData.test_portal && crmData.test_portal.toLowerCase() !== 'нет' && crmData.test_portal !== '0' && crmData.test_portal !== '' && !crmData.test_portal.includes('⌛') && !crmData.test_portal.includes('⌛️') && !crmData.test_portal.includes('⏳') && (
                       <CheckCircle2 className="w-5 h-5 text-green-300" />
                     )}
                   </Button>
@@ -706,7 +723,7 @@ const Profile = () => {
                   >
                     <FileCheck className="w-5 h-5" />
                     {t('profile.testReportButton') || 'Пройти Тест Отчет'}
-                    {crmData.test_report && crmData.test_report.toLowerCase() !== 'нет' && crmData.test_report !== '0' && crmData.test_report !== '' && (
+                    {crmData.test_report && crmData.test_report.toLowerCase() !== 'нет' && crmData.test_report !== '0' && crmData.test_report !== '' && !crmData.test_report.includes('⌛') && !crmData.test_report.includes('⌛️') && !crmData.test_report.includes('⏳') && (
                       <CheckCircle2 className="w-5 h-5 text-green-300" />
                     )}
                   </Button>
@@ -723,7 +740,7 @@ const Profile = () => {
                   >
                     <FileCheck className="w-5 h-5" />
                     {t('profile.testRobotButton') || 'Пройти Тест Робот'}
-                    {crmData.test_robot && crmData.test_robot.toLowerCase() !== 'нет' && crmData.test_robot !== '0' && crmData.test_robot !== '' && (
+                    {crmData.test_robot && crmData.test_robot.toLowerCase() !== 'нет' && crmData.test_robot !== '0' && crmData.test_robot !== '' && !crmData.test_robot.includes('⌛') && !crmData.test_robot.includes('⌛️') && !crmData.test_robot.includes('⏳') && (
                       <CheckCircle2 className="w-5 h-5 text-green-300" />
                     )}
                   </Button>

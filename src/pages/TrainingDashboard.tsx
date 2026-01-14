@@ -5,7 +5,7 @@ import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { useCrmData } from "@/hooks/useCrmData";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, CheckCircle2, Circle, FileCheck, GraduationCap, BookOpen, FileText, Bot } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, FileCheck, GraduationCap, BookOpen, FileText, Bot, Hourglass } from "lucide-react";
 import MobileLayout from "@/components/layout/MobileLayout";
 
 const translations: Record<Language, {
@@ -23,6 +23,7 @@ const translations: Record<Language, {
   testRobot: string;
   testRobotDesc: string;
   completed: string;
+  pending: string;
   notCompleted: string;
   startTest: string;
   viewTest: string;
@@ -44,6 +45,7 @@ const translations: Record<Language, {
     testRobot: "Тест Робот",
     testRobotDesc: "Изучите работу с HR-роботом",
     completed: "Пройден",
+    pending: "Ожидает",
     notCompleted: "Не пройден",
     startTest: "Пройти",
     viewTest: "Открыть",
@@ -65,6 +67,7 @@ const translations: Record<Language, {
     testRobot: "Robot Test",
     testRobotDesc: "Learn to work with HR-robot",
     completed: "Completed",
+    pending: "Pending",
     notCompleted: "Not completed",
     startTest: "Start",
     viewTest: "Open",
@@ -86,6 +89,7 @@ const translations: Record<Language, {
     testRobot: "Робот тесті",
     testRobotDesc: "HR-робот жұмысын зерттеңіз",
     completed: "Тапсырылды",
+    pending: "Күтілуде",
     notCompleted: "Тапсырылмады",
     startTest: "Бастау",
     viewTest: "Ашу",
@@ -99,8 +103,10 @@ interface TestCardProps {
   description: string;
   icon: React.ReactNode;
   isCompleted: boolean;
+  isPending: boolean;
   isAvailable: boolean;
   completedText: string;
+  pendingText: string;
   notCompletedText: string;
   startText: string;
   viewText: string;
@@ -114,8 +120,10 @@ const TestCard = ({
   description,
   icon,
   isCompleted,
+  isPending,
   isAvailable,
   completedText,
+  pendingText,
   notCompletedText,
   startText,
   viewText,
@@ -150,6 +158,8 @@ const TestCard = ({
             <h3 className="font-semibold text-white truncate">{title}</h3>
             {isCompleted ? (
               <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+            ) : isPending ? (
+              <Hourglass className="w-5 h-5 text-accent flex-shrink-0" />
             ) : (
               <Circle className="w-5 h-5 text-white/30 flex-shrink-0" />
             )}
@@ -160,9 +170,11 @@ const TestCard = ({
             <span className={`text-xs px-2 py-1 rounded-full ${
               isCompleted 
                 ? 'bg-green-500/20 text-green-400' 
-                : 'bg-white/10 text-white/60'
+                : isPending
+                  ? 'bg-accent/20 text-accent'
+                  : 'bg-white/10 text-white/60'
             }`}>
-              {isCompleted ? `${completedText}: ${testValue}` : notCompletedText}
+              {isCompleted ? `${completedText}: ${testValue}` : isPending ? pendingText : notCompletedText}
             </span>
             
             {isAvailable && (
@@ -201,12 +213,16 @@ const TrainingDashboard = () => {
   
   const t = translations[language];
 
-  // Check if test is completed (⌛️ means pending/not completed)
+  // Check if test is pending (⏳ / ⌛️ means waiting, not completed)
+  const isTestPending = (value: string | null): boolean => {
+    return !!value && (value.includes('⌛') || value.includes('⌛️') || value.includes('⏳'));
+  };
+
+  // Check if test is completed
   const isTestCompleted = (value: string | null): boolean => {
     if (!value || value === '' || value === '0') return false;
     const lowerValue = value.toLowerCase();
-    // ⌛️ or "нет" means not completed
-    if (lowerValue === 'нет' || value.includes('⌛') || value.includes('⌛️')) return false;
+    if (lowerValue === 'нет' || isTestPending(value)) return false;
     return true;
   };
 
@@ -290,8 +306,10 @@ const TrainingDashboard = () => {
               description={t.testConditionsDesc}
               icon={<FileCheck className="w-6 h-6" />}
               isCompleted={isTestCompleted(crmData?.test_conditions)}
+              isPending={isTestPending(crmData?.test_conditions)}
               isAvailable={isTestAvailable('тест условия')}
               completedText={t.completed}
+              pendingText={t.pending}
               notCompletedText={t.notCompleted}
               startText={t.startTest}
               viewText={t.viewTest}
@@ -305,8 +323,10 @@ const TrainingDashboard = () => {
               description={t.testPortalDesc}
               icon={<BookOpen className="w-6 h-6" />}
               isCompleted={isTestCompleted(crmData?.test_portal)}
+              isPending={isTestPending(crmData?.test_portal)}
               isAvailable={isTestAvailable('тест портал')}
               completedText={t.completed}
+              pendingText={t.pending}
               notCompletedText={t.notCompleted}
               startText={t.startTest}
               viewText={t.viewTest}
@@ -320,8 +340,10 @@ const TrainingDashboard = () => {
               description={t.testReportDesc}
               icon={<FileText className="w-6 h-6" />}
               isCompleted={isTestCompleted(crmData?.test_report)}
+              isPending={isTestPending(crmData?.test_report)}
               isAvailable={isTestAvailable('тест отчет')}
               completedText={t.completed}
+              pendingText={t.pending}
               notCompletedText={t.notCompleted}
               startText={t.startTest}
               viewText={t.viewTest}
@@ -335,8 +357,10 @@ const TrainingDashboard = () => {
               description={t.testRobotDesc}
               icon={<Bot className="w-6 h-6" />}
               isCompleted={isTestCompleted(crmData?.test_robot)}
+              isPending={isTestPending(crmData?.test_robot)}
               isAvailable={isTestAvailable('тест робот')}
               completedText={t.completed}
+              pendingText={t.pending}
               notCompletedText={t.notCompleted}
               startText={t.startTest}
               viewText={t.viewTest}

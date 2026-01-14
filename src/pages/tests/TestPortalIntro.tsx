@@ -63,26 +63,26 @@ const translations: Record<Language, {
     headerTitle: "Portal Test",
     back: "Back",
     title: "Portal Test",
-    intro: "2️⃣ Complete the second training (out of four) on",
-    step1: "Training Portal",
-    studyInfo: "Study the videos in the YouTube playlist.",
+    intro: "2️⃣ We are undergoing the second training (out of four) on the",
+    step1: "Training portal",
+    studyInfo: "We are studying videos in a YouTube playlist.",
     youtubeLink: "📹 Training on YouTube",
-    altText: "If YouTube doesn't work, there are mirrors:",
+    altText: "",
     rutubeLink: "RuTube",
     vkLink: "VK Video",
-    afterStudy: "After watching the videos, take the Portal Test:",
+    afterStudy: "After studying the video, we take the test on the Portal:",
     testButton: "Take Portal Test",
-    testNote: "The test is a learning element",
-    requirement1: "✅ You need to score the maximum points 21/21.",
-    requirement2: "✅ Shows incorrect answers for review each time.",
-    requirement3: "✅ You can take the test unlimited times.",
-    requirement4: "✅ The next stage will be sent immediately after passing the test with maximum score.",
-    resultsNote: "Results are published in the chat",
+    testNote: "The test is an element of learning",
+    requirement1: "✅ It is necessary to score the maximum number of points 21/21.",
+    requirement2: "✅ It shows incorrect answers each time to repeat.",
+    requirement3: "✅ You can take the test an unlimited number of times.",
+    requirement4: "✅ We will send the next stage immediately after passing the maximum score test.",
+    resultsNote: "The results are published in the chat",
     chatButton: "Results Chat",
-    chatNote: "and sent to private messages.",
-    moreVideos: "More videos on the topic can be found in our YouTube playlists:",
-    portalPlaylist: "📹 Training Portal",
-    scriptsPlaylist: "📹 Sales Scripts",
+    chatNote: "and they are sent to the personal account.",
+    moreVideos: "More videos on the topic can be viewed in our playlists on YouTube:",
+    portalPlaylist: "📹 Learning Portal",
+    scriptsPlaylist: "📹 Sales scripts",
     notionPlaylist: "📹 Notion",
     codeNote: "⚠️ YOU WILL NEED TO ENTER YOUR CODE"
   },
@@ -156,23 +156,27 @@ const TestPortalIntro = () => {
             <p>{t.studyInfo}</p>
             
             {/* YouTube link */}
-            <Button onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLk6E8i0IuOgXkY-xu0VgjXsIaikMNU6VD')} variant="gold" size="lg" className="w-full gap-2">
+            <Button onClick={() => handleOpenLink(language === 'en' ? 'https://www.youtube.com/playlist?list=PL05Wr7vQtmzGpRfnakJFMiII-YmtUyxLV' : 'https://www.youtube.com/playlist?list=PLk6E8i0IuOgXkY-xu0VgjXsIaikMNU6VD')} variant="gold" size="lg" className="w-full gap-2">
               <Youtube className="w-5 h-5" />
               {t.youtubeLink}
             </Button>
             
-            {/* Alternative links */}
-            <p className="text-sm">{t.altText}</p>
-            <div className="flex gap-2">
-              <Button onClick={() => handleOpenLink('https://rutube.ru/plst/480133')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
-                <Play className="w-4 h-4" />
-                {t.rutubeLink}
-              </Button>
-              <Button onClick={() => handleOpenLink('https://vk.com/video/playlist/-157196671_69')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
-                <Play className="w-4 h-4" />
-                {t.vkLink}
-              </Button>
-            </div>
+            {/* Alternative links - only show for non-English */}
+            {language !== 'en' && (
+              <>
+                <p className="text-sm">{t.altText}</p>
+                <div className="flex gap-2">
+                  <Button onClick={() => handleOpenLink('https://rutube.ru/plst/480133')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
+                    <Play className="w-4 h-4" />
+                    {t.rutubeLink}
+                  </Button>
+                  <Button onClick={() => handleOpenLink('https://vk.com/video/playlist/-157196671_69')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
+                    <Play className="w-4 h-4" />
+                    {t.vkLink}
+                  </Button>
+                </div>
+              </>
+            )}
             
             <p className="pt-4">{t.afterStudy}</p>
             

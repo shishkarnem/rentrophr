@@ -66,28 +66,28 @@ const translations: Record<Language, {
     headerTitle: "Report Test",
     back: "Back",
     title: "Report Test",
-    intro: "3️⃣ Complete the third training (out of four) on",
-    step1: "Telegram Reporting",
-    studyInfo: "Study the video on YouTube.",
-    youtubeLink: "3️⃣ Training on YouTube",
-    altText: "If YouTube doesn't work, there are mirrors:",
+    intro: "3️⃣ We are undergoing the third training (out of four) on",
+    step1: "Reporting in telegram",
+    studyInfo: "We are studying videos on YouTube.",
+    youtubeLink: "📹 Training on YouTube",
+    altText: "",
     rutubeLink: "RuTube",
     vkLink: "VK Video",
-    afterStudy: "After watching the video, take the Reporting Test:",
-    testButton: "Third Certification",
-    testNote: "The test is a learning element",
-    requirement1: "✅ You need to score the maximum points 10/10.",
-    requirement2: "✅ Shows incorrect answers for review each time.",
-    requirement3: "✅ You can take the test unlimited times.",
-    requirement4: "✅ The next stage will be sent immediately after passing the test with maximum score.",
-    resultsNote: "Results are published in the chat",
+    afterStudy: "After studying the video, we take the Reporting test:",
+    testButton: "Take Reporting Test",
+    testNote: "The test is an element of learning",
+    requirement1: "✅ It is necessary to score a maximum of 10/10 points.",
+    requirement2: "✅ Each time it shows incorrect answers for repetition.",
+    requirement3: "✅ You can take the test an unlimited number of times.",
+    requirement4: "✅ We will send the next stage immediately after passing the maximum score test.",
+    resultsNote: "The results are published in the chat",
     chatButton: "Training Chat",
-    chatNote: "and sent to private messages.",
-    templateTitle: "Link to reporting template",
+    chatNote: "and they are sent to the personal account.",
+    templateTitle: "Link to the reporting template",
     templateButton: "Reporting Template",
-    moreVideos: "More videos on the topic can be found in our YouTube playlists:",
-    reportPlaylist: "📹 More Reporting Videos",
-    salesPlaylist: "📹 Sales YouTube",
+    moreVideos: "More videos on the topic can be viewed in our playlists on YouTube:",
+    reportPlaylist: "📹 Reporting system",
+    salesPlaylist: "📹 Sales techniques",
     salesRutubePlaylist: "📹 Sales RuTube"
   },
   kz: {
@@ -168,7 +168,7 @@ const TestReportIntro = () => {
             
             {/* YouTube link */}
             <Button
-              onClick={() => handleOpenLink('https://youtu.be/fIqwwAOf_tg?si=dybBhT96QmA33uP9')}
+              onClick={() => handleOpenLink(language === 'en' ? 'https://www.youtube.com/playlist?list=PL05Wr7vQtmzFYFpdvHUdUtQi_6mWCdlhK' : 'https://youtu.be/fIqwwAOf_tg?si=dybBhT96QmA33uP9')}
               variant="gold"
               size="lg"
               className="w-full gap-2"
@@ -177,28 +177,32 @@ const TestReportIntro = () => {
               {t.youtubeLink}
             </Button>
             
-            {/* Alternative links */}
-            <p className="text-sm">{t.altText}</p>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => handleOpenLink('https://rutube.ru/video/690762e4bec04c1323a8a2607ded1aac/')}
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
-              >
-                <Play className="w-4 h-4" />
-                {t.rutubeLink}
-              </Button>
-              <Button
-                onClick={() => handleOpenLink('https://vk.com/video-157196671_456239608')}
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
-              >
-                <Play className="w-4 h-4" />
-                {t.vkLink}
-              </Button>
-            </div>
+            {/* Alternative links - only show for non-English */}
+            {language !== 'en' && (
+              <>
+                <p className="text-sm">{t.altText}</p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleOpenLink('https://rutube.ru/video/690762e4bec04c1323a8a2607ded1aac/')}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
+                  >
+                    <Play className="w-4 h-4" />
+                    {t.rutubeLink}
+                  </Button>
+                  <Button
+                    onClick={() => handleOpenLink('https://vk.com/video-157196671_456239608')}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
+                  >
+                    <Play className="w-4 h-4" />
+                    {t.vkLink}
+                  </Button>
+                </div>
+              </>
+            )}
             
             <p className="pt-4">{t.afterStudy}</p>
             
@@ -245,7 +249,7 @@ const TestReportIntro = () => {
             <div className="pt-4 space-y-3">
               <p className="text-white font-medium">{t.templateTitle}</p>
               <Button
-                onClick={() => handleOpenLink('https://docs.google.com/spreadsheets/d/1LT6xyI8GSdTq7guJjiu-IzPJul67sxmWxtbG5nvVLyU/copy')}
+                onClick={() => handleOpenLink(language === 'en' ? 'https://docs.google.com/spreadsheets/d/1LcQfzGLXq-bzL4j8q_83RV2dQOTwF5SW_6Rt9FpNTag/copy' : 'https://docs.google.com/spreadsheets/d/1LT6xyI8GSdTq7guJjiu-IzPJul67sxmWxtbG5nvVLyU/copy')}
                 variant="gold"
                 size="lg"
                 className="w-full gap-2"

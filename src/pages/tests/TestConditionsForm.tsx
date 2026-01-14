@@ -32,7 +32,9 @@ const translations: Record<Language, { headerTitle: string; back: string; loadin
 const TestConditionsForm = () => {
   const navigate = useNavigate();
   const { isTelegram, profile } = useTelegram();
-  const { crmData, isLoading } = useCrmData(profile?.id ? Number(profile.id) : null);
+  // Get telegram_id from profile (not id which is UUID)
+  const telegramId = profile?.telegram_id ? Number(profile.telegram_id) : null;
+  const { crmData, isLoading } = useCrmData(telegramId);
   const isMobile = useIsMobile();
   const { language } = useLanguage();
   const showMobileNav = isTelegram || isMobile;

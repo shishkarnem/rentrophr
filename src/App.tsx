@@ -47,6 +47,8 @@ import InterviewForm from "./pages/interview/InterviewForm";
 // Test pages
 import TestConditionsIntro from "./pages/tests/TestConditionsIntro";
 import TestConditionsForm from "./pages/tests/TestConditionsForm";
+import TestPortalIntro from "./pages/tests/TestPortalIntro";
+import TestPortalForm from "./pages/tests/TestPortalForm";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +102,8 @@ const AppContent = () => {
         {/* Test routes */}
         <Route path="/tests/conditions" element={<TestConditionsIntro />} />
         <Route path="/tests/conditions/form" element={<TestConditionsForm />} />
+        <Route path="/tests/portal" element={<TestPortalIntro />} />
+        <Route path="/tests/portal/form" element={<TestPortalForm />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

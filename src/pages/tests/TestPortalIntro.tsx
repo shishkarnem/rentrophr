@@ -5,7 +5,6 @@ import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileCheck, ExternalLink, Youtube, Play } from "lucide-react";
 import MobileLayout from "@/components/layout/MobileLayout";
-
 const translations: Record<Language, {
   headerTitle: string;
   back: string;
@@ -115,36 +114,29 @@ const translations: Record<Language, {
     codeNote: "⚠️ СІЗГЕ МІНДЕТТІ ТҮРДЕ КОДТЫ ЕНГІЗУ КЕРЕК"
   }
 };
-
 const TestPortalIntro = () => {
   const navigate = useNavigate();
-  const { isTelegram } = useTelegram();
+  const {
+    isTelegram
+  } = useTelegram();
   const isMobile = useIsMobile();
-  const { language } = useLanguage();
+  const {
+    language
+  } = useLanguage();
   const showMobileNav = isTelegram || isMobile;
-  
   const t = translations[language];
-
   const handleOpenLink = (url: string) => {
     window.open(url, '_blank');
   };
-
-  const content = (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
-      }}
-    >
+  const content = <div className="min-h-screen" style={{
+    background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+  }}>
       {/* Header */}
-      <div className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{ background: 'rgba(23, 52, 79, 0.9)' }}>
+      <div className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{
+      background: 'rgba(23, 52, 79, 0.9)'
+    }}>
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-white hover:bg-white/10"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-white hover:bg-white/10">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold text-white">{t.headerTitle}</h1>
@@ -164,12 +156,7 @@ const TestPortalIntro = () => {
             <p>{t.studyInfo}</p>
             
             {/* YouTube link */}
-            <Button
-              onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLk6E8i0IuOgXkY-xu0VgjXsIaikMNU6VD')}
-              variant="gold"
-              size="lg"
-              className="w-full gap-2"
-            >
+            <Button onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLk6E8i0IuOgXkY-xu0VgjXsIaikMNU6VD')} variant="gold" size="lg" className="w-full gap-2">
               <Youtube className="w-5 h-5" />
               {t.youtubeLink}
             </Button>
@@ -177,21 +164,11 @@ const TestPortalIntro = () => {
             {/* Alternative links */}
             <p className="text-sm">{t.altText}</p>
             <div className="flex gap-2">
-              <Button
-                onClick={() => handleOpenLink('https://rutube.ru/plst/480133')}
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
-              >
+              <Button onClick={() => handleOpenLink('https://rutube.ru/plst/480133')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
                 <Play className="w-4 h-4" />
                 {t.rutubeLink}
               </Button>
-              <Button
-                onClick={() => handleOpenLink('https://vk.com/video/playlist/-157196671_69')}
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10"
-              >
+              <Button onClick={() => handleOpenLink('https://vk.com/video/playlist/-157196671_69')} variant="outline" size="sm" className="flex-1 gap-2 border-white/20 text-white hover:bg-white/10">
                 <Play className="w-4 h-4" />
                 {t.vkLink}
               </Button>
@@ -199,12 +176,7 @@ const TestPortalIntro = () => {
             
             <p className="pt-4">{t.afterStudy}</p>
             
-            <Button
-              onClick={() => navigate('/tests/portal/form')}
-              variant="gold"
-              size="lg"
-              className="w-full gap-2"
-            >
+            <Button onClick={() => navigate('/tests/portal/form')} variant="gold" size="lg" className="w-full gap-2">
               <FileCheck className="w-5 h-5" />
               {t.testButton}
             </Button>
@@ -225,12 +197,7 @@ const TestPortalIntro = () => {
                 <strong className="text-white">{t.resultsNote}</strong>
               </p>
               
-              <Button
-                onClick={() => handleOpenLink('https://t.me/+VROkOiW7pJfh5YV5')}
-                variant="gold"
-                size="lg"
-                className="w-full gap-2"
-              >
+              <Button onClick={() => handleOpenLink('https://t.me/+VROkOiW7pJfh5YV5')} variant="gold" size="lg" className="w-full gap-2">
                 <ExternalLink className="w-5 h-5" />
                 {t.chatButton}
               </Button>
@@ -243,48 +210,27 @@ const TestPortalIntro = () => {
               <p className="text-white font-medium">{t.moreVideos}</p>
               
               <div className="space-y-2">
-                <Button
-                  onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHELG2FeFSju0i4QTWjXJqH5h')}
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 border-white/20 text-white hover:bg-white/10"
-                >
+                <Button onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHELG2FeFSju0i4QTWjXJqH5h')} variant="outline" size="sm" className="w-full gap-2 border-white/20 text-white hover:bg-white/10">
                   {t.portalPlaylist}
                 </Button>
-                <Button
-                  onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHEIFVxSLo7Lcty0dTnETl_F5')}
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 border-white/20 text-white hover:bg-white/10"
-                >
+                <Button onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHEIFVxSLo7Lcty0dTnETl_F5')} variant="outline" size="sm" className="w-full gap-2 border-white/20 text-white hover:bg-white/10">
                   {t.scriptsPlaylist}
                 </Button>
-                <Button
-                  onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHEIh-NGZhftwsATls34doLlZ')}
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 border-white/20 text-white hover:bg-white/10"
-                >
+                <Button onClick={() => handleOpenLink('https://www.youtube.com/playlist?list=PLGx5ZBGKgHEIh-NGZhftwsATls34doLlZ')} variant="outline" size="sm" className="w-full gap-2 border-white/20 text-white hover:bg-white/10">
                   {t.notionPlaylist}
                 </Button>
               </div>
             </div>
             
             {/* Code warning */}
-            <div className="pt-4 p-4 bg-accent/20 rounded-lg border border-accent/30">
-              <p className="text-center text-accent font-semibold">{t.codeNote}</p>
-            </div>
+            
           </div>
         </div>
       </div>
-    </div>
-  );
-
+    </div>;
   if (showMobileNav) {
     return <MobileLayout>{content}</MobileLayout>;
   }
-
   return content;
 };
-
 export default TestPortalIntro;

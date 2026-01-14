@@ -62,20 +62,22 @@ const TestRobotForm = () => {
         background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
       }}
     >
-      {/* Header */}
-      <div className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{ background: 'rgba(23, 52, 79, 0.9)' }}>
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-semibold text-white">{t.headerTitle}</h1>
+      {/* Header - only show on desktop */}
+      {!showMobileNav && (
+        <div className="sticky top-0 z-50 backdrop-blur-lg border-b border-white/10" style={{ background: 'rgba(23, 52, 79, 0.9)' }}>
+          <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-semibold text-white">{t.headerTitle}</h1>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Form iframe */}
       <div className="flex-1 w-full">

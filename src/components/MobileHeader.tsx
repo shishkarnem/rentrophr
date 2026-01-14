@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronRight } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, ChevronRight, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import SmartSearch from '@/components/SmartSearch';
@@ -10,7 +10,12 @@ import logo from '@/assets/RR-Logo.png';
 const MobileHeader = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
+  
+  // Show back button on subpages (not on main routes)
+  const mainRoutes = ['/', '/work', '/conditions', '/wiki', '/profile', '/projects'];
+  const showBackButton = !mainRoutes.includes(location.pathname);
 
   const workPages = [
     { name: t('work.arendaRopov'), path: '/work/arenda-ropov' },
@@ -59,10 +64,25 @@ const MobileHeader = () => {
           <span className="text-white font-bold text-lg">RentROP</span>
         </div>
         
-        {/* Second row: Search and Language */}
-        <div className="flex justify-center items-center gap-6 px-4 py-3">
-          <SmartSearch />
-          <LanguageSwitcher />
+        {/* Second row: Back button, Search and Language */}
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Back button on the left */}
+          <div className="flex-1 flex justify-start">
+            {showBackButton && (
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+            )}
+          </div>
+          
+          {/* Search and Language in center-right */}
+          <div className="flex items-center gap-6">
+            <SmartSearch />
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 

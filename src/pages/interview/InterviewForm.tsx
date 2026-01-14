@@ -97,10 +97,8 @@ const InterviewForm = () => {
         background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
       }}
     >
-      {/* Header */}
-      {showMobileNav ? (
-        <MobileHeader />
-      ) : (
+      {/* Header - only show on desktop */}
+      {!showMobileNav && (
         <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4 flex items-center">
             <button
@@ -114,18 +112,8 @@ const InterviewForm = () => {
         </div>
       )}
 
-      {/* Back button for mobile at top */}
-      {showMobileNav && (
-        <div className="px-4 pt-20 pb-2">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{t.back}</span>
-          </button>
-        </div>
-      )}
+      {/* Mobile header */}
+      {showMobileNav && <MobileHeader />}
 
       {/* Full-width iframe container */}
       <div className={`flex-1 ${showMobileNav ? 'pb-20' : ''}`}>

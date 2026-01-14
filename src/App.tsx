@@ -53,6 +53,7 @@ import TestReportIntro from "./pages/tests/TestReportIntro";
 import TestReportForm from "./pages/tests/TestReportForm";
 import TestRobotIntro from "./pages/tests/TestRobotIntro";
 import TestRobotForm from "./pages/tests/TestRobotForm";
+import TrainingDashboard from "./pages/TrainingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +113,9 @@ const AppContent = () => {
         <Route path="/tests/report/form" element={<TestReportForm />} />
         <Route path="/tests/robot" element={<TestRobotIntro />} />
         <Route path="/tests/robot/form" element={<TestRobotForm />} />
+        
+        {/* Training Dashboard */}
+        <Route path="/training" element={<TrainingDashboard />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -644,6 +644,19 @@ const Profile = () => {
                   {crmData.interview && crmData.interview.toLowerCase() !== 'нет' && crmData.interview !== '0' && crmData.interview !== '' && (
                     <CheckCircle2 className="w-5 h-5 text-green-300" />
                   )}
+                </Button>
+              </div>
+              
+              {/* Training Dashboard Button */}
+              <div className="py-3">
+                <Button
+                  onClick={() => navigate('/training')}
+                  variant="cta"
+                  size="lg"
+                  className="w-full gap-2"
+                >
+                  <GraduationCap className="w-5 h-5" />
+                  {t('profile.trainingButton') || 'Обучение и тесты'}
                 </Button>
               </div>
               

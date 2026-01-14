@@ -201,9 +201,13 @@ const TrainingDashboard = () => {
   
   const t = translations[language];
 
-  // Check if test is completed
+  // Check if test is completed (⌛️ means pending/not completed)
   const isTestCompleted = (value: string | null): boolean => {
-    return !!value && value.toLowerCase() !== 'нет' && value !== '0' && value !== '';
+    if (!value || value === '' || value === '0') return false;
+    const lowerValue = value.toLowerCase();
+    // ⌛️ or "нет" means not completed
+    if (lowerValue === 'нет' || value.includes('⌛') || value.includes('⌛️')) return false;
+    return true;
   };
 
   // Check if test is available

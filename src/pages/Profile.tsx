@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import MobileNavbar from '@/components/MobileNavbar';
 import MobileHeader from '@/components/MobileHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 
 // Inline language switcher for profile with DB sync
 const ProfileLanguageSwitcher = () => {
@@ -113,7 +114,7 @@ const InfoRow = ({ label, value, isLink }: { label: string; value: string | null
 );
 
 // Resume text with expandable popup
-const ResumeTextRow = ({ label, value }: { label: string; value: string | null }) => {
+const ResumeTextRow = ({ label, value, showAllText }: { label: string; value: string | null; showAllText?: string }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   if (!value) {
@@ -134,7 +135,7 @@ const ResumeTextRow = ({ label, value }: { label: string; value: string | null }
               onClick={() => setIsExpanded(true)}
               className="text-accent hover:text-accent/80 flex items-center gap-1 text-xs"
             >
-              Показать всё <ChevronDown className="w-3 h-3" />
+              {showAllText || 'Показать всё'} <ChevronDown className="w-3 h-3" />
             </button>
           )}
         </div>
@@ -584,37 +585,80 @@ const Profile = () => {
               <h3 className="text-lg font-semibold text-white">{t('profile.progress') || 'Прогресс'}</h3>
             </div>
             
+            {/* Tests Progress Visualization */}
+            {(() => {
+              const tests = [
+                { key: 'conditions', value: crmData.test_conditions },
+                { key: 'portal', value: crmData.test_portal },
+                { key: 'report', value: crmData.test_report },
+                { key: 'robot', value: crmData.test_robot },
+              ];
+              const passedCount = tests.filter(test => 
+                test.value && test.value.toLowerCase() !== 'нет' && test.value !== '0' && test.value !== ''
+              ).length;
+              const progressPercent = (passedCount / tests.length) * 100;
+              
+              return (
+                <div className="mb-4 p-4 bg-white/5 rounded-xl">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white/80 text-sm">{t('profile.testsProgress') || 'Прогресс тестов'}</span>
+                    <span className="text-accent font-bold">{passedCount}/4</span>
+                  </div>
+                  <Progress value={progressPercent} className="h-3" />
+                  <div className="flex justify-between mt-2">
+                    {tests.map((test, idx) => {
+                      const isPassed = test.value && test.value.toLowerCase() !== 'нет' && test.value !== '0' && test.value !== '';
+                      return (
+                        <div 
+                          key={test.key} 
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                            isPassed 
+                              ? 'bg-green-500 text-white' 
+                              : 'bg-white/10 text-white/50'
+                          }`}
+                        >
+                          {idx + 1}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+            
             <div className="space-y-1">
               <ProgressItem label={t('profile.availableSkills') || 'Доступные навыки'} value={crmData.available_skills} />
               <ProgressItem label={t('profile.languageChoice') || 'Выбор языка'} value={crmData.language_choice} />
               
-              {/* Interview CTA Button */}
-              <div className="py-3">
+              {/* Interview row with data + optional button */}
+              <ProgressItem label={t('profile.interview') || 'Интервью'} value={crmData.interview} />
+              <div className="py-2">
                 <Button
                   onClick={() => navigate('/interview')}
-                  variant="cta"
+                  variant="gold"
                   size="lg"
                   className="w-full gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
-                  {t('profile.interview') || 'Интервью'}
+                  {t('profile.interviewButton') || 'Пройти Интервью'}
                   {crmData.interview && crmData.interview.toLowerCase() !== 'нет' && crmData.interview !== '0' && crmData.interview !== '' && (
                     <CheckCircle2 className="w-5 h-5 text-green-300" />
                   )}
                 </Button>
               </div>
               
-              {/* Test Conditions CTA Button - only show if available in skills */}
+              {/* Test Conditions row with data + optional button */}
+              <ProgressItem label={t('profile.testConditions') || 'Тест Условия'} value={crmData.test_conditions} />
               {crmData.available_skills && crmData.available_skills.toLowerCase().includes('тест условия') && (
-                <div className="py-3">
+                <div className="py-2">
                   <Button
                     onClick={() => navigate('/tests/conditions')}
-                    variant="cta"
+                    variant="gold"
                     size="lg"
                     className="w-full gap-2"
                   >
                     <FileCheck className="w-5 h-5" />
-                    {t('profile.testConditions') || 'Тест Условия'}
+                    {t('profile.testConditionsButton') || 'Пройти Тест Условия'}
                     {crmData.test_conditions && crmData.test_conditions.toLowerCase() !== 'нет' && crmData.test_conditions !== '0' && crmData.test_conditions !== '' && (
                       <CheckCircle2 className="w-5 h-5 text-green-300" />
                     )}
@@ -644,7 +688,7 @@ const Profile = () => {
               <InfoRow label={t('profile.ropName') || 'РОП (ФИО)'} value={crmData.rop_name} />
               <InfoRow label={t('profile.city') || 'Город'} value={crmData.city} />
               <InfoRow label={t('profile.region') || 'Регион'} value={crmData.region} />
-              <ResumeTextRow label={t('profile.checklistAnswers') || 'Ответы на чек-лист'} value={crmData.checklist_answers} />
+              <ResumeTextRow label={t('profile.checklistAnswers') || 'Ответы на чек-лист'} value={crmData.checklist_answers} showAllText={t('profile.showAll') || 'Показать всё'} />
             </div>
           </div>
         )}
@@ -733,7 +777,7 @@ const Profile = () => {
               <InfoRow label={t('profile.birthDate') || 'Дата рождения'} value={crmData?.birth_date || resumeFormData.birth_date || null} />
               <InfoRow label={t('profile.resumeLink') || 'Ссылка на резюме'} value={crmData?.resume_link || resumeFormData.resume_link || null} isLink />
               <InfoRow label={t('profile.resumeLinkChat') || 'Ссылка на резюме в чате'} value={crmData?.resume_link_chat || null} isLink />
-              <ResumeTextRow label={t('profile.resumeText') || 'Текст резюме'} value={crmData?.resume_text || resumeFormData.resume_text || null} />
+              <ResumeTextRow label={t('profile.resumeText') || 'Текст резюме'} value={crmData?.resume_text || resumeFormData.resume_text || null} showAllText={t('profile.showAll') || 'Показать всё'} />
             </div>
           )}
         </div>

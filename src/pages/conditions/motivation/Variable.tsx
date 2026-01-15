@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, Percent, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
@@ -60,43 +60,18 @@ const Variable = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
-                  <CardGlassDark className="p-8 space-y-8">
+                  <CardGlassDark className="p-8 space-y-8" hover>
                     <div>
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Percent className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('variable.variablePremium')}
-                      </motion.h2>
-                      <motion.p 
-                        className="text-white/80 leading-relaxed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        {t('variable.variablePremiumDesc')}
-                      </motion.p>
+                      <CardGlassDarkHeader icon={Percent} title={t('variable.variablePremium')} />
+                      <CardGlassDarkContent>
+                        <p>{t('variable.variablePremiumDesc')}</p>
+                      </CardGlassDarkContent>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.35 }}
-                      >
-                        <TrendingUp className="w-5 h-5 text-accent" />
+                      <CardGlassDarkTitle icon={TrendingUp} className="mb-4">
                         {t('variable.howCalculated')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <div className="space-y-4">
                         {[t('variable.calcDesc1'), t('variable.calcDesc2'), t('variable.calcDesc3')].map((desc, i) => (
                           <motion.div 
@@ -109,7 +84,7 @@ const Variable = () => {
                             whileHover={{ scale: 1.02, x: 5 }}
                             transition={{ type: 'spring', stiffness: 400 }}
                           >
-                            <p className="text-white/80">{desc}</p>
+                            <p className="text-white/70">{desc}</p>
                           </motion.div>
                         ))}
                       </div>
@@ -127,14 +102,9 @@ const Variable = () => {
                     </motion.div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7 }}
-                      >
+                      <h3 className="text-xl font-bold text-accent mb-4">
                         {t('variable.motivationCalc')}
-                      </motion.h3>
+                      </h3>
                       <div className="space-y-4">
                         <motion.a 
                           href={motivationTable} 

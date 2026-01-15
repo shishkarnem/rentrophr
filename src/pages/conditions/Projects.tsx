@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent, CardGlassDarkSubtitle } from '@/components/ui/card';
 import { ArrowLeft, FolderKanban, Users, Video, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -67,23 +67,9 @@ const Projects = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <FolderKanban className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('projects.selection')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader icon={FolderKanban} title={t('projects.selection')} />
+                      <CardGlassDarkContent>
                         <p>
                           {t('projects.selectionDesc1')}{' '}
                           <motion.a 
@@ -99,7 +85,7 @@ const Projects = () => {
                         </p>
                         <p>{t('projects.selectionDesc3')}</p>
                         <p>{t('projects.selectionDesc4')}</p>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
 
@@ -109,24 +95,10 @@ const Projects = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.35 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Users className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('projects.team')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
-                        <p className="font-semibold text-white">{t('projects.teamDesc')}</p>
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader icon={Users} title={t('projects.team')} />
+                      <CardGlassDarkContent>
+                        <CardGlassDarkSubtitle>{t('projects.teamDesc')}</CardGlassDarkSubtitle>
                         <ul className="space-y-3">
                           {[
                             { label: t('projects.rop'), desc: t('projects.ropDesc') },
@@ -145,12 +117,12 @@ const Projects = () => {
                             >
                               <span className="text-accent font-bold">{i + 1}.</span>
                               <div>
-                                <strong className="text-white">{item.label}</strong> {item.desc}
+                                <strong className="text-accent">{item.label}</strong> <span className="text-white/70">{item.desc}</span>
                               </div>
                             </motion.li>
                           ))}
                         </ul>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
 
@@ -160,25 +132,11 @@ const Projects = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Video className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('projects.videoCard')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader icon={Video} title={t('projects.videoCard')} />
+                      <CardGlassDarkContent>
                         <p>{t('projects.videoCardDesc')}</p>
-                        <p className="font-semibold text-white">{t('projects.videoInstructions')}</p>
+                        <CardGlassDarkSubtitle>{t('projects.videoInstructions')}</CardGlassDarkSubtitle>
                         <ul className="space-y-2">
                           {[t('projects.videoInstr1'), t('projects.videoInstr2'), t('projects.videoInstr3')].map((item, i) => (
                             <motion.li 
@@ -190,11 +148,11 @@ const Projects = () => {
                               whileHover={{ x: 5 }}
                             >
                               <span className="text-accent">•</span>
-                              {item}
+                              <span className="text-white/70">{item}</span>
                             </motion.li>
                           ))}
                         </ul>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
 
@@ -204,7 +162,7 @@ const Projects = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
+                    <CardGlassDark className="p-8" hover>
                       <motion.div 
                         className="flex items-start gap-4 p-4 glass-dark rounded-xl"
                         whileHover={{ scale: 1.02, x: 5 }}
@@ -217,7 +175,7 @@ const Projects = () => {
                           <Send className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
                         </motion.div>
                         <div className="text-white/70">
-                          <p className="font-semibold text-white mb-1">{t('projects.important')}</p>
+                          <p className="font-semibold text-accent mb-1">{t('projects.important')}</p>
                           <p>{t('projects.importantDesc')}</p>
                         </div>
                       </motion.div>

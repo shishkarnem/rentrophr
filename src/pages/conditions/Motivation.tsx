@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Handshake, Settings, Users, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import tariffTable from '@/assets/tariff-table.jpg';
@@ -47,16 +47,8 @@ const Motivation = () => {
             </AnimatedSection>
             
             <AnimatedSection variant="morphIn" delay={0.2}>
-              <CardGlassDark className="p-8">
-                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                  <motion.span 
-                    className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                    whileHover={{ rotate: 10, scale: 1.1 }}
-                  >
-                    <DollarSign className="w-5 h-5 text-primary" />
-                  </motion.span>
-                  {t('motivation.paymentSystem')}
-                </h2>
+              <CardGlassDark className="p-8" hover>
+                <CardGlassDarkHeader icon={DollarSign} title={t('motivation.paymentSystem')} />
                 <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4" staggerDelay={0.08}>
                   {motivationItems.map((item, i) => (
                     <StaggerItem key={i} variant="fadeUp">
@@ -70,7 +62,7 @@ const Motivation = () => {
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
                               <item.icon className="w-5 h-5 text-accent" />
-                              <span className="font-semibold text-white">{t(item.nameKey)}</span>
+                              <span className="font-semibold text-accent">{t(item.nameKey)}</span>
                             </div>
                             <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-accent group-hover:translate-x-1 transition-all" />
                           </div>
@@ -103,7 +95,7 @@ const Motivation = () => {
                 </AnimatedSection>
 
                 <AnimatedSection variant="fadeUp" delay={0.5} className="mt-8">
-                  <h3 className="text-xl font-bold text-white mb-4">{t('motivation.tariffCalc')}</h3>
+                  <h3 className="text-xl font-bold text-accent mb-4">{t('motivation.tariffCalc')}</h3>
                   <div className="space-y-4">
                     <motion.a 
                       href={tariffTable} 

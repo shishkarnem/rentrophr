@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -747,6 +747,22 @@ const Profile = () => {
                 </div>
               )}
               <ProgressItem label={t('profile.contractSigning') || 'Подписание договора'} value={crmData.contract_signing} />
+              {crmData.available_skills && crmData.available_skills.toLowerCase().includes('создание договора') && (
+                <div className="py-2">
+                  <Button
+                    onClick={() => navigate('/contract')}
+                    variant="gold"
+                    size="lg"
+                    className="w-full gap-2"
+                  >
+                    <FileSignature className="w-5 h-5" />
+                    {t('profile.contractButton') || 'Создание договора'}
+                    {crmData.contract_signing && crmData.contract_signing.toLowerCase() !== 'нет' && crmData.contract_signing !== '0' && crmData.contract_signing !== '' && !crmData.contract_signing.includes('⌛') && !crmData.contract_signing.includes('⌛️') && !crmData.contract_signing.includes('⏳') && (
+                      <CheckCircle2 className="w-5 h-5 text-green-300" />
+                    )}
+                  </Button>
+                </div>
+              )}
               <ProgressItem label={t('profile.videoCard') || 'Видео-визитка'} value={crmData.video_card} />
               <ProgressItem label={t('profile.workStartProgress') || 'Выход на работу'} value={crmData.work_start} />
               <ProgressItem label={t('profile.projectsMailing') || 'Рассылка проектов'} value={crmData.projects_mailing} />

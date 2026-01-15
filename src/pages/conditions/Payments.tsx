@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, Wallet, Calendar, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,12 +15,10 @@ const Payments = () => {
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   
-  // Отключаем backdrop-filter на мобильной версии для лучшей производительности
   const mobileOptimizedClass = showMobileNav ? 'mobile-optimized' : '';
   const { 
     cardVariants, 
     scaleVariants, 
-    iconHover, 
     iconSpin, 
     hoverLift,
     shouldAnimate,
@@ -62,32 +60,12 @@ const Payments = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  <CardGlassDark className="p-8">
-                    <motion.h2 
-                      className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                      initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration, delay: 0.3 }}
-                    >
-                      <motion.span 
-                        className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                        whileHover={iconHover}
-                        transition={{ type: 'spring', stiffness: 400 }}
-                      >
-                        <Wallet className="w-5 h-5 text-primary" />
-                      </motion.span>
-                      {t('payments.schedule')}
-                    </motion.h2>
-                    <div className="space-y-6 text-white/70 leading-relaxed">
-                      <motion.p
-                        initial={shouldAnimate ? { opacity: 0 } : undefined}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        {t('payments.scheduleDesc')}
-                      </motion.p>
+                  <CardGlassDark className="p-8" hover>
+                    <CardGlassDarkHeader icon={Wallet} title={t('payments.schedule')} />
+                    <CardGlassDarkContent>
+                      <p>{t('payments.scheduleDesc')}</p>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                         <motion.div 
                           className="p-6 glass-dark rounded-xl text-center"
                           custom={0}
@@ -102,8 +80,8 @@ const Payments = () => {
                           >
                             <Calendar className="w-6 h-6 text-primary" />
                           </motion.div>
-                          <p className="text-2xl font-bold text-white mb-1">{t('payments.day30')}</p>
-                          <p className="text-sm">{t('payments.day30Desc')}</p>
+                          <p className="text-2xl font-bold text-accent mb-1">{t('payments.day30')}</p>
+                          <p className="text-sm text-white/60">{t('payments.day30Desc')}</p>
                         </motion.div>
                         
                         <motion.div 
@@ -120,11 +98,11 @@ const Payments = () => {
                           >
                             <CreditCard className="w-6 h-6 text-white" />
                           </motion.div>
-                          <p className="text-2xl font-bold text-white mb-1">{t('payments.day15')}</p>
-                          <p className="text-sm">{t('payments.day15Desc')}</p>
+                          <p className="text-2xl font-bold text-accent mb-1">{t('payments.day15')}</p>
+                          <p className="text-sm text-white/60">{t('payments.day15Desc')}</p>
                         </motion.div>
                       </div>
-                    </div>
+                    </CardGlassDarkContent>
                   </CardGlassDark>
                 </motion.div>
               </div>

@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, FileCheck, Download, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -67,23 +67,9 @@ const Registration = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <FileCheck className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('registration.contractTerms')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader icon={FileCheck} title={t('registration.contractTerms')} />
+                      <CardGlassDarkContent>
                         <p>{t('registration.contractDesc1')}</p>
                         <p>{t('registration.contractDesc2')}</p>
                         <motion.div 
@@ -91,11 +77,11 @@ const Registration = () => {
                           whileHover={{ scale: 1.02, x: 5 }}
                           transition={{ type: 'spring', stiffness: 400 }}
                         >
-                          <p className="font-semibold text-white mb-2">{t('registration.tkContract')}</p>
-                          <p>{t('registration.tkContractDesc')}</p>
+                          <p className="font-semibold text-accent mb-2">{t('registration.tkContract')}</p>
+                          <p className="text-white/70">{t('registration.tkContractDesc')}</p>
                           <ul className="mt-2 space-y-1">
                             <motion.li 
-                              className="flex gap-2"
+                              className="flex gap-2 text-white/70"
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.4 }}
@@ -104,7 +90,7 @@ const Registration = () => {
                               26% — {t('registration.kzTax')}
                             </motion.li>
                             <motion.li 
-                              className="flex gap-2"
+                              className="flex gap-2 text-white/70"
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.5 }}
@@ -114,7 +100,7 @@ const Registration = () => {
                             </motion.li>
                           </ul>
                         </motion.div>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
 
@@ -124,22 +110,8 @@ const Registration = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.35 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Download className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('registration.downloadContracts')}
-                      </motion.h2>
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader icon={Download} title={t('registration.downloadContracts')} />
                       <div className="space-y-4">
                         <motion.div 
                           className="p-4 glass-dark rounded-xl"
@@ -153,7 +125,7 @@ const Registration = () => {
                             >
                               <Globe className="w-5 h-5 text-accent" />
                             </motion.div>
-                            <span className="font-semibold text-white">{t('registration.kzTax')}</span>
+                            <span className="font-semibold text-accent">{t('registration.kzTax')}</span>
                           </div>
                           <motion.a 
                             href="https://docs.google.com/document/d/1xZ4DUBOOdOegt4UTHmMP1oe9ZsC23ZoRjrHTFqlPyLw/export?format=pdf"
@@ -179,7 +151,7 @@ const Registration = () => {
                             >
                               <Globe className="w-5 h-5 text-accent" />
                             </motion.div>
-                            <span className="font-semibold text-white">{t('registration.rfTax')}</span>
+                            <span className="font-semibold text-accent">{t('registration.rfTax')}</span>
                           </div>
                           <div className="space-y-2">
                             <motion.a 
@@ -214,15 +186,10 @@ const Registration = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-xl font-bold mb-4 text-white"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                      >
+                    <CardGlassDark className="p-8" hover>
+                      <h2 className="text-xl font-bold mb-4 text-accent">
                         {t('registration.procedure')}
-                      </motion.h2>
+                      </h2>
                       <ul className="space-y-3 text-white/70">
                         {[
                           t('registration.step1'),

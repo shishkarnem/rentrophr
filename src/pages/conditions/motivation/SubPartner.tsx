@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, Users, Gift } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,14 +15,11 @@ const SubPartner = () => {
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   
-  // Отключаем backdrop-filter на мобильной версии для лучшей производительности
   const mobileOptimizedClass = showMobileNav ? 'mobile-optimized' : '';
   const { 
     cardVariants, 
     scaleVariants, 
-    iconHover,
     hoverLift,
-    hoverScale,
     shouldAnimate,
     isMobile: isOptMobile,
     duration,
@@ -67,31 +64,14 @@ const SubPartner = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  <CardGlassDark className="p-8 space-y-8">
+                  <CardGlassDark className="p-8 space-y-8" hover>
                     <div>
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration, delay: 0.3 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={iconHover}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Users className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('subpartner.amoPartnership')}
-                      </motion.h2>
-                      <motion.p 
-                        className="text-white/80 leading-relaxed"
-                        initial={shouldAnimate ? { opacity: 0 } : undefined}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        {t('subpartner.amoDesc')} <span className="text-accent font-semibold">{t('subpartner.amoPercent')}</span>.
-                      </motion.p>
+                      <CardGlassDarkHeader icon={Users} title={t('subpartner.amoPartnership')} />
+                      <CardGlassDarkContent>
+                        <p>
+                          {t('subpartner.amoDesc')} <span className="text-accent font-semibold">{t('subpartner.amoPercent')}</span>.
+                        </p>
+                      </CardGlassDarkContent>
                     </div>
 
                     <motion.div 
@@ -115,20 +95,9 @@ const SubPartner = () => {
                     </motion.div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration, delay: 0.5 }}
-                      >
-                        <motion.div
-                          animate={isOptMobile ? undefined : { scale: [1, 1.2, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <Gift className="w-5 h-5 text-accent" />
-                        </motion.div>
+                      <CardGlassDarkTitle icon={Gift} className="mb-4">
                         {t('subpartner.clientBonuses')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {bonuses.map((item, i) => (
                           <motion.div 
@@ -140,7 +109,7 @@ const SubPartner = () => {
                             animate="visible"
                             whileHover={isOptMobile ? undefined : hoverLift}
                           >
-                            <span className="font-semibold text-white">{item.title}</span>
+                            <span className="font-semibold text-accent">{item.title}</span>
                             <p className="text-white/60 text-sm">{item.desc}</p>
                           </motion.div>
                         ))}
@@ -152,9 +121,9 @@ const SubPartner = () => {
                       initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.8 }}
-                      whileHover={isOptMobile ? undefined : hoverScale}
+                      whileHover={isOptMobile ? undefined : { scale: 1.02, x: 5 }}
                     >
-                      <p className="text-white/80">
+                      <p className="text-white/70">
                         {t('subpartner.otherSystems')} <span className="text-accent font-semibold">{t('subpartner.systemsCount')}</span> {t('subpartner.systemsEnd')}
                       </p>
                     </motion.div>

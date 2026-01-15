@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Clock, MapPin, Briefcase, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,21 +20,15 @@ const MotivationImage = lazy(() => import('@/assets/motivation-table.jpg').then(
 // Section components for lazy loading
 const FixedPremiumSection = ({ t }: { t: (key: string) => string }) => (
   <div>
-    <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-      <motion.span 
-        className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-        whileHover={{ rotate: 10, scale: 1.1 }}
-      >
-        <DollarSign className="w-5 h-5 text-primary" />
-      </motion.span>
-      {t('fix.fixedPremium')}
-    </h2>
-    <p className="text-white/80 leading-relaxed">
-      {t('fix.fixedPremiumDesc')} <Link to="/work/reports" className="text-accent hover:underline">{t('fix.reportForDay')}</Link>.
-    </p>
-    <p className="text-white/80 leading-relaxed mt-4">
-      {t('fix.premiumSizeDesc')} <span className="text-accent font-semibold">40-55% {t('fix.fromTariff')}</span>.
-    </p>
+    <CardGlassDarkHeader icon={DollarSign} title={t('fix.fixedPremium')} />
+    <CardGlassDarkContent>
+      <p>
+        {t('fix.fixedPremiumDesc')} <Link to="/work/reports" className="text-accent hover:underline">{t('fix.reportForDay')}</Link>.
+      </p>
+      <p>
+        {t('fix.premiumSizeDesc')} <span className="text-accent font-semibold">40-55% {t('fix.fromTariff')}</span>.
+      </p>
+    </CardGlassDarkContent>
   </div>
 );
 
@@ -47,10 +41,9 @@ const WorkFormatsSection = ({ t }: { t: (key: string) => string }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-        <Clock className="w-5 h-5 text-accent" />
+      <CardGlassDarkTitle icon={Clock} className="mb-4">
         {t('fix.workFormats')}
-      </h3>
+      </CardGlassDarkTitle>
       <div className="grid gap-3">
         {formats.map((item, i) => (
           <motion.div 
@@ -59,7 +52,7 @@ const WorkFormatsSection = ({ t }: { t: (key: string) => string }) => {
             whileHover={{ x: 5, scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
-            <span className="font-semibold text-white">{t(item.title)}</span>
+            <span className="font-semibold text-accent">{t(item.title)}</span>
             <p className="text-white/60 text-sm">{t(item.desc)}</p>
           </motion.div>
         ))}
@@ -76,10 +69,9 @@ const EmploymentSection = ({ t }: { t: (key: string) => string }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-        <Briefcase className="w-5 h-5 text-accent" />
+      <CardGlassDarkTitle icon={Briefcase} className="mb-4">
         {t('fix.employment')}
-      </h3>
+      </CardGlassDarkTitle>
       <div className="grid sm:grid-cols-2 gap-3">
         {hours.map((item, i) => (
           <motion.div 
@@ -88,7 +80,7 @@ const EmploymentSection = ({ t }: { t: (key: string) => string }) => {
             whileHover={{ y: -3, scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
-            <span className="font-semibold text-white">{t(item.title)}</span>
+            <span className="font-semibold text-accent">{t(item.title)}</span>
             <p className="text-white/60 text-sm">{t(item.desc)}</p>
           </motion.div>
         ))}
@@ -106,7 +98,7 @@ const TariffTypesSection = ({ t }: { t: (key: string) => string }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4">{t('fix.tariffTypes')}</h3>
+      <h3 className="text-xl font-bold text-accent mb-4">{t('fix.tariffTypes')}</h3>
       <div className="grid gap-3">
         {types.map((item, i) => (
           <motion.div 
@@ -134,10 +126,9 @@ const RegionsSection = ({ t }: { t: (key: string) => string }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-        <MapPin className="w-5 h-5 text-accent" />
+      <CardGlassDarkTitle icon={MapPin} className="mb-4">
         {t('fix.regions')}
-      </h3>
+      </CardGlassDarkTitle>
       <div className="grid sm:grid-cols-2 gap-3">
         {regions.map((item, i) => (
           <motion.div 
@@ -146,7 +137,7 @@ const RegionsSection = ({ t }: { t: (key: string) => string }) => {
             whileHover={{ y: -3 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
-            <span className="font-semibold text-white">{t(item.title)}</span>
+            <span className="font-semibold text-accent">{t(item.title)}</span>
             <p className="text-white/60 text-sm">{t(item.desc)}</p>
           </motion.div>
         ))}
@@ -163,17 +154,16 @@ const VATSection = ({ t }: { t: (key: string) => string }) => (
     }}
     transition={{ duration: 2, repeat: Infinity }}
   >
-    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
-      <AlertTriangle className="w-5 h-5 text-accent" />
+    <CardGlassDarkTitle icon={AlertTriangle} className="mb-4">
       {t('fix.vatTitle')}
-    </h3>
-    <div className="space-y-4 text-white/80">
+    </CardGlassDarkTitle>
+    <div className="space-y-4 text-white/70">
       <p className="font-semibold text-accent">{t('fix.vatInfo1')}</p>
       <p>{t('fix.vatInfo2')}</p>
       <p>{t('fix.vatInfo3')}</p>
       
       <div className="p-4 glass-dark rounded-xl">
-        <p className="font-semibold text-white mb-2">{t('fix.vatExample')}</p>
+        <p className="font-semibold text-accent mb-2">{t('fix.vatExample')}</p>
         <ul className="space-y-2 text-sm">
           <li>• {t('fix.vatExampleItem1')}</li>
           <li>• {t('fix.vatExampleItem2')} <span className="text-accent font-semibold">126 000 руб</span></li>
@@ -192,7 +182,7 @@ const VATSection = ({ t }: { t: (key: string) => string }) => (
 
 const TariffGridSection = ({ t }: { t: (key: string) => string }) => (
   <div>
-    <h3 className="text-xl font-bold text-white mb-4">{t('fix.tariffGrid')}</h3>
+    <h3 className="text-xl font-bold text-accent mb-4">{t('fix.tariffGrid')}</h3>
     <div className="space-y-4">
       <Suspense fallback={<div className="w-full h-48 bg-white/5 rounded-xl animate-pulse" />}>
         <motion.a 
@@ -227,7 +217,6 @@ const Fix = () => {
   const showMobileNav = isTelegram || isMobile;
   const mobileOptimizedClass = showMobileNav ? 'mobile-optimized' : '';
   
-  // Track which sections are visible
   const [visibleSections, setVisibleSections] = useState({
     formats: false,
     employment: false,
@@ -263,18 +252,16 @@ const Fix = () => {
                 <span className="text-gradient-gold">{t('fix.title')}</span>
               </motion.h1>
               
-              {/* Section 1: Fixed Premium */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <CardGlassDark className="p-8 mb-6">
+                <CardGlassDark className="p-8 mb-6" hover>
                   <FixedPremiumSection t={t} />
                 </CardGlassDark>
               </motion.div>
 
-              {/* Section 2: Work Formats */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -282,12 +269,11 @@ const Fix = () => {
                 transition={{ duration: 0.3 }}
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, formats: true }))}
               >
-                <CardGlassDark className="p-8 mb-6">
+                <CardGlassDark className="p-8 mb-6" hover>
                   {visibleSections.formats || !showMobileNav ? <WorkFormatsSection t={t} /> : <div className="h-40 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>
 
-              {/* Section 3: Employment */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -295,12 +281,11 @@ const Fix = () => {
                 transition={{ duration: 0.3 }}
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, employment: true }))}
               >
-                <CardGlassDark className="p-8 mb-6">
+                <CardGlassDark className="p-8 mb-6" hover>
                   {visibleSections.employment || !showMobileNav ? <EmploymentSection t={t} /> : <div className="h-32 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>
 
-              {/* Section 4: Tariff Types */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -308,12 +293,11 @@ const Fix = () => {
                 transition={{ duration: 0.3 }}
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, tariffTypes: true }))}
               >
-                <CardGlassDark className="p-8 mb-6">
+                <CardGlassDark className="p-8 mb-6" hover>
                   {visibleSections.tariffTypes || !showMobileNav ? <TariffTypesSection t={t} /> : <div className="h-40 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>
 
-              {/* Section 5: Regions */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -321,12 +305,11 @@ const Fix = () => {
                 transition={{ duration: 0.3 }}
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, regions: true }))}
               >
-                <CardGlassDark className="p-8 mb-6">
+                <CardGlassDark className="p-8 mb-6" hover>
                   {visibleSections.regions || !showMobileNav ? <RegionsSection t={t} /> : <div className="h-48 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>
 
-              {/* Section 6: VAT Info */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -338,7 +321,6 @@ const Fix = () => {
                 {visibleSections.vat || !showMobileNav ? <VATSection t={t} /> : <div className="h-64 animate-pulse bg-white/5 rounded-xl" />}
               </motion.div>
 
-              {/* Section 7: Tariff Grid */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -346,7 +328,7 @@ const Fix = () => {
                 transition={{ duration: 0.3 }}
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, grid: true }))}
               >
-                <CardGlassDark className="p-8">
+                <CardGlassDark className="p-8" hover>
                   {visibleSections.grid || !showMobileNav ? <TariffGridSection t={t} /> : <div className="h-96 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>

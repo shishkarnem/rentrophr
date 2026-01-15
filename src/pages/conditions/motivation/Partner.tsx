@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, Handshake, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,31 +46,12 @@ const Partner = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
-                  <CardGlassDark className="p-8 space-y-8">
+                  <CardGlassDark className="p-8 space-y-8" hover>
                     <div>
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Handshake className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('partner.program')}
-                      </motion.h2>
-                      <motion.p 
-                        className="text-white/80 leading-relaxed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        {t('partner.programDesc')}
-                      </motion.p>
+                      <CardGlassDarkHeader icon={Handshake} title={t('partner.program')} />
+                      <CardGlassDarkContent>
+                        <p>{t('partner.programDesc')}</p>
+                      </CardGlassDarkContent>
                     </div>
 
                     <motion.div 
@@ -99,7 +80,7 @@ const Partner = () => {
                       transition={{ delay: 0.6 }}
                       whileHover={{ scale: 1.02, x: 5 }}
                     >
-                      <p className="text-white/80">
+                      <p className="text-white/70">
                         {t('partner.paymentDetails')}{' '}
                         <motion.a 
                           href="https://t.me/+4-EaFu0bCbw5YTY6" 

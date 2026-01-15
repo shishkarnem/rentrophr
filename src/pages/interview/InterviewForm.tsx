@@ -31,21 +31,25 @@ const translations: Record<Language, {
   headerTitle: string;
   back: string;
   loading: string;
+  gdprNotice: string;
 }> = {
   ru: {
     headerTitle: 'Интервью',
     back: 'Назад',
     loading: 'Загрузка…',
+    gdprNotice: 'Отправляя свои данные через данную форму, вы подтверждаете согласие на передачу ваших персональных данных иностранному сервису Google (Google LLC, США) в соответствии с ФЗ-152 «О персональных данных».',
   },
   en: {
     headerTitle: 'Interview',
     back: 'Back',
     loading: 'Loading…',
+    gdprNotice: 'By submitting your data through this form, you confirm your consent to the transfer of your personal data to a foreign service Google (Google LLC, USA).',
   },
   kz: {
     headerTitle: 'Сұхбат',
     back: 'Артқа',
     loading: 'Жүктелуде…',
+    gdprNotice: 'Осы форма арқылы деректеріңізді жіберу кезінде, сіз дербес деректеріңізді Google (Google LLC, АҚШ) шетелдік сервисіне беруге келісім бересіз.',
   },
 };
 
@@ -115,8 +119,18 @@ const InterviewForm = () => {
       {/* Mobile header */}
       {showMobileNav && <MobileHeader />}
 
+      {/* GDPR Notice */}
+      <div className={`px-4 ${showMobileNav ? 'pt-28' : 'pt-4'}`}>
+        <div className="max-w-2xl mx-auto glass-dark rounded-xl p-4 border border-blue-500/30 bg-blue-500/5">
+          <div className="flex items-start gap-3">
+            <span className="text-blue-400 text-lg">🔒</span>
+            <p className="text-white/80 text-sm leading-relaxed">{t.gdprNotice}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Full-width iframe container - add padding for mobile header/navbar */}
-      <div className={`flex-1 ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
+      <div className={`flex-1 ${showMobileNav ? 'pb-32' : ''}`}>
         <iframe
           src={formUrl}
           className="w-full h-full min-h-[calc(100vh-80px)]"

@@ -45,6 +45,7 @@ const translations = {
     botText: 'Также вы можете заполнить через ИИ-робота телеграм',
     botCommand: 'отправив ему команду "Создание договора"',
     openBot: 'Открыть бота',
+    gdprNotice: 'Отправляя свои реквизиты и контактные данные через данную форму, вы подтверждаете согласие на передачу ваших персональных данных иностранному сервису Google (Google LLC, США) в соответствии с ФЗ-152 «О персональных данных».',
   },
   en: {
     title: 'Contract Creation',
@@ -82,6 +83,7 @@ const translations = {
     botText: 'You can also fill it via the Telegram AI bot',
     botCommand: 'by sending the command "Contract creation"',
     openBot: 'Open Bot',
+    gdprNotice: 'By submitting your details and contact information through this form, you confirm your consent to the transfer of your personal data to a foreign service Google (Google LLC, USA).',
   },
   kz: {
     title: 'Шарт жасау',
@@ -119,6 +121,7 @@ const translations = {
     botText: 'Сондай-ақ Telegram ИИ-робот арқылы толтыруға болады',
     botCommand: '"Шарт жасау" командасын жіберу арқылы',
     openBot: 'Ботты ашу',
+    gdprNotice: 'Осы форма арқылы деректеріңізді жіберу кезінде, сіз дербес деректеріңізді Google (Google LLC, АҚШ) шетелдік сервисіне беруге келісім бересіз.',
   },
 };
 
@@ -221,6 +224,14 @@ const ContractIntro = () => {
             <h4 className="text-white font-semibold mb-2">{t.kzWarningTitle}</h4>
             <p className="text-white/90 mb-3">{t.kzWarningText}</p>
             <p className="text-white/70 text-sm">{t.legalEntityNote}</p>
+          </div>
+
+          {/* GDPR Notice */}
+          <div className="glass-dark rounded-2xl p-6 border border-blue-500/30 bg-blue-500/5">
+            <div className="flex items-start gap-3">
+              <span className="text-blue-400 text-lg">🔒</span>
+              <p className="text-white/80 text-sm leading-relaxed">{t.gdprNotice}</p>
+            </div>
           </div>
 
           {/* Choose contract type */}

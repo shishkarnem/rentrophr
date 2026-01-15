@@ -7,10 +7,22 @@ import { useCrmData } from '@/hooks/useCrmData';
 import { Button } from '@/components/ui/button';
 import MobileLayout from '@/components/layout/MobileLayout';
 
-const translations: Record<Language, { title: string; loading: string }> = {
-  ru: { title: 'Договор ИП РФ', loading: 'Загрузка...' },
-  en: { title: 'IP RF Contract', loading: 'Loading...' },
-  kz: { title: 'ЖК РФ шарты', loading: 'Жүктелуде...' },
+const translations: Record<Language, { title: string; loading: string; gdprNotice: string }> = {
+  ru: { 
+    title: 'Договор ИП РФ', 
+    loading: 'Загрузка...',
+    gdprNotice: 'Отправляя свои реквизиты и контактные данные через данную форму, вы подтверждаете согласие на передачу ваших персональных данных иностранному сервису Google (Google LLC, США) в соответствии с ФЗ-152 «О персональных данных».',
+  },
+  en: { 
+    title: 'IP RF Contract', 
+    loading: 'Loading...',
+    gdprNotice: 'By submitting your details and contact information through this form, you confirm your consent to the transfer of your personal data to a foreign service Google (Google LLC, USA).',
+  },
+  kz: { 
+    title: 'ЖК РФ шарты', 
+    loading: 'Жүктелуде...',
+    gdprNotice: 'Осы форма арқылы деректеріңізді жіберу кезінде, сіз дербес деректеріңізді Google (Google LLC, АҚШ) шетелдік сервисіне беруге келісім бересіз.',
+  },
 };
 
 const ContractFormIPRF = () => {
@@ -73,8 +85,18 @@ const ContractFormIPRF = () => {
         </div>
       )}
 
+      {/* GDPR Notice */}
+      <div className={`px-4 ${showMobileNav ? 'pt-28' : 'pt-4'}`}>
+        <div className="max-w-2xl mx-auto glass-dark rounded-xl p-4 border border-blue-500/30 bg-blue-500/5">
+          <div className="flex items-start gap-3">
+            <span className="text-blue-400 text-lg">🔒</span>
+            <p className="text-white/80 text-sm leading-relaxed">{t.gdprNotice}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Form iframe - add padding for mobile header/navbar */}
-      <div className={`flex-1 w-full ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
+      <div className={`flex-1 w-full ${showMobileNav ? 'pb-32' : ''}`}>
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 text-accent animate-spin" />

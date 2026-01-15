@@ -7,18 +7,18 @@ const buttonVariants = cva("inline-flex items-center justify-center gap-2 whites
     variant: {
       default: "bg-primary text-primary-foreground shadow-glass hover:opacity-90 active:scale-[0.98]",
       destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-      outline: "border-2 border-border bg-transparent text-foreground hover:bg-muted hover:border-accent",
-      secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-      ghost: "text-foreground hover:bg-muted hover:text-foreground",
-      link: "text-accent underline-offset-4 hover:underline",
+      outline: "border-2 border-accent/30 bg-transparent text-accent hover:bg-accent/10 hover:border-accent [&_svg]:text-accent",
+      secondary: "bg-secondary text-accent shadow-sm hover:bg-secondary/80 [&_svg]:text-accent",
+      ghost: "text-accent hover:bg-accent/10 hover:text-accent [&_svg]:text-accent",
+      link: "text-accent underline-offset-4 hover:underline [&_svg]:text-accent",
       // CTA Button - Red to Orange gradient
       cta: "gradient-cta text-white font-bold shadow-cta hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300",
       // Gold variant
       gold: "gradient-gold text-gold-foreground font-bold shadow-gold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
       // Glass variant
       glass: "glass text-foreground hover:bg-white/80 active:scale-[0.98]",
-      // Glass dark variant
-      glassDark: "glass-dark text-white border-white/10 hover:border-white/20 active:scale-[0.98]"
+      // Glass dark variant - gold text and icons
+      glassDark: "glass-dark text-accent border-accent/20 hover:border-accent/40 active:scale-[0.98] [&_svg]:text-accent"
     },
     size: {
       default: "h-11 px-6 py-2",

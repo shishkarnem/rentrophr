@@ -128,12 +128,12 @@ const HeroSection = () => {
                   transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
                   <Button 
-                    variant="cta" 
+                    variant="gold" 
                     size="xl"
                     className="group"
                   >
                     {t('hero.learnWork')}
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-5 h-5 text-gold-foreground group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
               </Link>
@@ -144,7 +144,7 @@ const HeroSection = () => {
                   transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 >
                   <Button 
-                    variant="glassDark" 
+                    variant="gold" 
                     size="xl"
                   >
                     {t('hero.workConditions')}

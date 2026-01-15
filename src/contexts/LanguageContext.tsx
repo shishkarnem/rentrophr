@@ -407,6 +407,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.contractButton': 'Создание договора',
+    'profile.videoCardButton': 'Создать Видео-визитку',
   },
   en: {
     // Navigation
@@ -784,6 +785,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.contractButton': 'Create Contract',
+    'profile.videoCardButton': 'Create Video Business Card',
   },
   kz: {
     // Navigation
@@ -1161,6 +1163,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Profile
     'profile.contractButton': 'Шарт құру',
+    'profile.videoCardButton': 'Бейне-визитка жасау',
   },
 };
 

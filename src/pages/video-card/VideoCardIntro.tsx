@@ -5,9 +5,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { useCrmData } from "@/hooks/useCrmData";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Video, ExternalLink, Sparkles, Copy, Check, X, Bot } from "lucide-react";
+import { ArrowLeft, Video, ExternalLink, Sparkles, Copy, Check, X, Bot, ChevronDown, Edit2, RefreshCw, Save } from "lucide-react";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -33,6 +34,7 @@ const translations: Record<Language, {
   aiButton: string;
   resumeTitle: string;
   noResume: string;
+  showAll: string;
   sendToHR: string;
   projectsChannel: string;
   projectsChannelNote: string;
@@ -42,8 +44,12 @@ const translations: Record<Language, {
   copyButton: string;
   copied: string;
   closeButton: string;
+  editButton: string;
+  regenerateButton: string;
+  saveButton: string;
   errorGenerating: string;
   scriptSaved: string;
+  scriptUpdated: string;
   openBot: string;
 }> = {
   ru: {
@@ -68,6 +74,7 @@ const translations: Record<Language, {
     aiButton: "ИИ-Сценарий визитки",
     resumeTitle: "Ваше резюме для ИИ:",
     noResume: "Резюме не заполнено. Заполните текст резюме в Профиле.",
+    showAll: "Показать всё",
     sendToHR: "Файл с видео отправьте своему HR для получения итоговой ссылки на портфолио. Это ссылка на ваше портфолио в закрытом доступе. Доступ имеют только ДПРы и Менеджеры проектов.",
     projectsChannel: "Канал проектов",
     projectsChannelNote: "С этой ссылкой Вы можете откликаться на проекты в комментариях под постами в телеграм канале. Тут проекты публикуются в моменте, рекомендуем не отключать напоминания)🔔",
@@ -77,8 +84,12 @@ const translations: Record<Language, {
     copyButton: "Копировать",
     copied: "Скопировано!",
     closeButton: "Закрыть",
+    editButton: "Редактировать",
+    regenerateButton: "Перегенерировать",
+    saveButton: "Сохранить",
     errorGenerating: "Ошибка при генерации сценария",
     scriptSaved: "Сценарий сохранён",
+    scriptUpdated: "Сценарий обновлён",
     openBot: "Открыть бота"
   },
   en: {
@@ -103,6 +114,7 @@ const translations: Record<Language, {
     aiButton: "AI Script Generator",
     resumeTitle: "Your resume for AI:",
     noResume: "Resume not filled in. Fill in the resume text in your Profile.",
+    showAll: "Show all",
     sendToHR: "Send the video file to your HR to get the final portfolio link. This is a private link to your portfolio. Only Project Directors and Project Managers have access.",
     projectsChannel: "Projects Channel",
     projectsChannelNote: "With this link, you can apply for projects in the comments under posts in the telegram channel. Projects are published in real-time, we recommend keeping notifications on)🔔",
@@ -112,8 +124,12 @@ const translations: Record<Language, {
     copyButton: "Copy",
     copied: "Copied!",
     closeButton: "Close",
+    editButton: "Edit",
+    regenerateButton: "Regenerate",
+    saveButton: "Save",
     errorGenerating: "Error generating script",
     scriptSaved: "Script saved",
+    scriptUpdated: "Script updated",
     openBot: "Open Bot"
   },
   kz: {
@@ -138,6 +154,7 @@ const translations: Record<Language, {
     aiButton: "AI сценарий жасаушы",
     resumeTitle: "AI үшін түйіндемеңіз:",
     noResume: "Түйіндеме толтырылмаған. Профильде түйіндеме мәтінін толтырыңыз.",
+    showAll: "Барлығын көрсету",
     sendToHR: "Бейне файлын HR-ға жіберіңіз, соңғы портфолио сілтемесін алу үшін. Бұл портфолиоңызға жабық сілтеме. Тек ДПР-лар мен Жоба менеджерлері қол жеткізе алады.",
     projectsChannel: "Жобалар арнасы",
     projectsChannelNote: "Бұл сілтемемен сіз телеграм арнасындағы жазбалардың астында жобаларға өтініш бере аласыз. Жобалар сәтте жарияланады, хабарландыруларды өшірмеуді ұсынамыз)🔔",
@@ -147,8 +164,12 @@ const translations: Record<Language, {
     copyButton: "Көшіру",
     copied: "Көшірілді!",
     closeButton: "Жабу",
+    editButton: "Өңдеу",
+    regenerateButton: "Қайта жасау",
+    saveButton: "Сақтау",
     errorGenerating: "Сценарий жасауда қате",
     scriptSaved: "Сценарий сақталды",
+    scriptUpdated: "Сценарий жаңартылды",
     openBot: "Ботты ашу"
   }
 };
@@ -166,7 +187,11 @@ const VideoCardIntro = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showScriptDialog, setShowScriptDialog] = useState(false);
   const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+  const [editedScript, setEditedScript] = useState<string>("");
   const [isCopied, setIsCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
   
   const t = translations[language];
 
@@ -198,6 +223,8 @@ const VideoCardIntro = () => {
       
       if (data?.script) {
         setGeneratedScript(data.script);
+        setEditedScript(data.script);
+        setIsEditing(false);
         setShowScriptDialog(true);
         toast.success(t.scriptSaved);
         refetchCrmData();
@@ -227,8 +254,74 @@ const VideoCardIntro = () => {
   const handleShowSavedScript = () => {
     if (crmData?.video_script) {
       setGeneratedScript(crmData.video_script);
+      setEditedScript(crmData.video_script);
+      setIsEditing(false);
       setShowScriptDialog(true);
     }
+  };
+
+  // Handle regeneration
+  const handleRegenerate = async () => {
+    if (!crmData?.resume_text) {
+      toast.error(t.noResume);
+      return;
+    }
+    setIsEditing(false);
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-video-script', {
+        body: { 
+          resumeText: crmData.resume_text,
+          language: language,
+          telegramId: telegramId
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.script) {
+        setGeneratedScript(data.script);
+        setEditedScript(data.script);
+        toast.success(t.scriptSaved);
+        refetchCrmData();
+      }
+    } catch (error) {
+      console.error('Error generating script:', error);
+      toast.error(t.errorGenerating);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Handle save edited script
+  const handleSaveEditedScript = async () => {
+    if (!telegramId || !editedScript.trim()) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('crm_data')
+        .update({ video_script: editedScript })
+        .eq('telegram_id', telegramId);
+
+      if (error) throw error;
+      
+      setGeneratedScript(editedScript);
+      setIsEditing(false);
+      toast.success(t.scriptUpdated);
+      refetchCrmData();
+    } catch (error) {
+      console.error('Error saving script:', error);
+      toast.error(t.errorGenerating);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Toggle edit mode
+  const handleStartEditing = () => {
+    setEditedScript(generatedScript || '');
+    setIsEditing(true);
   };
 
   const content = (
@@ -293,11 +386,21 @@ const VideoCardIntro = () => {
           <div className="bg-white/5 rounded-xl p-4 space-y-4">
             <p className="text-white/80">{t.aiHelp}</p>
             
-            {/* Resume preview */}
+            {/* Resume preview with Show All */}
             <div className="space-y-2">
-              <p className="text-white/60 text-sm">{t.resumeTitle}</p>
+              <div className="flex justify-between items-start">
+                <p className="text-white/60 text-sm">{t.resumeTitle}</p>
+                {crmData?.resume_text && crmData.resume_text.split('\n').length > 5 && (
+                  <button 
+                    onClick={() => setShowResumeDialog(true)}
+                    className="text-accent hover:text-accent/80 flex items-center gap-1 text-xs"
+                  >
+                    {t.showAll} <ChevronDown className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
               {crmData?.resume_text ? (
-                <div className="bg-white/5 rounded-lg p-3 max-h-32 overflow-y-auto">
+                <div className="bg-white/5 rounded-lg p-3 max-h-32 overflow-hidden">
                   <p className="text-white/80 text-sm whitespace-pre-wrap">
                     {crmData.resume_text.split('\n').slice(0, 5).join('\n')}
                     {crmData.resume_text.split('\n').length > 5 && '...'}
@@ -373,50 +476,134 @@ const VideoCardIntro = () => {
         </div>
       </div>
 
-      {/* Script Dialog */}
-      <Dialog open={showScriptDialog} onOpenChange={setShowScriptDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden glass-dark border-white/10">
-          <DialogHeader>
+      {/* Script Dialog - Fixed for mobile */}
+      <Dialog open={showScriptDialog} onOpenChange={(open) => {
+        setShowScriptDialog(open);
+        if (!open) setIsEditing(false);
+      }}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[85vh] mx-auto glass-dark border-white/10 flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-white flex items-center gap-2">
               <Video className="w-5 h-5 text-accent" />
               {t.scriptTitle}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="overflow-y-auto max-h-[60vh] pr-2">
-            <div className="bg-white/5 rounded-lg p-4">
-              <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
-                {generatedScript}
-              </p>
-            </div>
+          <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+            {isEditing ? (
+              <Textarea
+                value={editedScript}
+                onChange={(e) => setEditedScript(e.target.value)}
+                className="w-full min-h-[40vh] bg-white/5 border-white/10 text-white/90 resize-none"
+                placeholder={t.scriptTitle}
+              />
+            ) : (
+              <div className="bg-white/5 rounded-lg p-4">
+                <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
+                  {generatedScript}
+                </p>
+              </div>
+            )}
           </div>
           
-          <div className="flex gap-3 mt-4">
-            <Button
-              onClick={handleCopyScript}
-              variant="gold"
-              className="flex-1 gap-2"
-            >
-              {isCopied ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  {t.copied}
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  {t.copyButton}
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={() => setShowScriptDialog(false)}
-              variant="outline"
-              className="gap-2"
-            >
-              <X className="w-4 h-4" />
-              {t.closeButton}
-            </Button>
+          <div className="flex-shrink-0 pt-4 space-y-3">
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveEditedScript}
+                  disabled={isSaving}
+                  variant="gold"
+                  className="flex-1 gap-2"
+                >
+                  {isSaving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      {t.saveButton}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedScript(generatedScript || '');
+                  }}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  {t.closeButton}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCopyScript}
+                    variant="gold"
+                    className="flex-1 gap-2"
+                  >
+                    {isCopied ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        {t.copied}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        {t.copyButton}
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleStartEditing}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    {t.editButton}
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleRegenerate}
+                    disabled={isGenerating}
+                    variant="outline"
+                    className="flex-1 gap-2"
+                  >
+                    {isGenerating ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-accent"></div>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4" />
+                        {t.regenerateButton}
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => setShowScriptDialog(false)}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    {t.closeButton}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resume Full Dialog */}
+      <Dialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[80vh] mx-auto glass-dark border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white">{t.resumeTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh]">
+            <p className="text-white text-sm whitespace-pre-wrap">{crmData?.resume_text}</p>
           </div>
         </DialogContent>
       </Dialog>

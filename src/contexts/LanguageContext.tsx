@@ -404,6 +404,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'ai.subtitle': 'РентРОП',
     'ai.greeting': 'Привет! Я AI-ассистент РентРОП. Задайте мне любой вопрос о вакансии, условиях работы или компании.',
     'ai.error': 'Извините, произошла ошибка. Попробуйте еще раз.',
+    
+    // Profile
+    'profile.contractButton': 'Создание договора',
   },
   en: {
     // Navigation
@@ -778,6 +781,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'ai.subtitle': 'RentROP',
     'ai.greeting': 'Hello! I am the RentROP AI assistant. Ask me any question about the vacancy, working conditions, or the company.',
     'ai.error': 'Sorry, an error occurred. Please try again.',
+    
+    // Profile
+    'profile.contractButton': 'Create Contract',
   },
   kz: {
     // Navigation
@@ -1152,6 +1158,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'ai.subtitle': 'РентРОП',
     'ai.greeting': 'Сәлеметсіз бе! Мен РентРОП AI көмекшісімін. Вакансия, жұмыс шарттары немесе компания туралы кез келген сұрақ қойыңыз.',
     'ai.error': 'Кешіріңіз, қате орын алды. Қайталап көріңіз.',
+    
+    // Profile
+    'profile.contractButton': 'Шарт құру',
   },
 };
 

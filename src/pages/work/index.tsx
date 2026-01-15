@@ -82,7 +82,7 @@ const WorkIndex = () => {
                         whileTap={{ scale: 0.98 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                       >
-                        <CardGlassDark className="p-6 h-full cursor-pointer group">
+                        <CardGlassDark className="p-6 h-full cursor-pointer group" hover>
                           <div className="flex items-start gap-4">
                             <motion.div 
                               className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center flex-shrink-0"
@@ -92,7 +92,7 @@ const WorkIndex = () => {
                               <page.icon className="w-6 h-6 text-primary" />
                             </motion.div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-accent transition-colors flex items-center gap-2">
+                              <h3 className="text-xl font-bold text-accent mb-2 group-hover:text-accent/80 transition-colors flex items-center gap-2">
                                 {t(page.titleKey)}
                                 <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                               </h3>

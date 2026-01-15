@@ -33,6 +33,7 @@ export interface CrmData {
   test_robot: string | null;
   contract_signing: string | null;
   video_card: string | null;
+  video_script: string | null;
   work_start: string | null;
   projects_mailing: string | null;
   hr: string | null;

@@ -134,6 +134,7 @@ export type Database = {
           training_completed: string | null
           updated_at: string
           video_card: string | null
+          video_script: string | null
           waiting_period: string | null
           work_start: string | null
           work_start_date: string | null
@@ -219,6 +220,7 @@ export type Database = {
           training_completed?: string | null
           updated_at?: string
           video_card?: string | null
+          video_script?: string | null
           waiting_period?: string | null
           work_start?: string | null
           work_start_date?: string | null
@@ -304,6 +306,7 @@ export type Database = {
           training_completed?: string | null
           updated_at?: string
           video_card?: string | null
+          video_script?: string | null
           waiting_period?: string | null
           work_start?: string | null
           work_start_date?: string | null

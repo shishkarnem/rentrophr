@@ -61,6 +61,9 @@ import ContractFormIPRF from "./pages/contract/ContractFormIPRF";
 import ContractFormPhysRF from "./pages/contract/ContractFormPhysRF";
 import ContractFormIPKZ from "./pages/contract/ContractFormIPKZ";
 
+// Video Card page
+import VideoCardIntro from "./pages/video-card/VideoCardIntro";
+
 const queryClient = new QueryClient();
 
 // Inner component that has access to Telegram context
@@ -127,6 +130,9 @@ const AppContent = () => {
         <Route path="/contract" element={<ContractIntro />} />
         <Route path="/contract/ip-rf" element={<ContractFormIPRF />} />
         <Route path="/contract/phys-rf" element={<ContractFormPhysRF />} />
+        
+        {/* Video Card route */}
+        <Route path="/video-card" element={<VideoCardIntro />} />
         <Route path="/contract/ip-kz" element={<ContractFormIPKZ />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

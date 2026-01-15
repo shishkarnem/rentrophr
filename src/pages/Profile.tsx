@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature, Video } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -764,6 +764,22 @@ const Profile = () => {
                 </div>
               )}
               <ProgressItem label={t('profile.videoCard') || 'Видео-визитка'} value={crmData.video_card} />
+              {crmData.available_skills && crmData.available_skills.toLowerCase().includes('подбор проекта') && (
+                <div className="py-2">
+                  <Button
+                    onClick={() => navigate('/video-card')}
+                    variant="gold"
+                    size="lg"
+                    className="w-full gap-2"
+                  >
+                    <Video className="w-5 h-5" />
+                    {t('profile.videoCardButton') || 'Создать Видео-визитку'}
+                    {crmData.video_card && crmData.video_card.toLowerCase() !== 'нет' && crmData.video_card !== '0' && crmData.video_card !== '' && !crmData.video_card.includes('⌛') && !crmData.video_card.includes('⌛️') && !crmData.video_card.includes('⏳') && (
+                      <CheckCircle2 className="w-5 h-5 text-green-300" />
+                    )}
+                  </Button>
+                </div>
+              )}
               <ProgressItem label={t('profile.workStartProgress') || 'Выход на работу'} value={crmData.work_start} />
               <ProgressItem label={t('profile.projectsMailing') || 'Рассылка проектов'} value={crmData.projects_mailing} />
             </div>

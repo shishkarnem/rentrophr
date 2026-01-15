@@ -115,8 +115,8 @@ const InterviewForm = () => {
       {/* Mobile header */}
       {showMobileNav && <MobileHeader />}
 
-      {/* Full-width iframe container */}
-      <div className={`flex-1 ${showMobileNav ? 'pb-20' : ''}`}>
+      {/* Full-width iframe container - add padding for mobile header/navbar */}
+      <div className={`flex-1 ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
         <iframe
           src={formUrl}
           className="w-full h-full min-h-[calc(100vh-80px)]"

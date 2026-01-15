@@ -79,8 +79,8 @@ const TestRobotForm = () => {
         </div>
       )}
 
-      {/* Form iframe */}
-      <div className="flex-1 w-full">
+      {/* Form iframe - add padding for mobile header/navbar */}
+      <div className={`flex-1 w-full ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 text-accent animate-spin" />

@@ -84,7 +84,7 @@ const InterviewIntro = () => {
         </div>
       )}
 
-      <main className={`container mx-auto px-4 py-8 max-w-lg ${showMobileNav ? 'pt-4 pb-24' : ''}`}>
+      <main className={`container mx-auto px-4 py-8 max-w-lg ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
 
         <div className="glass-dark rounded-2xl p-6 space-y-6">
           {/* Robot icon */}

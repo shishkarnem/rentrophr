@@ -157,7 +157,7 @@ const TestReportIntro = () => {
       )}
 
       {/* Content */}
-      <div className={`max-w-2xl mx-auto px-4 py-8 space-y-6 ${showMobileNav ? 'pt-4' : ''}`}>
+      <div className={`max-w-2xl mx-auto px-4 py-8 space-y-6 ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
         <div className="glass-dark rounded-2xl p-6 space-y-6">
           <h2 className="text-2xl font-bold text-white">{t.title}</h2>
           

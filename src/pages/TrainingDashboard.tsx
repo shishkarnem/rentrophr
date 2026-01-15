@@ -268,7 +268,7 @@ const TrainingDashboard = () => {
       )}
 
       {/* Content */}
-      <div className={`max-w-2xl mx-auto px-4 py-8 space-y-6 ${showMobileNav ? 'pt-4' : ''}`}>
+      <div className={`max-w-2xl mx-auto px-4 py-8 space-y-6 ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
         {/* Hero Section */}
         <div className="glass-dark rounded-2xl p-6 text-center">
           <GraduationCap className="w-16 h-16 text-accent mx-auto mb-4" />

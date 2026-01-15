@@ -166,7 +166,7 @@ const ContractIntro = () => {
         </div>
       )}
 
-      <main className={`container mx-auto px-4 py-6 max-w-2xl ${showMobileNav ? 'pt-4 pb-24' : ''}`}>
+      <main className={`container mx-auto px-4 py-6 max-w-2xl ${showMobileNav ? 'pt-28 pb-32' : ''}`}>
         <div className="space-y-6">
           {/* Intro with date and code */}
           <div className="glass-dark rounded-2xl p-6">

@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent, CardGlassDarkSubtitle } from '@/components/ui/card';
 import { ArrowLeft, DollarSign, Percent, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -38,91 +38,70 @@ const ArendaRopov = () => {
               
               <StaggerContainer className="space-y-8" staggerDelay={0.15}>
                 <StaggerItem variant="fadeUp">
-                  <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <CardGlassDark className="p-8">
-                      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ rotate: 10, scale: 1.1 }}
-                        >
-                          <Building2 className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('arenda.product')}
-                      </h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
-                        <p className="text-lg font-semibold text-white">{t('arenda.productTitle')}</p>
-                        <p>{t('arenda.productDesc')}</p>
-                      </div>
-                    </CardGlassDark>
-                  </motion.div>
+                  <CardGlassDark className="p-8" hover>
+                    <CardGlassDarkHeader 
+                      icon={Building2} 
+                      title={t('arenda.product')} 
+                    />
+                    <CardGlassDarkContent>
+                      <CardGlassDarkSubtitle>{t('arenda.productTitle')}</CardGlassDarkSubtitle>
+                      <p>{t('arenda.productDesc')}</p>
+                    </CardGlassDarkContent>
+                  </CardGlassDark>
                 </StaggerItem>
 
                 <StaggerItem variant="fadeUp">
-                  <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <CardGlassDark className="p-8">
-                      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ rotate: 10, scale: 1.1 }}
+                  <CardGlassDark className="p-8" hover>
+                    <CardGlassDarkHeader 
+                      icon={DollarSign} 
+                      title={t('arenda.payment')} 
+                    />
+                    <CardGlassDarkContent>
+                      <p>{t('arenda.paymentDesc')}</p>
+                      <ul className="space-y-4">
+                        <motion.li 
+                          className="flex gap-3"
+                          whileHover={{ x: 5 }}
+                          transition={{ type: 'spring', stiffness: 400 }}
                         >
-                          <DollarSign className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('arenda.payment')}
-                      </h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
-                        <p>{t('arenda.paymentDesc')}</p>
-                        <ul className="space-y-4">
-                          <motion.li 
-                            className="flex gap-3"
-                            whileHover={{ x: 5 }}
-                            transition={{ type: 'spring', stiffness: 400 }}
-                          >
-                            <span className="text-accent font-bold">1.</span>
-                            <div>
-                              <Link to="/conditions/motivation" className="text-accent hover:underline font-semibold">{t('arenda.fixedPremium')}</Link> {t('arenda.fixedPremiumDesc')}
-                            </div>
-                          </motion.li>
-                          <motion.li 
-                            className="flex gap-3"
-                            whileHover={{ x: 5 }}
-                            transition={{ type: 'spring', stiffness: 400 }}
-                          >
-                            <span className="text-accent font-bold">2.</span>
-                            <div>
-                              <Link to="/conditions/motivation" className="text-accent hover:underline font-semibold">{t('arenda.variablePremium')}</Link> {t('arenda.variablePremiumDesc')}
-                            </div>
-                          </motion.li>
-                        </ul>
-                      </div>
-                    </CardGlassDark>
-                  </motion.div>
+                          <span className="text-accent font-bold">1.</span>
+                          <div>
+                            <Link to="/conditions/motivation" className="text-accent hover:underline font-semibold">{t('arenda.fixedPremium')}</Link> {t('arenda.fixedPremiumDesc')}
+                          </div>
+                        </motion.li>
+                        <motion.li 
+                          className="flex gap-3"
+                          whileHover={{ x: 5 }}
+                          transition={{ type: 'spring', stiffness: 400 }}
+                        >
+                          <span className="text-accent font-bold">2.</span>
+                          <div>
+                            <Link to="/conditions/motivation" className="text-accent hover:underline font-semibold">{t('arenda.variablePremium')}</Link> {t('arenda.variablePremiumDesc')}
+                          </div>
+                        </motion.li>
+                      </ul>
+                    </CardGlassDarkContent>
+                  </CardGlassDark>
                 </StaggerItem>
 
                 <StaggerItem variant="fadeUp">
-                  <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <CardGlassDark className="p-8">
-                      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ rotate: 10, scale: 1.1 }}
-                        >
-                          <Percent className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('arenda.variablePart')}
-                      </h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
-                        <p>{t('arenda.variablePartDesc1')}</p>
-                        <p>{t('arenda.variablePartDesc2')}</p>
-                        <p>{t('arenda.variablePartDesc3')}</p>
-                        <p className="mt-4">
-                          {t('arenda.moreDetails')}{' '}
-                          <a href="https://arenda-ropa.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                            arenda-ropa.com
-                          </a>
-                        </p>
-                      </div>
-                    </CardGlassDark>
-                  </motion.div>
+                  <CardGlassDark className="p-8" hover>
+                    <CardGlassDarkHeader 
+                      icon={Percent} 
+                      title={t('arenda.variablePart')} 
+                    />
+                    <CardGlassDarkContent>
+                      <p>{t('arenda.variablePartDesc1')}</p>
+                      <p>{t('arenda.variablePartDesc2')}</p>
+                      <p>{t('arenda.variablePartDesc3')}</p>
+                      <p className="mt-4">
+                        {t('arenda.moreDetails')}{' '}
+                        <a href="https://arenda-ropa.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                          arenda-ropa.com
+                        </a>
+                      </p>
+                    </CardGlassDarkContent>
+                  </CardGlassDark>
                 </StaggerItem>
               </StaggerContainer>
             </div>

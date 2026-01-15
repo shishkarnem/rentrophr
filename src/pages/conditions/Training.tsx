@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkContent } from '@/components/ui/card';
 import { ArrowLeft, GraduationCap, BookOpen, CheckCircle, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,7 +15,6 @@ const Training = () => {
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   
-  // Отключаем backdrop-filter на мобильной версии для лучшей производительности
   const mobileOptimizedClass = showMobileNav ? 'mobile-optimized' : '';
   const { 
     cardVariants, 
@@ -27,7 +26,6 @@ const Training = () => {
     isMobile: isOptMobile,
     duration,
     ease,
-    staggerDelay
   } = useOptimizedAnimations();
 
   const trainingStages = [
@@ -71,23 +69,12 @@ const Training = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration, delay: 0.2 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={iconHover}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <GraduationCap className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('training.stepByStep')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader 
+                        icon={GraduationCap} 
+                        title={t('training.stepByStep')} 
+                      />
+                      <CardGlassDarkContent>
                         <motion.p
                           initial={shouldAnimate ? { opacity: 0 } : undefined}
                           animate={{ opacity: 1 }}
@@ -95,10 +82,10 @@ const Training = () => {
                         >
                           {t('training.stepByStepDesc')}
                         </motion.p>
-                      </div>
+                      </CardGlassDarkContent>
 
                       <motion.h3 
-                        className="text-lg font-semibold text-white mt-8 mb-4"
+                        className="text-lg font-semibold text-accent mt-8 mb-4"
                         initial={shouldAnimate ? { opacity: 0 } : undefined}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.35 }}
@@ -123,7 +110,7 @@ const Training = () => {
                             >
                               <span className="text-primary font-bold">{stage.num}</span>
                             </motion.div>
-                            <p className="text-sm text-white font-medium">{t(stage.titleKey)}</p>
+                            <p className="text-sm text-white/80 font-medium">{t(stage.titleKey)}</p>
                           </motion.div>
                         ))}
                       </div>
@@ -136,23 +123,12 @@ const Training = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration, delay: 0.35 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={iconHover}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Send className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('training.group')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader 
+                        icon={Send} 
+                        title={t('training.group')} 
+                      />
+                      <CardGlassDarkContent>
                         <p>
                           {t('training.groupDesc1')}{' '}
                           <motion.a 
@@ -166,7 +142,7 @@ const Training = () => {
                           </motion.a>
                         </p>
                         <p>{t('training.groupDesc2')}</p>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
 
@@ -176,23 +152,12 @@ const Training = () => {
                     initial="hidden"
                     animate="visible"
                   >
-                    <CardGlassDark className="p-8">
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-                        initial={shouldAnimate ? { opacity: 0, x: -20 } : undefined}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration, delay: 0.5 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={iconHover}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <BookOpen className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('training.knowledgeBase')}
-                      </motion.h2>
-                      <div className="space-y-4 text-white/70 leading-relaxed">
+                    <CardGlassDark className="p-8" hover>
+                      <CardGlassDarkHeader 
+                        icon={BookOpen} 
+                        title={t('training.knowledgeBase')} 
+                      />
+                      <CardGlassDarkContent>
                         <p>{t('training.knowledgeBaseDesc1')}</p>
                         <p>{t('training.knowledgeBaseDesc2')}</p>
                         <motion.div 
@@ -203,7 +168,7 @@ const Training = () => {
                           <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                           <p>{t('training.accessNote')}</p>
                         </motion.div>
-                      </div>
+                      </CardGlassDarkContent>
                     </CardGlassDark>
                   </motion.div>
                 </div>

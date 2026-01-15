@@ -1,5 +1,5 @@
 import MobileLayout from '@/components/layout/MobileLayout';
-import { CardGlassDark } from '@/components/ui/card';
+import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle } from '@/components/ui/card';
 import { ArrowLeft, Settings, Users, Wallet, FileText, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -77,21 +77,10 @@ const Services = () => {
                     </motion.div>
 
                     <div>
-                      <motion.h2 
-                        className="text-2xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.35 }}
-                      >
-                        <motion.span 
-                          className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center"
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <Settings className="w-5 h-5 text-primary" />
-                        </motion.span>
-                        {t('services.whatServices')}
-                      </motion.h2>
+                      <CardGlassDarkHeader 
+                        icon={Settings} 
+                        title={t('services.whatServices')} 
+                      />
                       <div className="grid sm:grid-cols-2 gap-3">
                         {services.map((service, i) => (
                           <motion.div 
@@ -104,22 +93,16 @@ const Services = () => {
                             whileHover={{ scale: 1.02, x: 5 }}
                             transition={{ type: 'spring', stiffness: 400 }}
                           >
-                            <span className="font-semibold text-white">{i + 1}. {service}</span>
+                            <span className="font-semibold text-white/80">{i + 1}. {service}</span>
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                      >
-                        <Users className="w-5 h-5 text-accent" />
+                      <CardGlassDarkTitle icon={Users} className="mb-4">
                         {t('services.toWhom')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <div className="grid gap-3">
                         {[t('services.newClients'), t('services.existingClients'), t('services.helpRops')].map((item, i) => (
                           <motion.div 
@@ -130,22 +113,16 @@ const Services = () => {
                             transition={{ delay: 0.55 + i * 0.1 }}
                             whileHover={{ scale: 1.02, x: 5 }}
                           >
-                            <span className="font-semibold text-white">{i + 1}. {item}</span>
+                            <span className="font-semibold text-white/80">{i + 1}. {item}</span>
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.65 }}
-                      >
-                        <Wallet className="w-5 h-5 text-accent" />
+                      <CardGlassDarkTitle icon={Wallet} className="mb-4">
                         {t('services.atWhoseExpense')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <div className="grid gap-3">
                         {[t('services.expense1'), t('services.expense2'), t('services.expense3')].map((item, i) => (
                           <motion.div 
@@ -156,22 +133,16 @@ const Services = () => {
                             transition={{ delay: 0.7 + i * 0.1 }}
                             whileHover={{ scale: 1.02, x: 5 }}
                           >
-                            <span className="text-white/80">{i + 1}. {item}</span>
+                            <span className="text-white/70">{i + 1}. {item}</span>
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.8 }}
-                      >
-                        <FileText className="w-5 h-5 text-accent" />
+                      <CardGlassDarkTitle icon={FileText} className="mb-4">
                         {t('services.howPriceAgreed')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <div className="space-y-3">
                         <motion.div 
                           className="p-4 glass-dark rounded-xl"
@@ -180,7 +151,7 @@ const Services = () => {
                           transition={{ delay: 0.85 }}
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
-                          <p className="text-white/80">
+                          <p className="text-white/70">
                             1. {t('services.priceDesc1')} <span className="text-accent font-semibold">{t('services.priceRange')}</span> {t('services.priceDesc1End')}
                           </p>
                         </motion.div>
@@ -191,7 +162,7 @@ const Services = () => {
                           transition={{ delay: 0.9 }}
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
-                          <p className="text-white/80">2. {t('services.priceDesc2')}</p>
+                          <p className="text-white/70">2. {t('services.priceDesc2')}</p>
                         </motion.div>
                         <motion.div 
                           className="p-4 glass-dark rounded-xl"
@@ -200,20 +171,15 @@ const Services = () => {
                           transition={{ delay: 0.95 }}
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
-                          <p className="text-white/80">3. {t('services.priceDesc3')}</p>
+                          <p className="text-white/70">3. {t('services.priceDesc3')}</p>
                         </motion.div>
                       </div>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1 }}
-                      >
+                      <h3 className="text-xl font-bold text-accent mb-4">
                         {t('services.howMuchPay')}
-                      </motion.h3>
+                      </h3>
                       <div className="grid sm:grid-cols-2 gap-3">
                         <motion.div 
                           className="p-4 glass-dark rounded-xl"
@@ -222,7 +188,7 @@ const Services = () => {
                           transition={{ delay: 1.05 }}
                           whileHover={{ scale: 1.02 }}
                         >
-                          <p className="text-white/80">{t('services.payLtv')}</p>
+                          <p className="text-white/70">{t('services.payLtv')}</p>
                         </motion.div>
                         <motion.div 
                           className="p-4 glass-dark rounded-xl"
@@ -231,26 +197,15 @@ const Services = () => {
                           transition={{ delay: 1.1 }}
                           whileHover={{ scale: 1.02 }}
                         >
-                          <p className="text-white/80">{t('services.payOneTime')} <span className="text-accent font-semibold">{t('services.payOneTimePercent')}</span> {t('services.payOneTimeEnd')}</p>
+                          <p className="text-white/70">{t('services.payOneTime')} <span className="text-accent font-semibold">{t('services.payOneTimePercent')}</span> {t('services.payOneTimeEnd')}</p>
                         </motion.div>
                       </div>
                     </div>
 
                     <div>
-                      <motion.h3 
-                        className="text-xl font-bold text-white mb-4 flex items-center gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 1.15 }}
-                      >
-                        <motion.div
-                          animate={{ rotate: [0, 360] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                        >
-                          <Star className="w-5 h-5 text-accent" />
-                        </motion.div>
+                      <CardGlassDarkTitle icon={Star} className="mb-4">
                         {t('services.ps')}
-                      </motion.h3>
+                      </CardGlassDarkTitle>
                       <motion.div 
                         className="p-4 glass-dark rounded-xl"
                         initial={{ opacity: 0, x: -20 }}
@@ -258,7 +213,7 @@ const Services = () => {
                         transition={{ delay: 1.2 }}
                         whileHover={{ scale: 1.02, x: 5 }}
                       >
-                        <p className="text-white/80">{t('services.psDesc')}</p>
+                        <p className="text-white/70">{t('services.psDesc')}</p>
                       </motion.div>
                     </div>
                   </CardGlassDark>

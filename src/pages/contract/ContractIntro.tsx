@@ -269,23 +269,24 @@ const ContractIntro = () => {
 
           {/* Bot link */}
           <div className="glass-dark rounded-2xl p-6">
-            <div className="flex items-center gap-3">
-              <Bot className="w-6 h-6 text-accent" />
-              <div>
-                <p className="text-white/90">
-                  {t.botText}{' '}
-                  <a 
-                    href="https://t.me/RentROP_HR_bot" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline"
-                  >
-                    https://t.me/RentROP_HR_bot
-                  </a>
-                  {' '}{t.botCommand}
-                </p>
-              </div>
-            </div>
+            <p className="text-white/90 mb-4">
+              {t.botText} {t.botCommand}
+            </p>
+            <Button
+              asChild
+              variant="gold"
+              size="lg"
+              className="w-full gap-2"
+            >
+              <a 
+                href="https://t.me/RentROP_HR_bot" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Bot className="w-5 h-5" />
+                {language === 'ru' ? 'Открыть бота' : language === 'kz' ? 'Ботты ашу' : 'Open Bot'}
+              </a>
+            </Button>
           </div>
         </div>
       </main>

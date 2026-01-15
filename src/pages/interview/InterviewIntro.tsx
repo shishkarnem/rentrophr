@@ -29,6 +29,7 @@ const InterviewIntro = () => {
       retry: 'В случае отказа роботом, Вы можете повторно пройти интервью с Вашим HR лично.',
       reminder: 'Перед самим интервью, просьба посмотреть Имя и Фамилию вашего HR в приглашении на интервью. Также запомните ваш код, который прислали ранее. Пригодится в дальнейшем.',
       button: 'Пройти Интервью',
+      gdprNotice: 'Отправляя свои данные через данную форму, вы подтверждаете согласие на передачу ваших персональных данных иностранному сервису Google (Google LLC, США) в соответствии с ФЗ-152 «О персональных данных».',
     },
     en: {
       title: 'Taking the Interview',
@@ -43,6 +44,7 @@ const InterviewIntro = () => {
       retry: 'If the robot rejects you, you can retake the interview with your HR personally.',
       reminder: 'Before the interview, please check the name of your HR in the interview invitation. Also remember your code that was sent earlier. It will be useful later.',
       button: 'Start Interview',
+      gdprNotice: 'By submitting your data through this form, you confirm your consent to the transfer of your personal data to a foreign service Google (Google LLC, USA).',
     },
     kz: {
       title: 'Сұхбаттан өту',
@@ -57,6 +59,7 @@ const InterviewIntro = () => {
       retry: 'Робот бас тартқан жағдайда, сіз HR-мен жеке сұхбаттан қайта өте аласыз.',
       reminder: 'Сұхбаттан бұрын, HR-дің аты-жөнін сұхбатқа шақыруда қараңыз. Сондай-ақ бұрын жіберілген кодыңызды есте сақтаңыз. Болашақта қажет болады.',
       button: 'Сұхбатты бастау',
+      gdprNotice: 'Осы форма арқылы деректеріңізді жіберу кезінде, сіз дербес деректеріңізді Google (Google LLC, АҚШ) шетелдік сервисіне беруге келісім бересіз.',
     },
   };
 
@@ -122,6 +125,14 @@ const InterviewIntro = () => {
             </div>
 
             <p className="text-accent font-medium">{t.reminder}</p>
+
+            {/* GDPR Notice */}
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mt-4">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-400">🔒</span>
+                <p className="text-white/70 text-xs leading-relaxed">{t.gdprNotice}</p>
+              </div>
+            </div>
           </div>
 
           {/* CTA Button */}

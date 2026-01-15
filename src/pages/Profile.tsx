@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature, Video } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature, Video, Copy, Check, FileDown, Languages } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -15,6 +15,7 @@ import MobileNavbar from '@/components/MobileNavbar';
 import MobileHeader from '@/components/MobileHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
 
 // Inline language switcher for profile with DB sync
 const ProfileLanguageSwitcher = () => {
@@ -159,7 +160,7 @@ const ResumeTextRow = ({ label, value, showAllText }: { label: string; value: st
       </div>
       
       <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto glass-dark border-white/10">
+        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-lg max-h-[80vh] overflow-y-auto glass-dark border-white/10 p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-white">{label}</DialogTitle>
           </DialogHeader>
@@ -173,7 +174,7 @@ const ResumeTextRow = ({ label, value, showAllText }: { label: string; value: st
 const Profile = () => {
   const navigate = useNavigate();
   const { isTelegram, profile, isLoading, updateProfile, uploadPhoto } = useTelegram();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -184,6 +185,17 @@ const Profile = () => {
   
   // Sync functionality
   const { isSyncing, syncNow, syncOnAppLoad, formatLastSyncTime, canSync } = useSyncCrm();
+  
+  // Script dialog state
+  const [showScriptDialog, setShowScriptDialog] = useState(false);
+  const [isEditingScript, setIsEditingScript] = useState(false);
+  const [editedScript, setEditedScript] = useState('');
+  const [isSavingScript, setIsSavingScript] = useState(false);
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  
+  // Translation state
+  const [isTranslatingResume, setIsTranslatingResume] = useState(false);
   
   // Auto-sync on app load
   useEffect(() => {
@@ -245,6 +257,152 @@ const Profile = () => {
       });
     }
   }, [crmData]);
+
+  // Script management functions
+  const handleShowScript = () => {
+    if (crmData?.video_script) {
+      setEditedScript(crmData.video_script);
+      setIsEditingScript(false);
+      setShowScriptDialog(true);
+    }
+  };
+
+  const handleCopyScript = async () => {
+    const textToCopy = editedScript;
+    if (!textToCopy) return;
+    
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setIsCopied(true);
+      toast.success(t('profile.copied') || 'Скопировано!');
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error('Error copying:', error);
+    }
+  };
+
+  const handleExportPdf = () => {
+    const textToExport = editedScript;
+    if (!textToExport) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${t('profile.scriptTitle') || 'Сценарий видео-визитки'}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              padding: 40px; 
+              line-height: 1.6;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            h1 { 
+              color: #333; 
+              border-bottom: 2px solid #d4af37;
+              padding-bottom: 10px;
+            }
+            p { white-space: pre-wrap; }
+          </style>
+        </head>
+        <body>
+          <h1>${t('profile.scriptTitle') || 'Сценарий видео-визитки'}</h1>
+          <p>${textToExport}</p>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleSaveScript = async () => {
+    if (!telegramId || !editedScript.trim()) return;
+    
+    setIsSavingScript(true);
+    try {
+      const { error } = await supabase
+        .from('crm_data')
+        .update({ video_script: editedScript })
+        .eq('telegram_id', telegramId);
+
+      if (error) throw error;
+      
+      setIsEditingScript(false);
+      toast.success(t('profile.scriptUpdated') || 'Сценарий обновлён');
+      refetchCrmData();
+    } catch (error) {
+      console.error('Error saving script:', error);
+      toast.error(t('profile.saveError'));
+    } finally {
+      setIsSavingScript(false);
+    }
+  };
+
+  const handleRegenerateScript = async () => {
+    if (!crmData?.resume_text) {
+      toast.error(t('profile.noResume') || 'Резюме не заполнено');
+      return;
+    }
+    
+    setIsGeneratingScript(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-video-script', {
+        body: { 
+          resumeText: crmData.resume_text,
+          language: language,
+          telegramId: telegramId
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.script) {
+        setEditedScript(data.script);
+        setIsEditingScript(false);
+        toast.success(t('profile.scriptSaved') || 'Сценарий сохранён');
+        refetchCrmData();
+      }
+    } catch (error) {
+      console.error('Error generating script:', error);
+      toast.error(t('profile.saveError'));
+    } finally {
+      setIsGeneratingScript(false);
+    }
+  };
+
+  const handleTranslateResume = async () => {
+    if (!crmData?.resume_text) {
+      toast.error(t('profile.noResume') || 'Резюме не заполнено');
+      return;
+    }
+
+    setIsTranslatingResume(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('translate-resume', {
+        body: { 
+          resumeText: crmData.resume_text,
+          targetLanguage: language,
+          telegramId: telegramId
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.translatedText) {
+        toast.success(t('profile.translateSuccess') || 'Резюме переведено');
+        refetchCrmData();
+      }
+    } catch (error) {
+      console.error('Error translating resume:', error);
+      toast.error(t('profile.saveError'));
+    } finally {
+      setIsTranslatingResume(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -374,6 +532,63 @@ const Profile = () => {
       setIsSavingResume(false);
     }
   };
+
+  // Translation labels
+  const scriptLabels: Record<Language, {
+    scriptTitle: string;
+    showAll: string;
+    copyButton: string;
+    copied: string;
+    editButton: string;
+    saveButton: string;
+    regenerateButton: string;
+    exportPdf: string;
+    closeButton: string;
+    translateButton: string;
+    translating: string;
+  }> = {
+    ru: {
+      scriptTitle: 'Сценарий видео-визитки',
+      showAll: 'Показать всё',
+      copyButton: 'Копировать',
+      copied: 'Скопировано!',
+      editButton: 'Редактировать',
+      saveButton: 'Сохранить',
+      regenerateButton: 'Перегенерировать',
+      exportPdf: 'Экспорт PDF',
+      closeButton: 'Закрыть',
+      translateButton: 'Перевести',
+      translating: 'Перевод...'
+    },
+    en: {
+      scriptTitle: 'Video Business Card Script',
+      showAll: 'Show all',
+      copyButton: 'Copy',
+      copied: 'Copied!',
+      editButton: 'Edit',
+      saveButton: 'Save',
+      regenerateButton: 'Regenerate',
+      exportPdf: 'Export PDF',
+      closeButton: 'Close',
+      translateButton: 'Translate',
+      translating: 'Translating...'
+    },
+    kz: {
+      scriptTitle: 'Бейне визитка сценарийі',
+      showAll: 'Барлығын көрсету',
+      copyButton: 'Көшіру',
+      copied: 'Көшірілді!',
+      editButton: 'Өңдеу',
+      saveButton: 'Сақтау',
+      regenerateButton: 'Қайта жасау',
+      exportPdf: 'PDF экспорт',
+      closeButton: 'Жабу',
+      translateButton: 'Аудару',
+      translating: 'Аударуда...'
+    }
+  };
+
+  const sl = scriptLabels[language];
 
   return (
     <div 
@@ -587,6 +802,35 @@ const Profile = () => {
               <InfoRow label={t('profile.waitingPeriod') || 'Срок в ожидании'} value={crmData.waiting_period} />
               <InfoRow label={t('profile.trainingCompleted') || 'Пройдено обучение за'} value={crmData.training_completed} />
             </div>
+          </div>
+        )}
+
+        {/* Video Script Preview */}
+        {crmData?.video_script && (
+          <div className="glass-dark rounded-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-accent" />
+                <h3 className="text-lg font-semibold text-white">{sl.scriptTitle}</h3>
+              </div>
+            </div>
+            
+            <div className="bg-white/5 rounded-lg p-3 max-h-32 overflow-hidden">
+              <p className="text-white/80 text-sm whitespace-pre-wrap">
+                {crmData.video_script.split('\n').slice(0, 5).join('\n')}
+                {crmData.video_script.split('\n').length > 5 && '...'}
+              </p>
+            </div>
+            
+            <Button
+              onClick={handleShowScript}
+              variant="gold"
+              size="sm"
+              className="w-full gap-2"
+            >
+              <ChevronDown className="w-4 h-4" />
+              {sl.showAll}
+            </Button>
           </div>
         )}
 
@@ -810,12 +1054,28 @@ const Profile = () => {
               <FileText className="w-5 h-5 text-accent" />
               <h3 className="text-lg font-semibold text-white">{t('profile.resume') || 'Резюме'}</h3>
             </div>
-            <button
-              onClick={() => setIsEditingResume(!isEditingResume)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <Edit2 className="w-4 h-4 text-accent" />
-            </button>
+            <div className="flex items-center gap-2">
+              {crmData?.resume_text && !isEditingResume && (
+                <button
+                  onClick={handleTranslateResume}
+                  disabled={isTranslatingResume}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
+                  title={sl.translateButton}
+                >
+                  {isTranslatingResume ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-accent"></div>
+                  ) : (
+                    <Languages className="w-4 h-4 text-accent" />
+                  )}
+                </button>
+              )}
+              <button
+                onClick={() => setIsEditingResume(!isEditingResume)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Edit2 className="w-4 h-4 text-accent" />
+              </button>
+            </div>
           </div>
 
           {isEditingResume ? (
@@ -900,6 +1160,136 @@ const Profile = () => {
       </div>
       
       {showMobileNav && <MobileNavbar />}
+
+      {/* Script Dialog */}
+      <Dialog open={showScriptDialog} onOpenChange={(open) => {
+        setShowScriptDialog(open);
+        if (!open) setIsEditingScript(false);
+      }}>
+        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-lg max-h-[80vh] glass-dark border-white/10 flex flex-col p-4 sm:p-6">
+          <DialogHeader className="flex-shrink-0 pb-2">
+            <DialogTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+              <Video className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+              {sl.scriptTitle}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+            {isEditingScript ? (
+              <Textarea
+                value={editedScript}
+                onChange={(e) => setEditedScript(e.target.value)}
+                className="w-full min-h-[35vh] bg-white/5 border-white/10 text-white/90 resize-none text-sm"
+                placeholder={sl.scriptTitle}
+              />
+            ) : (
+              <div className="bg-white/5 rounded-lg p-3 sm:p-4">
+                <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-sm">
+                  {editedScript}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-shrink-0 pt-3 space-y-2">
+            {isEditingScript ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={handleSaveScript}
+                  disabled={isSavingScript}
+                  variant="gold"
+                  size="sm"
+                  className="gap-1"
+                >
+                  {isSavingScript ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary"></div>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      {sl.saveButton}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsEditingScript(false);
+                    setEditedScript(crmData?.video_script || '');
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                >
+                  <X className="w-4 h-4" />
+                  {sl.closeButton}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    onClick={handleCopyScript}
+                    variant="gold"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    {isCopied ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                    <span className="hidden sm:inline">{isCopied ? sl.copied : sl.copyButton}</span>
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditingScript(true)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">{sl.editButton}</span>
+                  </Button>
+                  <Button
+                    onClick={handleExportPdf}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span className="hidden sm:inline">PDF</span>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={handleRegenerateScript}
+                    disabled={isGeneratingScript}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    {isGeneratingScript ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-accent"></div>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4" />
+                        {sl.regenerateButton}
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => setShowScriptDialog(false)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <X className="w-4 h-4" />
+                    {sl.closeButton}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

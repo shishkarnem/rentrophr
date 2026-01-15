@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.crm-ai-search]
 verify_jwt = false
+
+[functions.generate-video-script]
+verify_jwt = false
+
+[functions.translate-resume]
+verify_jwt = false

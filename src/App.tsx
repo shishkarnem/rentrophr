@@ -55,6 +55,12 @@ import TestRobotIntro from "./pages/tests/TestRobotIntro";
 import TestRobotForm from "./pages/tests/TestRobotForm";
 import TrainingDashboard from "./pages/TrainingDashboard";
 
+// Contract pages
+import ContractIntro from "./pages/contract/ContractIntro";
+import ContractFormIPRF from "./pages/contract/ContractFormIPRF";
+import ContractFormPhysRF from "./pages/contract/ContractFormPhysRF";
+import ContractFormIPKZ from "./pages/contract/ContractFormIPKZ";
+
 const queryClient = new QueryClient();
 
 // Inner component that has access to Telegram context
@@ -116,6 +122,12 @@ const AppContent = () => {
         
         {/* Training Dashboard */}
         <Route path="/training" element={<TrainingDashboard />} />
+        
+        {/* Contract routes */}
+        <Route path="/contract" element={<ContractIntro />} />
+        <Route path="/contract/ip-rf" element={<ContractFormIPRF />} />
+        <Route path="/contract/phys-rf" element={<ContractFormPhysRF />} />
+        <Route path="/contract/ip-kz" element={<ContractFormIPKZ />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

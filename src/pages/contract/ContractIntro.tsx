@@ -19,6 +19,9 @@ const translations = {
     contract2: 'Договор для России для самозанятых',
     contract3: 'Договор для Казахстана и СНГ для ИП',
     warningText: 'Сразу предупрежу, мы не меняем условия договора индивидуально, для всех сотрудников у нас единый договор. Либо подходят условия, либо не подходят. Третьего выбора нет.',
+    kzWarningTitle: '⚠️ Важно для Казахстана, СНГ и всего мира:',
+    kzWarningText: 'Договор заключается только на юридическое лицо (ИП). Заключение договора на физическое лицо невозможно.',
+    legalEntityNote: 'При создании договора на юридическое лицо, отличное от ИП (ООО, ТОО и др.), договор заключается индивидуально. Для этого необходимо отдельно связаться со своим HR.',
     chooseText: 'Если Вам подходят условия договора, то выберите какой договор из представленных мы сейчас создадим.',
     optionIP: 'Договор ИП РФ 🇷🇺',
     optionPhys: 'Договор Физ.лицо РФ 🇷🇺',
@@ -39,8 +42,9 @@ const translations = {
     ],
     additionalTitle: 'Дополнительные сведения:',
     additional: ['ИНН или БИН', 'ОГРН', 'КПП', 'Расчетный счет', 'Кор.счет', 'БИК', 'В банке', 'Email'],
-    botText: 'Также вы можете заполнить через ИИ-робота телеграм по ссылке',
+    botText: 'Также вы можете заполнить через ИИ-робота телеграм',
     botCommand: 'отправив ему команду "Создание договора"',
+    openBot: 'Открыть бота',
   },
   en: {
     title: 'Contract Creation',
@@ -52,6 +56,9 @@ const translations = {
     contract2: 'Contract for Russia for self-employed',
     contract3: 'Contract for Kazakhstan and CIS for IP',
     warningText: 'I warn you right away, we do not change the terms of the contract individually; all employees have a single contract. Either the conditions suit you, or they don\'t. There is no third choice.',
+    kzWarningTitle: '⚠️ Important for Kazakhstan, CIS and worldwide:',
+    kzWarningText: 'Contracts are concluded only with legal entities (Individual Entrepreneurs). Contracts with individuals are not possible.',
+    legalEntityNote: 'When creating a contract with a legal entity other than an Individual Entrepreneur (LLC, LLP, etc.), the contract is concluded individually. Please contact your HR separately for this.',
     chooseText: 'If the contract terms suit you, choose which contract we will create now.',
     optionIP: 'IP RF Contract 🇷🇺',
     optionPhys: 'Individual RF Contract 🇷🇺',
@@ -72,8 +79,9 @@ const translations = {
     ],
     additionalTitle: 'Additional information:',
     additional: ['TIN or BIN', 'OGRN', 'KPP', 'Settlement account', 'Correspondent account', 'BIC', 'Bank name', 'Email'],
-    botText: 'You can also fill it via the Telegram AI bot at',
+    botText: 'You can also fill it via the Telegram AI bot',
     botCommand: 'by sending the command "Contract creation"',
+    openBot: 'Open Bot',
   },
   kz: {
     title: 'Шарт жасау',
@@ -85,6 +93,9 @@ const translations = {
     contract2: 'Ресей үшін өзін-өзі жұмыспен қамтыған шарты',
     contract3: 'Қазақстан және ТМД үшін ЖК шарты',
     warningText: 'Бірден ескертемін, біз шарт талаптарын жеке өзгертпейміз, барлық қызметкерлерге бірыңғай шарт қолданылады. Не шарттар сәйкес келеді, не сәйкес келмейді. Үшінші таңдау жоқ.',
+    kzWarningTitle: '⚠️ Қазақстан, ТМД және бүкіл әлем үшін маңызды:',
+    kzWarningText: 'Шарт тек заңды тұлғалармен (ЖК) жасалады. Жеке тұлғалармен шарт жасау мүмкін емес.',
+    legalEntityNote: 'ЖК-дан басқа заңды тұлғамен (ЖШС, ЖАҚ және т.б.) шарт жасау кезінде шарт жеке түрде жасалады. Ол үшін HR-ға жеке хабарласу қажет.',
     chooseText: 'Егер шарт талаптары сізге сәйкес келсе, қай шартты жасайтынымызды таңдаңыз.',
     optionIP: 'ЖК РФ шарты 🇷🇺',
     optionPhys: 'Жеке тұлға РФ шарты 🇷🇺',
@@ -107,6 +118,7 @@ const translations = {
     additional: ['ЖСН немесе БСН', 'ОГРН', 'КПП', 'Есеп шоты', 'Корреспонденттік шот', 'БИК', 'Банк атауы', 'Email'],
     botText: 'Сондай-ақ Telegram ИИ-робот арқылы толтыруға болады',
     botCommand: '"Шарт жасау" командасын жіберу арқылы',
+    openBot: 'Ботты ашу',
   },
 };
 
@@ -204,6 +216,13 @@ const ContractIntro = () => {
             <p className="text-white/90">{t.warningText}</p>
           </div>
 
+          {/* KZ/CIS Warning */}
+          <div className="glass-dark rounded-2xl p-6 border border-red-500/30 bg-red-500/5">
+            <h4 className="text-white font-semibold mb-2">{t.kzWarningTitle}</h4>
+            <p className="text-white/90 mb-3">{t.kzWarningText}</p>
+            <p className="text-white/70 text-sm">{t.legalEntityNote}</p>
+          </div>
+
           {/* Choose contract type */}
           <div className="glass-dark rounded-2xl p-6">
             <p className="text-white/90 mb-4">{t.chooseText}</p>
@@ -284,7 +303,7 @@ const ContractIntro = () => {
                 rel="noopener noreferrer"
               >
                 <Bot className="w-5 h-5" />
-                {language === 'ru' ? 'Открыть бота' : language === 'kz' ? 'Ботты ашу' : 'Open Bot'}
+                {t.openBot}
               </a>
             </Button>
           </div>

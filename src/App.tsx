@@ -59,6 +59,7 @@ import TrainingDashboard from "./pages/TrainingDashboard";
 import ContractIntro from "./pages/contract/ContractIntro";
 import ContractFormIPRF from "./pages/contract/ContractFormIPRF";
 import ContractFormPhysRF from "./pages/contract/ContractFormPhysRF";
+import ContractFormIPWorld from "./pages/contract/ContractFormIPWorld";
 import ContractFormIPKZ from "./pages/contract/ContractFormIPKZ";
 
 // Video Card page
@@ -130,10 +131,11 @@ const AppContent = () => {
         <Route path="/contract" element={<ContractIntro />} />
         <Route path="/contract/ip-rf" element={<ContractFormIPRF />} />
         <Route path="/contract/phys-rf" element={<ContractFormPhysRF />} />
+        <Route path="/contract/ip-kz" element={<ContractFormIPKZ />} />
+        <Route path="/contract/ip-world" element={<ContractFormIPWorld />} />
         
         {/* Video Card route */}
         <Route path="/video-card" element={<VideoCardIntro />} />
-        <Route path="/contract/ip-kz" element={<ContractFormIPKZ />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

@@ -18,6 +18,7 @@ const translations = {
     contract1: 'Договор для России и Мира для ИП',
     contract2: 'Договор для России для самозанятых',
     contract3: 'Договор для Казахстана и СНГ для ИП',
+    contract4: 'Договор для Всего Мира для ИП',
     warningText: 'Сразу предупрежу, мы не меняем условия договора индивидуально, для всех сотрудников у нас единый договор. Либо подходят условия, либо не подходят. Третьего выбора нет.',
     kzWarningTitle: '⚠️ Важно для Казахстана, СНГ и всего мира:',
     kzWarningText: 'Договор заключается только на юридическое лицо (ИП). Заключение договора на физическое лицо невозможно.',
@@ -26,6 +27,7 @@ const translations = {
     optionIP: 'Договор ИП РФ 🇷🇺',
     optionPhys: 'Договор Физ.лицо РФ 🇷🇺',
     optionKZ: 'Договор ИП KZ 🇰🇿',
+    optionWorld: 'Договор ИП Мир 🌍',
     requisitesTitle: 'Для договора нужно подготовить реквизиты:',
     requiredTitle: 'Обязательно нужно:',
     required: [
@@ -56,6 +58,7 @@ const translations = {
     contract1: 'Contract for Russia and World for IP',
     contract2: 'Contract for Russia for self-employed',
     contract3: 'Contract for Kazakhstan and CIS for IP',
+    contract4: 'Contract for Worldwide for IP',
     warningText: 'I warn you right away, we do not change the terms of the contract individually; all employees have a single contract. Either the conditions suit you, or they don\'t. There is no third choice.',
     kzWarningTitle: '⚠️ Important for Kazakhstan, CIS and worldwide:',
     kzWarningText: 'Contracts are concluded only with legal entities (Individual Entrepreneurs). Contracts with individuals are not possible.',
@@ -64,6 +67,7 @@ const translations = {
     optionIP: 'IP RF Contract 🇷🇺',
     optionPhys: 'Individual RF Contract 🇷🇺',
     optionKZ: 'IP KZ Contract 🇰🇿',
+    optionWorld: 'IP World Contract 🌍',
     requisitesTitle: 'You need to prepare the following details for the contract:',
     requiredTitle: 'Required:',
     required: [
@@ -94,6 +98,7 @@ const translations = {
     contract1: 'Ресей және әлем үшін ЖК шарты',
     contract2: 'Ресей үшін өзін-өзі жұмыспен қамтыған шарты',
     contract3: 'Қазақстан және ТМД үшін ЖК шарты',
+    contract4: 'Бүкіл әлем үшін ЖК шарты',
     warningText: 'Бірден ескертемін, біз шарт талаптарын жеке өзгертпейміз, барлық қызметкерлерге бірыңғай шарт қолданылады. Не шарттар сәйкес келеді, не сәйкес келмейді. Үшінші таңдау жоқ.',
     kzWarningTitle: '⚠️ Қазақстан, ТМД және бүкіл әлем үшін маңызды:',
     kzWarningText: 'Шарт тек заңды тұлғалармен (ЖК) жасалады. Жеке тұлғалармен шарт жасау мүмкін емес.',
@@ -102,6 +107,7 @@ const translations = {
     optionIP: 'ЖК РФ шарты 🇷🇺',
     optionPhys: 'Жеке тұлға РФ шарты 🇷🇺',
     optionKZ: 'ЖК KZ шарты 🇰🇿',
+    optionWorld: 'ЖК Әлем шарты 🌍',
     requisitesTitle: 'Шарт үшін мына деректерді дайындау керек:',
     requiredTitle: 'Міндетті:',
     required: [
@@ -155,6 +161,7 @@ const ContractIntro = () => {
     { label: t.contract1, url: 'https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/view' },
     { label: t.contract2, url: 'https://drive.google.com/file/d/1FDbZ5daP_esGZO5XNIHR6de08H6EnbLG/view' },
     { label: t.contract3, url: 'https://drive.google.com/file/d/1alsd16UeR3uzKHs6wVYfJwboQ8wmzLRi/view' },
+    { label: t.contract4, url: 'https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/view' },
   ];
 
   return (
@@ -264,6 +271,15 @@ const ContractIntro = () => {
               >
                 <span className="text-lg">3️⃣</span>
                 {t.optionKZ}
+              </Button>
+              <Button
+                onClick={() => navigate('/contract/ip-world')}
+                variant="gold"
+                size="lg"
+                className="w-full justify-start gap-3"
+              >
+                <span className="text-lg">4️⃣</span>
+                {t.optionWorld}
               </Button>
             </div>
           </div>

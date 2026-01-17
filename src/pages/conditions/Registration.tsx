@@ -176,6 +176,32 @@ const Registration = () => {
                             </motion.a>
                           </div>
                         </motion.div>
+
+                        <motion.div 
+                          className="p-4 glass-dark rounded-xl"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ type: 'spring', stiffness: 400 }}
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            <motion.div
+                              animate={{ rotate: [0, 360] }}
+                              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                            >
+                              <Globe className="w-5 h-5 text-accent" />
+                            </motion.div>
+                            <span className="font-semibold text-accent">{t('registration.worldTax')}</span>
+                          </div>
+                          <motion.a 
+                            href="https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/view"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-accent hover:underline"
+                            whileHover={{ scale: 1.05, x: 5 }}
+                          >
+                            <Download className="w-4 h-4" />
+                            {t('registration.contractWorldIp')}
+                          </motion.a>
+                        </motion.div>
                       </div>
                     </CardGlassDark>
                   </motion.div>

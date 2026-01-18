@@ -35,6 +35,7 @@ import Payments from "./pages/conditions/Payments";
 
 // Projects pages
 import ProjectsHistory from "./pages/projects/ProjectsHistory";
+import ProjectDetail from "./pages/projects/ProjectDetail";
 
 // Motivation sub-pages
 import Fix from "./pages/conditions/motivation/Fix";
@@ -115,8 +116,9 @@ const AppContent = () => {
         <Route path="/conditions/registration" element={<Registration />} />
         <Route path="/conditions/payments" element={<Payments />} />
         
-        {/* Projects history */}
+        {/* Projects routes */}
         <Route path="/projects/history" element={<ProjectsHistory />} />
+        <Route path="/projects/:projectCode" element={<ProjectDetail />} />
         
         {/* Interview routes */}
         <Route path="/interview" element={<InterviewIntro />} />

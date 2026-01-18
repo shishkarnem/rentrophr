@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Star, Check, X, SkipForward, Trash2, RefreshCcw, ChevronUp, ChevronRight, ChevronLeft, ChevronDown, Briefcase } from 'lucide-react';
+import { ArrowLeft, Star, Check, X, SkipForward, Trash2, RefreshCcw, ChevronUp, ChevronRight, ChevronLeft, ChevronDown, Briefcase, ExternalLink, User, Users, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileLayout from '@/components/layout/MobileLayout';
@@ -9,25 +9,28 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useProjectSwipes, SwipeAction, SwipeRecord } from '@/hooks/useProjectSwipes';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects, Project } from '@/hooks/useProjects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const actionConfig: Record<SwipeAction, { icon: typeof Star; directionIcon: typeof ChevronUp; color: string; bgColor: string; label: string }> = {
-  like: { icon: Star, directionIcon: ChevronUp, color: 'text-accent', bgColor: 'bg-accent/20', label: 'В закладках' },
-  respond: { icon: Check, directionIcon: ChevronRight, color: 'text-green-400', bgColor: 'bg-green-400/20', label: 'Отклики' },
-  pass: { icon: X, directionIcon: ChevronLeft, color: 'text-red-400', bgColor: 'bg-red-400/20', label: 'Не подходит' },
-  skip: { icon: SkipForward, directionIcon: ChevronDown, color: 'text-white/60', bgColor: 'bg-white/10', label: 'Пропущено' },
+const actionConfig: Record<SwipeAction, { icon: typeof Star; directionIcon: typeof ChevronUp; color: string; bgColor: string; labelKey: string }> = {
+  like: { icon: Star, directionIcon: ChevronUp, color: 'text-accent', bgColor: 'bg-accent/20', labelKey: 'projects.action.like' },
+  respond: { icon: Check, directionIcon: ChevronRight, color: 'text-green-400', bgColor: 'bg-green-400/20', labelKey: 'projects.action.respond' },
+  pass: { icon: X, directionIcon: ChevronLeft, color: 'text-red-400', bgColor: 'bg-red-400/20', labelKey: 'projects.action.pass' },
+  skip: { icon: SkipForward, directionIcon: ChevronDown, color: 'text-white/60', bgColor: 'bg-white/10', labelKey: 'projects.action.skip' },
 };
 
 interface ProjectDetailModalProps {
   record: SwipeRecord | null;
-  projectDescription?: string;
+  project: Project | null;
   onClose: () => void;
+  onChangeAction: (action: SwipeAction) => void;
 }
 
-const ProjectDetailModal = ({ record, projectDescription, onClose }: ProjectDetailModalProps) => {
+const ProjectDetailModal = ({ record, project, onClose, onChangeAction }: ProjectDetailModalProps) => {
+  const { t } = useLanguage();
+  
   if (!record) return null;
 
   const config = actionConfig[record.action];
@@ -43,11 +46,15 @@ const ProjectDetailModal = ({ record, projectDescription, onClose }: ProjectDeta
     return { title, details };
   };
 
-  const { title, details } = parseDescription(projectDescription || null);
+  const { title, details } = parseDescription(project?.description || null);
+
+  const handleActionChange = (action: SwipeAction) => {
+    onChangeAction(action);
+  };
 
   return (
     <Dialog open={!!record} onOpenChange={onClose}>
-      <DialogContent className="bg-primary/95 border-white/10 max-w-md max-h-[80vh] overflow-hidden">
+      <DialogContent className="bg-primary/95 border-white/10 max-w-md max-h-[85vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <Briefcase className="w-5 h-5 text-accent" />
@@ -56,17 +63,25 @@ const ProjectDetailModal = ({ record, projectDescription, onClose }: ProjectDeta
         </DialogHeader>
         
         <div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
-          {/* Status badge */}
+          {/* Current status badge */}
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${config.bgColor}`}>
             <ActionIcon className={`w-4 h-4 ${config.color}`} />
             <DirectionIcon className={`w-3 h-3 ${config.color}`} />
             <span className={`text-sm font-medium ${config.color}`}>
-              {config.label}
+              {t(config.labelKey)}
             </span>
           </div>
 
-          {/* Title */}
-          <h3 className="text-xl font-bold text-white">{title || `Проект #${record.projectCode}`}</h3>
+          {/* Title and region */}
+          <div>
+            <h3 className="text-xl font-bold text-white">{title || `${t('projects.project')} #${record.projectCode}`}</h3>
+            {project?.region && (
+              <div className="flex items-center gap-1 text-white/60 text-sm mt-1">
+                <MapPin className="w-3 h-3" />
+                {project.region}
+              </div>
+            )}
+          </div>
 
           {/* Description */}
           {details && (
@@ -76,6 +91,73 @@ const ProjectDetailModal = ({ record, projectDescription, onClose }: ProjectDeta
               </p>
             </div>
           )}
+
+          {/* Manager and DPR buttons */}
+          {(project?.manager_link || project?.dpr_link) && (
+            <div className="flex gap-3">
+              {project.manager_link && (
+                <Button
+                  variant="gold"
+                  size="sm"
+                  className="flex-1"
+                  asChild
+                >
+                  <a
+                    href={project.manager_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    {t('projects.manager')}
+                    <ExternalLink className="w-3 h-3 ml-1" />
+                  </a>
+                </Button>
+              )}
+              {project.dpr_link && (
+                <Button
+                  variant="gold"
+                  size="sm"
+                  className="flex-1"
+                  asChild
+                >
+                  <a
+                    href={project.dpr_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    {t('projects.dpr')}
+                    <ExternalLink className="w-3 h-3 ml-1" />
+                  </a>
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Change decision section */}
+          <div className="border-t border-white/10 pt-4">
+            <p className="text-white/60 text-sm mb-3">{t('projects.changeDecision')}</p>
+            <div className="grid grid-cols-4 gap-2">
+              {(['like', 'respond', 'pass', 'skip'] as SwipeAction[]).map((action) => {
+                const actionCfg = actionConfig[action];
+                const Icon = actionCfg.icon;
+                const isActive = record.action === action;
+                return (
+                  <Button
+                    key={action}
+                    variant="ghost"
+                    size="sm"
+                    className={`flex flex-col gap-1 h-auto py-3 ${isActive ? actionCfg.bgColor : 'bg-white/5'} ${isActive ? actionCfg.color : 'text-white/60'} hover:${actionCfg.bgColor}`}
+                    onClick={() => handleActionChange(action)}
+                    disabled={isActive}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-[10px]">{t(actionCfg.labelKey)}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Timestamp */}
           <p className="text-white/40 text-xs">
@@ -101,6 +183,7 @@ interface HistoryItemProps {
 }
 
 const HistoryItem = ({ record, projectTitle, onRemove, onClick }: HistoryItemProps) => {
+  const { t } = useLanguage();
   const config = actionConfig[record.action];
   const Icon = config.icon;
   const DirectionIcon = config.directionIcon;
@@ -127,7 +210,7 @@ const HistoryItem = ({ record, projectTitle, onRemove, onClick }: HistoryItemPro
               <span className="text-accent/70 text-xs">#{record.projectCode}</span>
             </div>
             <p className="text-white text-sm font-medium truncate">
-              {projectTitle || `Проект #${record.projectCode}`}
+              {projectTitle || `${t('projects.project')} #${record.projectCode}`}
             </p>
             <p className="text-white/40 text-xs mt-1">
               {new Date(record.timestamp).toLocaleDateString('ru-RU', {
@@ -160,22 +243,28 @@ const ProjectsHistory = () => {
   const { isTelegram } = useTelegram();
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
-  const { swipeHistory, getSwipesByAction, removeSwipe, clearHistory } = useProjectSwipes();
+  const { swipeHistory, getSwipesByAction, removeSwipe, clearHistory, addSwipe } = useProjectSwipes();
   const { data: projects = [] } = useProjects();
   const [selectedRecord, setSelectedRecord] = useState<SwipeRecord | null>(null);
 
   const tabs: SwipeAction[] = ['like', 'respond', 'pass', 'skip'];
 
-  // Helper to get project description by ID
-  const getProjectDescription = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    return project?.description || null;
+  // Helper to get project by ID
+  const getProject = (projectId: string) => {
+    return projects.find(p => p.id === projectId) || null;
   };
 
   const getProjectTitle = (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
     if (!project?.description) return null;
     return project.description.split('\n')[0]?.replace('Проект:', '').trim() || null;
+  };
+
+  const handleChangeAction = async (action: SwipeAction) => {
+    if (!selectedRecord) return;
+    await addSwipe(selectedRecord.projectId, selectedRecord.projectCode, action);
+    // Update selected record with new action
+    setSelectedRecord(prev => prev ? { ...prev, action, timestamp: new Date().toISOString() } : null);
   };
 
   return (
@@ -192,7 +281,7 @@ const ProjectsHistory = () => {
               >
                 <Link to="/projects" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors">
                   <ArrowLeft className="w-4 h-4" />
-                  {t('projects.backToSwipe') || 'К свайпам'}
+                  {t('projects.backToSwipe')}
                 </Link>
                 {swipeHistory.length > 0 && (
                   <Button
@@ -202,7 +291,7 @@ const ProjectsHistory = () => {
                     className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    {t('projects.clearAll') || 'Очистить'}
+                    {t('projects.clearAll')}
                   </Button>
                 )}
               </motion.div>
@@ -213,7 +302,7 @@ const ProjectsHistory = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <span className="text-gradient-gold">{t('projects.history') || 'История'}</span>
+                  <span className="text-gradient-gold">{t('projects.history')}</span>
                 </motion.h1>
 
                 {/* Restart swipes button */}
@@ -229,7 +318,7 @@ const ProjectsHistory = () => {
                       className="w-full py-6 rounded-2xl"
                     >
                       <RefreshCcw className="w-5 h-5 mr-2" />
-                      {t('projects.restartSwipes') || 'Пройти свайпы заново'}
+                      {t('projects.restartSwipes')}
                     </Button>
                   </Link>
                 </motion.div>
@@ -241,7 +330,7 @@ const ProjectsHistory = () => {
                     className="text-center py-12"
                   >
                     <p className="text-white/60">
-                      {t('projects.noHistory') || 'История пуста'}
+                      {t('projects.noHistory')}
                     </p>
                   </motion.div>
                 ) : (
@@ -273,7 +362,7 @@ const ProjectsHistory = () => {
                         <TabsContent key={action} value={action} className="mt-0">
                           {getSwipesByAction(action).length === 0 ? (
                             <p className="text-white/40 text-center py-8">
-                              {t('projects.noItemsInCategory') || 'Пусто'}
+                              {t('projects.noItemsInCategory')}
                             </p>
                           ) : (
                             getSwipesByAction(action)
@@ -302,8 +391,9 @@ const ProjectsHistory = () => {
       {/* Project detail modal */}
       <ProjectDetailModal
         record={selectedRecord}
-        projectDescription={selectedRecord ? getProjectDescription(selectedRecord.projectId) || undefined : undefined}
+        project={selectedRecord ? getProject(selectedRecord.projectId) : null}
         onClose={() => setSelectedRecord(null)}
+        onChangeAction={handleChangeAction}
       />
     </div>
   );

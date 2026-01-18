@@ -21,21 +21,35 @@ interface DbSwipeRecord {
   telegram_id: number;
 }
 
+const LOCAL_STORAGE_KEY = 'project_swipes_history';
+
 export const useProjectSwipes = () => {
   const [swipeHistory, setSwipeHistory] = useState<SwipeRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { profile } = useTelegram();
 
   const telegramId = profile?.telegram_id;
+  const useLocalStorage = !telegramId;
 
-  // Load swipes from database
+  // Load swipes from database or localStorage
   useEffect(() => {
     const loadSwipes = async () => {
-      if (!telegramId) {
+      // If no telegram ID, use localStorage
+      if (useLocalStorage) {
+        try {
+          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setSwipeHistory(parsed);
+          }
+        } catch (err) {
+          console.error('Error loading swipes from localStorage:', err);
+        }
         setIsLoading(false);
         return;
       }
 
+      // Load from database for telegram users
       try {
         const { data, error } = await supabase
           .from('project_swipes')
@@ -65,14 +79,38 @@ export const useProjectSwipes = () => {
     };
 
     loadSwipes();
-  }, [telegramId]);
+  }, [telegramId, useLocalStorage]);
+
+  // Helper to save to localStorage
+  const saveToLocalStorage = useCallback((records: SwipeRecord[]) => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(records));
+    } catch (err) {
+      console.error('Error saving to localStorage:', err);
+    }
+  }, []);
 
   const addSwipe = useCallback(async (projectId: string, projectCode: string, action: SwipeAction) => {
-    if (!telegramId) {
-      console.warn('No telegram ID, cannot save swipe');
+    const newRecord: SwipeRecord = {
+      id: `local_${Date.now()}`,
+      projectId,
+      projectCode,
+      action,
+      timestamp: new Date().toISOString(),
+    };
+
+    // If no telegram ID, use localStorage
+    if (useLocalStorage) {
+      setSwipeHistory(prev => {
+        const filtered = prev.filter(s => s.projectId !== projectId);
+        const updated = [newRecord, ...filtered];
+        saveToLocalStorage(updated);
+        return updated;
+      });
       return;
     }
 
+    // Save to database for telegram users
     try {
       const { data, error } = await supabase
         .from('project_swipes')
@@ -96,7 +134,7 @@ export const useProjectSwipes = () => {
       }
 
       if (data) {
-        const newRecord: SwipeRecord = {
+        const dbRecord: SwipeRecord = {
           id: data.id,
           projectId: data.project_id,
           projectCode: data.project_code,
@@ -106,17 +144,26 @@ export const useProjectSwipes = () => {
 
         setSwipeHistory(prev => {
           const filtered = prev.filter(s => s.projectId !== projectId);
-          return [newRecord, ...filtered];
+          return [dbRecord, ...filtered];
         });
       }
     } catch (err) {
       console.error('Error saving swipe:', err);
     }
-  }, [telegramId]);
+  }, [telegramId, useLocalStorage, saveToLocalStorage]);
 
   const removeSwipe = useCallback(async (projectId: string) => {
-    if (!telegramId) return;
+    // If no telegram ID, use localStorage
+    if (useLocalStorage) {
+      setSwipeHistory(prev => {
+        const updated = prev.filter(s => s.projectId !== projectId);
+        saveToLocalStorage(updated);
+        return updated;
+      });
+      return;
+    }
 
+    // Remove from database for telegram users
     try {
       const { error } = await supabase
         .from('project_swipes')
@@ -133,11 +180,17 @@ export const useProjectSwipes = () => {
     } catch (err) {
       console.error('Error removing swipe:', err);
     }
-  }, [telegramId]);
+  }, [telegramId, useLocalStorage, saveToLocalStorage]);
 
   const clearHistory = useCallback(async () => {
-    if (!telegramId) return;
+    // If no telegram ID, use localStorage
+    if (useLocalStorage) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      setSwipeHistory([]);
+      return;
+    }
 
+    // Clear from database for telegram users
     try {
       const { error } = await supabase
         .from('project_swipes')
@@ -153,7 +206,7 @@ export const useProjectSwipes = () => {
     } catch (err) {
       console.error('Error clearing history:', err);
     }
-  }, [telegramId]);
+  }, [telegramId, useLocalStorage]);
 
   const getSwipesByAction = useCallback((action: SwipeAction) => {
     return swipeHistory.filter(s => s.action === action);

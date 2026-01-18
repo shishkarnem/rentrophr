@@ -26,6 +26,7 @@ const LOCAL_STORAGE_KEY = 'project_swipes_history';
 export const useProjectSwipes = () => {
   const [swipeHistory, setSwipeHistory] = useState<SwipeRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
   const { profile } = useTelegram();
 
   const telegramId = profile?.telegram_id;
@@ -90,6 +91,28 @@ export const useProjectSwipes = () => {
     }
   }, []);
 
+  // Send notification to Telegram group for "respond" action
+  const sendNotification = useCallback(async (projectId: string, projectCode: string) => {
+    if (!telegramId) return;
+    
+    setIsSendingNotification(true);
+    try {
+      const response = await supabase.functions.invoke('notify-project-response', {
+        body: { projectId, projectCode, telegramId },
+      });
+      
+      if (response.error) {
+        console.error('Error sending notification:', response.error);
+      } else {
+        console.log('Notification sent successfully');
+      }
+    } catch (err) {
+      console.error('Error sending notification:', err);
+    } finally {
+      setIsSendingNotification(false);
+    }
+  }, [telegramId]);
+
   const addSwipe = useCallback(async (projectId: string, projectCode: string, action: SwipeAction) => {
     const newRecord: SwipeRecord = {
       id: `local_${Date.now()}`,
@@ -146,11 +169,16 @@ export const useProjectSwipes = () => {
           const filtered = prev.filter(s => s.projectId !== projectId);
           return [dbRecord, ...filtered];
         });
+
+        // Send notification for "respond" action
+        if (action === 'respond') {
+          sendNotification(projectId, projectCode);
+        }
       }
     } catch (err) {
       console.error('Error saving swipe:', err);
     }
-  }, [telegramId, useLocalStorage, saveToLocalStorage]);
+  }, [telegramId, useLocalStorage, saveToLocalStorage, sendNotification]);
 
   const removeSwipe = useCallback(async (projectId: string) => {
     // If no telegram ID, use localStorage
@@ -219,6 +247,7 @@ export const useProjectSwipes = () => {
   return {
     swipeHistory,
     isLoading,
+    isSendingNotification,
     addSwipe,
     removeSwipe,
     clearHistory,

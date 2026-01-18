@@ -66,46 +66,51 @@ serve(async (req: Request): Promise<Response> => {
       .single();
 
     // Build user info
-    const firstName = telegramProfile?.first_name || crmData?.telegram_name?.split(" ")[0] || "";
-    const lastName = telegramProfile?.last_name || "";
-    const fullName = `${firstName} ${lastName}`.trim() || "Не указано";
     const username = telegramProfile?.username;
     const userCode = crmData?.code || "—";
+    const fullName = crmData?.telegram_name || "";
+    const phone = crmData?.phone || "";
 
     // Build Telegram link
     const telegramLink = username 
       ? `https://t.me/${username}`
       : `tg://user?id=${telegramId}`;
 
-    // Build profile and project links
-    const domain = "https://rentrophr.lovable.app";
+    // Build profile and project links with production domain
+    const domain = "https://hr.rent-rop.com";
     const profileLink = `${domain}/${telegramId}`;
     const projectLink = `${domain}/projects/${projectCode}`;
 
-    // Build message
+    // Extract project name from description (first line or before newline)
+    const projectName = project.description?.split('\n')[0]?.replace(/^Проект:\s*/i, '').trim() || project.project_code;
+
+    // Extract @username from manager_link and dpr_link
+    const extractUsername = (link: string | null): string => {
+      if (!link) return "Не указан";
+      const match = link.match(/@(\w+)/);
+      return match ? `@${match[1]}` : link;
+    };
+
+    const managerUsername = extractUsername(project.manager_link);
+    const dprUsername = extractUsername(project.dpr_link);
+
+    // Build message in new format
+    const phoneSection = phone ? `${phone}\n` : "";
+    
     const message = `👍ОТКЛИК НА ПРОЕКТ👍
-
-${project.description || project.project_code}
-
+Проект: ${projectName} ${project.project_code}
 ${project.region || "Регион не указан"}
 
-Код проекта: ${project.project_code}
-
 Контакты:
-
-${fullName}, код: ${userCode}, @${username || telegramId}
-
-${telegramLink}
-
-Проект: ${projectLink}
-
+${fullName}
+${fullName} ${userCode} ${telegramLink}
+${phoneSection}
+Ссылка на Проект: ${projectLink}
 Профиль кандидата: ${profileLink}
+Менеджер проекта: ${managerUsername}
+ДПР: ${dprUsername}`;
 
-Менеджер проекта: ${project.manager_link || "Не указан"}
-
-ДПР: ${project.dpr_link || "Не указан"}`;
-
-    // Send to Telegram
+    // Send to Telegram with link preview enabled
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
     const telegramResponse = await fetch(telegramUrl, {
       method: "POST",
@@ -114,7 +119,7 @@ ${telegramLink}
         chat_id: chatId,
         text: message,
         parse_mode: "HTML",
-        disable_web_page_preview: true,
+        disable_web_page_preview: false,
       }),
     });
 

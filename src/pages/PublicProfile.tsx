@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { User, ArrowLeft, ExternalLink, Briefcase, Phone, Calendar, FileText, Video, GraduationCap, CheckCircle2, Hourglass, MessageCircle, ChevronDown, RefreshCw, Languages, Send } from 'lucide-react';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import MobileNavbar from '@/components/MobileNavbar';
+import MobileLayout from '@/components/layout/MobileLayout';
+import PageTransition from '@/components/PageTransition';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { Button } from '@/components/ui/button';
@@ -548,34 +549,43 @@ const PublicProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+      <div className="min-h-screen hero-gradient">
+        <MobileLayout>
+          <PageTransition>
+            <main className={showMobileNav ? "pt-32 pb-24" : "pt-24 pb-16"}>
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+              </div>
+            </main>
+          </PageTransition>
+        </MobileLayout>
       </div>
     );
   }
 
   if (error || (!profileData && !crmData)) {
     return (
-      <div 
-        className="min-h-screen relative z-10"
-        style={{ background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)' }}
-      >
-        <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-            <h1 className="text-lg font-semibold text-white">{l.title}</h1>
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-4 py-20 text-center">
-          <User className="w-24 h-24 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white">{l.notFound}</h2>
-        </div>
+      <div className="min-h-screen hero-gradient">
+        <MobileLayout>
+          <PageTransition>
+            <main className={showMobileNav ? "pt-32 pb-24" : "pt-24 pb-16"}>
+              <div className="container mx-auto px-4">
+                <button
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {l.back}
+                </button>
+                
+                <div className="text-center py-12">
+                  <User className="w-24 h-24 text-muted-foreground mx-auto mb-4" />
+                  <h2 className="text-xl font-bold text-white">{l.notFound}</h2>
+                </div>
+              </div>
+            </main>
+          </PageTransition>
+        </MobileLayout>
       </div>
     );
   }
@@ -601,24 +611,20 @@ const PublicProfile = () => {
   const progressPercent = (passedCount / tests.length) * 100;
 
   return (
-    <div 
-      className="min-h-screen relative z-10"
-      style={{ background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)' }}
-    >
-      {/* Header */}
-      <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <h1 className="text-lg font-semibold text-white">{l.title}</h1>
-        </div>
-      </div>
-
-      <div className={`container mx-auto px-4 py-8 max-w-md space-y-6 ${showMobileNav ? 'pb-24' : ''}`}>
+    <div className="min-h-screen hero-gradient">
+      <MobileLayout>
+        <PageTransition>
+          <main className={showMobileNav ? "pt-32 pb-24" : "pt-24 pb-16"}>
+            <div className="container mx-auto px-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-6"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {l.back}
+              </button>
+              
+              <div className="max-w-md mx-auto space-y-6">
         {/* Profile Photo */}
         <div className="relative mt-4" style={{ padding: '0 5%' }}>
           <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-4 border-accent/30 bg-muted flex items-center justify-center">
@@ -882,9 +888,11 @@ const PublicProfile = () => {
             <p className="text-white/80 text-sm">{crmData.available_skills}</p>
           </div>
         )}
-      </div>
-
-      {showMobileNav && <MobileNavbar />}
+              </div>
+            </div>
+          </main>
+        </PageTransition>
+      </MobileLayout>
 
       {/* Script Dialog */}
       <Dialog open={showScriptDialog} onOpenChange={setShowScriptDialog}>

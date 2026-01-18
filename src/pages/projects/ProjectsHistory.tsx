@@ -13,6 +13,8 @@ import { useProjects, Project } from '@/hooks/useProjects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import ProjectAccessModal from '@/components/projects/ProjectAccessModal';
 
 const actionConfig: Record<SwipeAction, { icon: typeof Star; directionIcon: typeof ChevronUp; color: string; bgColor: string; labelKey: string }> = {
   like: { icon: Star, directionIcon: ChevronUp, color: 'text-accent', bgColor: 'bg-accent/20', labelKey: 'projects.action.like' },
@@ -26,9 +28,11 @@ interface ProjectDetailModalProps {
   project: Project | null;
   onClose: () => void;
   onChangeAction: (action: SwipeAction) => void;
+  hasProjectAccess: boolean;
+  onAccessDenied: () => void;
 }
 
-const ProjectDetailModal = ({ record, project, onClose, onChangeAction }: ProjectDetailModalProps) => {
+const ProjectDetailModal = ({ record, project, onClose, onChangeAction, hasProjectAccess, onAccessDenied }: ProjectDetailModalProps) => {
   const { t } = useLanguage();
   
   if (!record) return null;
@@ -49,7 +53,18 @@ const ProjectDetailModal = ({ record, project, onClose, onChangeAction }: Projec
   const { title, details } = parseDescription(project?.description || null);
 
   const handleActionChange = (action: SwipeAction) => {
+    if (action === 'respond' && !hasProjectAccess) {
+      onAccessDenied();
+      return;
+    }
     onChangeAction(action);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (!hasProjectAccess) {
+      e.preventDefault();
+      onAccessDenied();
+    }
   };
 
   return (
@@ -100,17 +115,26 @@ const ProjectDetailModal = ({ record, project, onClose, onChangeAction }: Projec
                   variant="gold"
                   size="sm"
                   className="flex-1"
-                  asChild
+                  onClick={handleLinkClick}
+                  asChild={hasProjectAccess}
                 >
-                  <a
-                    href={project.manager_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    {t('projects.manager')}
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </a>
+                  {hasProjectAccess ? (
+                    <a
+                      href={project.manager_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      {t('projects.manager')}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </a>
+                  ) : (
+                    <>
+                      <User className="w-4 h-4 mr-2" />
+                      {t('projects.manager')}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </>
+                  )}
                 </Button>
               )}
               {project.dpr_link && (
@@ -118,17 +142,26 @@ const ProjectDetailModal = ({ record, project, onClose, onChangeAction }: Projec
                   variant="gold"
                   size="sm"
                   className="flex-1"
-                  asChild
+                  onClick={handleLinkClick}
+                  asChild={hasProjectAccess}
                 >
-                  <a
-                    href={project.dpr_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    {t('projects.dpr')}
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </a>
+                  {hasProjectAccess ? (
+                    <a
+                      href={project.dpr_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      {t('projects.dpr')}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </a>
+                  ) : (
+                    <>
+                      <Users className="w-4 h-4 mr-2" />
+                      {t('projects.dpr')}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </>
+                  )}
                 </Button>
               )}
             </div>
@@ -245,7 +278,9 @@ const ProjectsHistory = () => {
   const showMobileNav = isTelegram || isMobile;
   const { swipeHistory, getSwipesByAction, removeSwipe, clearHistory, addSwipe } = useProjectSwipes();
   const { data: projects = [] } = useProjects();
+  const { hasProjectAccess, progressStages, completedCount, totalCount, progressPercent } = useProjectAccess();
   const [selectedRecord, setSelectedRecord] = useState<SwipeRecord | null>(null);
+  const [showAccessModal, setShowAccessModal] = useState(false);
 
   const tabs: SwipeAction[] = ['like', 'respond', 'pass', 'skip'];
 
@@ -394,6 +429,21 @@ const ProjectsHistory = () => {
         project={selectedRecord ? getProject(selectedRecord.projectId) : null}
         onClose={() => setSelectedRecord(null)}
         onChangeAction={handleChangeAction}
+        hasProjectAccess={hasProjectAccess}
+        onAccessDenied={() => {
+          setSelectedRecord(null);
+          setShowAccessModal(true);
+        }}
+      />
+
+      {/* Access denied modal */}
+      <ProjectAccessModal
+        open={showAccessModal}
+        onClose={() => setShowAccessModal(false)}
+        progressStages={progressStages}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        progressPercent={progressPercent}
       />
     </div>
   );

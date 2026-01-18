@@ -9,6 +9,8 @@ import SwipeControls from './SwipeControls';
 import { Project } from '@/hooks/useProjects';
 import { useProjectSwipes, SwipeAction } from '@/hooks/useProjectSwipes';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import ProjectAccessModal from './ProjectAccessModal';
 
 interface ProjectStackProps {
   projects: Project[];
@@ -18,9 +20,11 @@ interface ProjectStackProps {
 const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
   const { t } = useLanguage();
   const { addSwipe, hasSwipedProject, swipeHistory, clearHistory, isLoading: swipesLoading } = useProjectSwipes();
+  const { hasProjectAccess, progressStages, completedCount, totalCount, progressPercent } = useProjectAccess();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHints, setShowHints] = useState(false);
   const [exitDirection, setExitDirection] = useState<{ x: number; y: number } | null>(null);
+  const [showAccessModal, setShowAccessModal] = useState(false);
 
   // Filter out already swiped projects - memoize with stable dependency
   const availableProjects = useMemo(() => {
@@ -47,6 +51,12 @@ const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
 
   const handleSwipe = (action: SwipeAction) => {
     if (!currentProject) return;
+
+    // Check access for respond action
+    if (action === 'respond' && !hasProjectAccess) {
+      setShowAccessModal(true);
+      return;
+    }
 
     // Set exit direction for animation
     const directions: Record<SwipeAction, { x: number; y: number }> = {
@@ -126,83 +136,94 @@ const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
   }
 
   return (
-    <div className="relative">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-white/60 text-sm">
-          {currentIndex + 1} / {availableProjects.length}
+    <>
+      <div className="relative">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-white/60 text-sm">
+            {currentIndex + 1} / {availableProjects.length}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowHints(true)}
+              className="text-white/60 hover:text-accent"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="text-white/60 hover:text-accent"
+            >
+              <Link to="/projects/history">
+                <History className="w-5 h-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowHints(true)}
-            className="text-white/60 hover:text-accent"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="text-white/60 hover:text-accent"
-          >
-            <Link to="/projects/history">
-              <History className="w-5 h-5" />
-            </Link>
-          </Button>
+
+        {/* Card stack */}
+        <div className="relative h-[500px] w-full max-w-md mx-auto">
+          <AnimatePresence>
+            {/* Background card (next one) */}
+            {nextProject && (
+              <motion.div
+                key={nextProject.id + '-bg'}
+                initial={{ scale: 0.95, opacity: 0.5 }}
+                animate={{ scale: 0.95, opacity: 0.5 }}
+                className="absolute inset-0"
+              >
+                <SwipeCard
+                  project={nextProject}
+                  onSwipe={() => {}}
+                  isTop={false}
+                />
+              </motion.div>
+            )}
+
+            {/* Current card */}
+            {currentProject && (
+              <motion.div
+                key={currentProject.id}
+                initial={{ scale: 1, x: 0, y: 0 }}
+                animate={{ scale: 1, x: 0, y: 0 }}
+                exit={exitDirection ? { 
+                  x: exitDirection.x, 
+                  y: exitDirection.y, 
+                  opacity: 0,
+                  transition: { duration: 0.2 }
+                } : undefined}
+                className="absolute inset-0"
+              >
+                <SwipeCard
+                  project={currentProject}
+                  onSwipe={handleSwipe}
+                  isTop={true}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Hints overlay */}
+          <SwipeHints show={showHints} onClose={() => setShowHints(false)} />
         </div>
+
+        {/* Controls */}
+        <SwipeControls onSwipe={handleSwipe} disabled={!currentProject} />
       </div>
 
-      {/* Card stack */}
-      <div className="relative h-[500px] w-full max-w-md mx-auto">
-        <AnimatePresence>
-          {/* Background card (next one) */}
-          {nextProject && (
-            <motion.div
-              key={nextProject.id + '-bg'}
-              initial={{ scale: 0.95, opacity: 0.5 }}
-              animate={{ scale: 0.95, opacity: 0.5 }}
-              className="absolute inset-0"
-            >
-              <SwipeCard
-                project={nextProject}
-                onSwipe={() => {}}
-                isTop={false}
-              />
-            </motion.div>
-          )}
-
-          {/* Current card */}
-          {currentProject && (
-            <motion.div
-              key={currentProject.id}
-              initial={{ scale: 1, x: 0, y: 0 }}
-              animate={{ scale: 1, x: 0, y: 0 }}
-              exit={exitDirection ? { 
-                x: exitDirection.x, 
-                y: exitDirection.y, 
-                opacity: 0,
-                transition: { duration: 0.2 }
-              } : undefined}
-              className="absolute inset-0"
-            >
-              <SwipeCard
-                project={currentProject}
-                onSwipe={handleSwipe}
-                isTop={true}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Hints overlay */}
-        <SwipeHints show={showHints} onClose={() => setShowHints(false)} />
-      </div>
-
-      {/* Controls */}
-      <SwipeControls onSwipe={handleSwipe} disabled={!currentProject} />
-    </div>
+      <ProjectAccessModal
+        open={showAccessModal}
+        onClose={() => setShowAccessModal(false)}
+        progressStages={progressStages}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        progressPercent={progressPercent}
+      />
+    </>
   );
 };
 

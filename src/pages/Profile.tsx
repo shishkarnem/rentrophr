@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature, Video, Copy, Check, FileDown, Languages } from 'lucide-react';
+import { User, Camera, Save, ArrowLeft, Edit2, FileText, Briefcase, CheckCircle2, ExternalLink, ChevronDown, X, MessageCircle, Settings, RefreshCw, FileCheck, GraduationCap, Hourglass, FileSignature, Video, Copy, Check, FileDown, Languages, Share2 } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -662,6 +662,40 @@ const Profile = () => {
             </h2>
             {profile?.username && (
               <p className="text-muted-foreground">@{profile.username}</p>
+            )}
+            
+            {/* Share Profile Button */}
+            {telegramId && (
+              <Button
+                variant="outline"
+                className="mt-4 gap-2 border-accent/50 text-accent hover:bg-accent/10"
+                onClick={async () => {
+                  const shareUrl = `https://hr.rent-rop.com/${telegramId}`;
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({
+                        title: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Profile',
+                        url: shareUrl,
+                      });
+                    } else {
+                      await navigator.clipboard.writeText(shareUrl);
+                      toast.success(
+                        language === 'ru' ? 'Ссылка скопирована!' :
+                        language === 'kz' ? 'Сілтеме көшірілді!' :
+                        'Link copied!'
+                      );
+                    }
+                  } catch (error) {
+                    // User cancelled sharing or error occurred
+                    console.log('Share cancelled or failed:', error);
+                  }
+                }}
+              >
+                <Share2 className="w-4 h-4" />
+                {language === 'ru' ? 'Поделиться профилем' :
+                 language === 'kz' ? 'Профильді бөлісу' :
+                 'Share Profile'}
+              </Button>
             )}
           </div>
         </div>

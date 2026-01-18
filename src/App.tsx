@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Wiki from "./pages/Wiki";
-import ProjectsPage from "./pages/ProjectsPage";
+import ProjectsSwipe from "./pages/projects/ProjectsSwipe";
 import AdminCRM from "./pages/AdminCRM";
 import AIAssistant from "./components/AIAssistant";
 import P5Background from "./components/P5Background";
@@ -89,7 +89,7 @@ const AppContent = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin/crm" element={<AdminCRM />} />
         <Route path="/wiki" element={<Wiki />} />
-        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects" element={<ProjectsSwipe />} />
         
         {/* Work routes */}
         <Route path="/work" element={<WorkIndex />} />

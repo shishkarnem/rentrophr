@@ -27,9 +27,9 @@ const ProjectsSwipe = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                <Link to="/conditions" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
+                <Link to="/conditions/projects" className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors mb-8">
                   <ArrowLeft className="w-4 h-4" />
-                  {t('conditions.backToConditions')}
+                  {t('projects.backToProjects') || 'Назад к проектам'}
                 </Link>
               </motion.div>
               

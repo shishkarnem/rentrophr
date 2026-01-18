@@ -33,6 +33,9 @@ import Projects from "./pages/conditions/Projects";
 import Registration from "./pages/conditions/Registration";
 import Payments from "./pages/conditions/Payments";
 
+// Projects pages
+import ProjectsHistory from "./pages/projects/ProjectsHistory";
+
 // Motivation sub-pages
 import Fix from "./pages/conditions/motivation/Fix";
 import Variable from "./pages/conditions/motivation/Variable";
@@ -109,6 +112,9 @@ const AppContent = () => {
         <Route path="/conditions/projects" element={<Projects />} />
         <Route path="/conditions/registration" element={<Registration />} />
         <Route path="/conditions/payments" element={<Payments />} />
+        
+        {/* Projects history */}
+        <Route path="/projects/history" element={<ProjectsHistory />} />
         
         {/* Interview routes */}
         <Route path="/interview" element={<InterviewIntro />} />

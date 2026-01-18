@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const Projects = () => {
+const ProjectsSwipe = () => {
   const { t } = useLanguage();
   const { isTelegram } = useTelegram();
   const isMobile = useIsMobile();
@@ -53,4 +53,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default ProjectsSwipe;

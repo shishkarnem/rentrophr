@@ -17,17 +17,18 @@ interface ProjectStackProps {
 
 const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
   const { t } = useLanguage();
-  const { addSwipe, hasSwipedProject, swipeHistory, clearHistory } = useProjectSwipes();
+  const { addSwipe, hasSwipedProject, swipeHistory, clearHistory, isLoading: swipesLoading } = useProjectSwipes();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHints, setShowHints] = useState(false);
   const [exitDirection, setExitDirection] = useState<{ x: number; y: number } | null>(null);
 
-  // Filter out already swiped projects
+  // Filter out already swiped projects - memoize with stable dependency
   const availableProjects = useMemo(() => {
+    if (swipesLoading) return projects; // Return all projects while loading swipes
     return projects.filter(p => !hasSwipedProject(p.id));
-  }, [projects, hasSwipedProject]);
+  }, [projects, hasSwipedProject, swipesLoading]);
 
-  // Reset index when projects change
+  // Reset index when available projects change
   useEffect(() => {
     setCurrentIndex(0);
   }, [availableProjects.length]);
@@ -35,11 +36,11 @@ const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
   // Check if hints were shown before
   useEffect(() => {
     const hintsShown = localStorage.getItem('project_swipe_hints_shown');
-    if (!hintsShown && availableProjects.length > 0) {
+    if (!hintsShown && availableProjects.length > 0 && !swipesLoading) {
       setShowHints(true);
       localStorage.setItem('project_swipe_hints_shown', 'true');
     }
-  }, [availableProjects.length]);
+  }, [availableProjects.length, swipesLoading]);
 
   const currentProject = availableProjects[currentIndex];
   const nextProject = availableProjects[currentIndex + 1];
@@ -71,7 +72,8 @@ const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
     setCurrentIndex(0);
   };
 
-  if (isLoading) {
+  // Show loading state
+  if (isLoading || swipesLoading) {
     return (
       <div className="flex items-center justify-center h-[500px]">
         <motion.div

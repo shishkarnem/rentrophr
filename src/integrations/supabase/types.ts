@@ -358,6 +358,54 @@ export type Database = {
         }
         Relationships: []
       }
+      projects_data: {
+        Row: {
+          availability: string | null
+          created_at: string
+          description: string | null
+          dpr: string | null
+          dpr_link: string | null
+          id: string
+          manager_link: string | null
+          project_code: string
+          project_manager: string | null
+          project_status: string | null
+          region: string | null
+          row_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          description?: string | null
+          dpr?: string | null
+          dpr_link?: string | null
+          id?: string
+          manager_link?: string | null
+          project_code: string
+          project_manager?: string | null
+          project_status?: string | null
+          region?: string | null
+          row_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          description?: string | null
+          dpr?: string | null
+          dpr_link?: string | null
+          id?: string
+          manager_link?: string | null
+          project_code?: string
+          project_manager?: string | null
+          project_status?: string | null
+          region?: string | null
+          row_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       telegram_profiles: {
         Row: {
           created_at: string

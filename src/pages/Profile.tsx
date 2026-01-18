@@ -670,7 +670,7 @@ const Profile = () => {
                 variant="outline"
                 className="mt-4 gap-2 border-accent/50 text-accent hover:bg-accent/10"
                 onClick={async () => {
-                  const shareUrl = `https://hr.rent-rop.com/${telegramId}`;
+                  const shareUrl = `https://rentrophr.lovable.app/${telegramId}`;
                   try {
                     if (navigator.share) {
                       await navigator.share({

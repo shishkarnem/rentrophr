@@ -67,6 +67,7 @@ import ContractFormIPKZ from "./pages/contract/ContractFormIPKZ";
 
 // Video Card page
 import VideoCardIntro from "./pages/video-card/VideoCardIntro";
+import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/:telegramId" element={<PublicProfile />} />
         <Route path="/admin/crm" element={<AdminCRM />} />
         <Route path="/wiki" element={<Wiki />} />
         <Route path="/projects" element={<ProjectsSwipe />} />

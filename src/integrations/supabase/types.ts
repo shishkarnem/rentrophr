@@ -361,6 +361,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          template_key: string
+          template_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          template_key: string
+          template_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          template_key?: string
+          template_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       project_swipes: {
         Row: {
           action: string

@@ -65,6 +65,13 @@ serve(async (req: Request): Promise<Response> => {
       .eq("telegram_id", telegramId)
       .single();
 
+    // Fetch message template
+    const { data: templateData } = await supabase
+      .from("notification_templates")
+      .select("template_text")
+      .eq("template_key", "project_response")
+      .single();
+
     // Build user info
     const username = telegramProfile?.username;
     const userCode = crmData?.code || "—";
@@ -94,12 +101,32 @@ serve(async (req: Request): Promise<Response> => {
     const managerUsername = extractUsername(project.manager_link);
     const dprUsername = extractUsername(project.dpr_link);
 
-    // Build message in new format
+    // Build message using template or default
     const phoneSection = phone ? `${phone}\n` : "";
+    const region = project.region || "Регион не указан";
     
-    const message = `👍ОТКЛИК НА ПРОЕКТ👍
+    let message: string;
+    
+    if (templateData?.template_text) {
+      // Use template from database with variable replacement
+      message = templateData.template_text
+        .replace(/\{\{project_name\}\}/g, projectName)
+        .replace(/\{\{project_code\}\}/g, project.project_code)
+        .replace(/\{\{region\}\}/g, region)
+        .replace(/\{\{full_name\}\}/g, fullName)
+        .replace(/\{\{user_code\}\}/g, userCode)
+        .replace(/\{\{telegram_link\}\}/g, telegramLink)
+        .replace(/\{\{phone_section\}\}/g, phoneSection)
+        .replace(/\{\{project_link\}\}/g, projectLink)
+        .replace(/\{\{profile_link\}\}/g, profileLink)
+        .replace(/\{\{manager_username\}\}/g, managerUsername)
+        .replace(/\{\{dpr_username\}\}/g, dprUsername)
+        .replace(/\{\{phone\}\}/g, phone);
+    } else {
+      // Default message format
+      message = `👍ОТКЛИК НА ПРОЕКТ👍
 Проект: ${projectName} ${project.project_code}
-${project.region || "Регион не указан"}
+${region}
 
 Контакты:
 ${fullName}
@@ -109,6 +136,7 @@ ${phoneSection}
 Профиль кандидата: ${profileLink}
 Менеджер проекта: ${managerUsername}
 ДПР: ${dprUsername}`;
+    }
 
     // Send to Telegram with link preview enabled
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;

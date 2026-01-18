@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Check, X, SkipForward } from 'lucide-react';
 import { SwipeAction } from '@/hooks/useProjectSwipes';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import ProjectAccessModal from './ProjectAccessModal';
 
 interface SwipeControlsProps {
   onSwipe: (action: SwipeAction) => void;
@@ -8,6 +11,17 @@ interface SwipeControlsProps {
 }
 
 const SwipeControls = ({ onSwipe, disabled }: SwipeControlsProps) => {
+  const { hasProjectAccess, progressStages, completedCount, totalCount, progressPercent } = useProjectAccess();
+  const [showAccessModal, setShowAccessModal] = useState(false);
+
+  const handleSwipe = (action: SwipeAction) => {
+    if (action === 'respond' && !hasProjectAccess) {
+      setShowAccessModal(true);
+      return;
+    }
+    onSwipe(action);
+  };
+
   const buttons = [
     { action: 'pass' as SwipeAction, icon: X, color: 'bg-red-500/20 hover:bg-red-500/40 text-red-400', label: 'Не подходит' },
     { action: 'skip' as SwipeAction, icon: SkipForward, color: 'bg-white/10 hover:bg-white/20 text-white/60', label: 'Пропустить' },
@@ -16,21 +30,32 @@ const SwipeControls = ({ onSwipe, disabled }: SwipeControlsProps) => {
   ];
 
   return (
-    <div className="flex justify-center gap-4 mt-4">
-      {buttons.map((btn) => (
-        <motion.button
-          key={btn.action}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onSwipe(btn.action)}
-          disabled={disabled}
-          className={`w-14 h-14 rounded-full ${btn.color} flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-          title={btn.label}
-        >
-          <btn.icon className="w-6 h-6" />
-        </motion.button>
-      ))}
-    </div>
+    <>
+      <div className="flex justify-center gap-4 mt-4">
+        {buttons.map((btn) => (
+          <motion.button
+            key={btn.action}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleSwipe(btn.action)}
+            disabled={disabled}
+            className={`w-14 h-14 rounded-full ${btn.color} flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+            title={btn.label}
+          >
+            <btn.icon className="w-6 h-6" />
+          </motion.button>
+        ))}
+      </div>
+
+      <ProjectAccessModal
+        open={showAccessModal}
+        onClose={() => setShowAccessModal(false)}
+        progressStages={progressStages}
+        completedCount={completedCount}
+        totalCount={totalCount}
+        progressPercent={progressPercent}
+      />
+    </>
   );
 };
 

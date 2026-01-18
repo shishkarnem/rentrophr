@@ -98,6 +98,7 @@ export type Database = {
           phone: string | null
           photo_link: string | null
           portal: string | null
+          profile_link: string | null
           progress: string | null
           projects_in_work: number | null
           projects_mailing: string | null
@@ -184,6 +185,7 @@ export type Database = {
           phone?: string | null
           photo_link?: string | null
           portal?: string | null
+          profile_link?: string | null
           progress?: string | null
           projects_in_work?: number | null
           projects_mailing?: string | null
@@ -270,6 +272,7 @@ export type Database = {
           phone?: string | null
           photo_link?: string | null
           portal?: string | null
+          profile_link?: string | null
           progress?: string | null
           projects_in_work?: number | null
           projects_mailing?: string | null

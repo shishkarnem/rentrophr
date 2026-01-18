@@ -31,66 +31,130 @@ const Projects = () => {
                 </Link>
               </motion.div>
               
-              <div className="max-w-md mx-auto text-center">
+              <div className="max-w-2xl mx-auto">
                 <motion.h1 
-                  className="text-3xl sm:text-4xl font-black text-white mb-6"
+                  className="text-3xl sm:text-4xl font-black text-white mb-6 text-center"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <span className="text-gradient-gold">{t('projects.selection') || 'Проекты'}</span>
+                  <span className="text-gradient-gold">{t('projects.selectionTitle')}</span>
                 </motion.h1>
 
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-white/70 mb-8 leading-relaxed"
+                {/* Project Selection Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="glass-card rounded-2xl p-6 mb-6"
                 >
-                  {t('projects.description') || 'Проекты можно посмотреть в телеграм канале или выбрать в нашем приложении'}
-                </motion.p>
+                  <p className="text-white/80 leading-relaxed mb-4">
+                    {t('projects.selectionText1')}
+                  </p>
+                  
+                  <a
+                    href="https://t.me/rentrop_project"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mb-4"
+                  >
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-gold to-gold/80 hover:from-gold/90 hover:to-gold/70 text-primary font-semibold rounded-xl transition-all hover:scale-105 group"
+                    >
+                      <FolderKanban className="w-4 h-4 mr-2" />
+                      {t('projects.telegramChannel')}
+                      <ExternalLink className="w-3 h-3 ml-2 opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Button>
+                  </a>
+                  
+                  <p className="text-white/80 leading-relaxed mb-4">
+                    {t('projects.selectionText2')}
+                  </p>
+                  
+                  <p className="text-white/80 leading-relaxed">
+                    {t('projects.selectionText3')}
+                  </p>
+                </motion.div>
+
+                {/* Team Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="glass-card rounded-2xl p-6 mb-6"
+                >
+                  <h2 className="text-xl font-bold text-gold mb-4">{t('projects.teamTitle')}</h2>
+                  <p className="text-white/80 leading-relaxed mb-4">
+                    {t('projects.teamIntro')}
+                  </p>
+                  <ul className="space-y-3 text-white/80">
+                    <li className="flex gap-2">
+                      <span className="text-gold font-bold">1.</span>
+                      <span>{t('projects.teamRop')}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-gold font-bold">2.</span>
+                      <span>{t('projects.teamDpr')}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-gold font-bold">3.</span>
+                      <span>{t('projects.teamManager')}</span>
+                    </li>
+                  </ul>
+                </motion.div>
+
+                {/* Video Card Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="glass-card rounded-2xl p-6 mb-6"
+                >
+                  <h2 className="text-xl font-bold text-gold mb-4">{t('projects.videoCardTitle')}</h2>
+                  <p className="text-white/80 leading-relaxed mb-4">
+                    {t('projects.videoCardText')}
+                  </p>
+                  <p className="text-white/80 leading-relaxed mb-3">
+                    {t('projects.videoCardInstruction')}
+                  </p>
+                  <ul className="space-y-2 text-white/80 list-disc list-inside ml-2">
+                    <li>{t('projects.videoCardStep1')}</li>
+                    <li>{t('projects.videoCardStep2')}</li>
+                    <li>{t('projects.videoCardStep3')}</li>
+                  </ul>
+                </motion.div>
+
+                {/* Important Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="glass-card rounded-2xl p-6 mb-8 border border-gold/20"
+                >
+                  <h2 className="text-xl font-bold text-gold mb-4">{t('projects.importantTitle')}</h2>
+                  <p className="text-white/80 leading-relaxed">
+                    {t('projects.importantText')}
+                  </p>
+                </motion.div>
 
                 {/* Swipe Projects Button */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="mb-6"
+                  transition={{ delay: 0.6 }}
+                  className="text-center"
                 >
                   <Link to="/projects">
                     <Button
                       size="lg"
-                      className="w-full bg-gradient-to-r from-gold to-gold/80 hover:from-gold/90 hover:to-gold/70 text-primary font-semibold px-8 py-6 rounded-2xl shadow-lg shadow-gold/20 transition-all hover:scale-105 group"
+                      className="w-full sm:w-auto bg-gradient-to-r from-gold to-gold/80 hover:from-gold/90 hover:to-gold/70 text-primary font-semibold px-8 py-6 rounded-2xl shadow-lg shadow-gold/20 transition-all hover:scale-105 group"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
-                      {t('projects.swipeProjects') || 'Выбрать проект'}
+                      {t('projects.swipeProjects')}
                       <FolderKanban className="w-4 h-4 ml-2 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
-                </motion.div>
-
-                {/* Telegram Channel Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <a
-                    href="https://t.me/rentrop_project"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block w-full"
-                  >
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="w-full border-gold/30 text-gold hover:bg-gold/10 font-semibold px-8 py-6 rounded-2xl transition-all hover:scale-105 group"
-                    >
-                      <FolderKanban className="w-5 h-5 mr-2" />
-                      {t('projects.viewInTelegram') || 'Смотреть в Telegram'}
-                      <ExternalLink className="w-4 h-4 ml-2 opacity-70 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </Button>
-                  </a>
                 </motion.div>
               </div>
             </div>

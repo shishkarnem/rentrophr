@@ -358,6 +358,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_swipes: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          project_code: string
+          project_id: string
+          telegram_id: number
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          project_code: string
+          project_id: string
+          telegram_id: number
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          project_code?: string
+          project_id?: string
+          telegram_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_swipes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects_data: {
         Row: {
           availability: string | null

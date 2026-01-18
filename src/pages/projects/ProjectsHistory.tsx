@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Star, Check, X, SkipForward, Trash2, RefreshCcw, ChevronUp, ChevronRight, ChevronLeft, ChevronDown, ExternalLink, User, Users, MapPin, Briefcase } from 'lucide-react';
+import { ArrowLeft, Star, Check, X, SkipForward, Trash2, RefreshCcw, ChevronUp, ChevronRight, ChevronLeft, ChevronDown, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileLayout from '@/components/layout/MobileLayout';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useProjectSwipes, SwipeAction, SwipeRecord } from '@/hooks/useProjectSwipes';
+import { useProjects } from '@/hooks/useProjects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,12 +23,11 @@ const actionConfig: Record<SwipeAction, { icon: typeof Star; directionIcon: type
 
 interface ProjectDetailModalProps {
   record: SwipeRecord | null;
+  projectDescription?: string;
   onClose: () => void;
 }
 
-const ProjectDetailModal = ({ record, onClose }: ProjectDetailModalProps) => {
-  const { t } = useLanguage();
-  
+const ProjectDetailModal = ({ record, projectDescription, onClose }: ProjectDetailModalProps) => {
   if (!record) return null;
 
   const config = actionConfig[record.action];
@@ -43,7 +43,7 @@ const ProjectDetailModal = ({ record, onClose }: ProjectDetailModalProps) => {
     return { title, details };
   };
 
-  const { title, details } = parseDescription(record.description);
+  const { title, details } = parseDescription(projectDescription || null);
 
   return (
     <Dialog open={!!record} onOpenChange={onClose}>
@@ -66,7 +66,7 @@ const ProjectDetailModal = ({ record, onClose }: ProjectDetailModalProps) => {
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-white">{title || 'Проект'}</h3>
+          <h3 className="text-xl font-bold text-white">{title || `Проект #${record.projectCode}`}</h3>
 
           {/* Description */}
           {details && (
@@ -93,7 +93,14 @@ const ProjectDetailModal = ({ record, onClose }: ProjectDetailModalProps) => {
   );
 };
 
-const HistoryItem = ({ record, onRemove, onClick }: { record: SwipeRecord; onRemove: () => void; onClick: () => void }) => {
+interface HistoryItemProps {
+  record: SwipeRecord;
+  projectTitle?: string;
+  onRemove: () => void;
+  onClick: () => void;
+}
+
+const HistoryItem = ({ record, projectTitle, onRemove, onClick }: HistoryItemProps) => {
   const config = actionConfig[record.action];
   const Icon = config.icon;
   const DirectionIcon = config.directionIcon;
@@ -120,7 +127,7 @@ const HistoryItem = ({ record, onRemove, onClick }: { record: SwipeRecord; onRem
               <span className="text-accent/70 text-xs">#{record.projectCode}</span>
             </div>
             <p className="text-white text-sm font-medium truncate">
-              {record.description?.split('\n')[0]?.replace('Проект:', '').trim() || 'Проект'}
+              {projectTitle || `Проект #${record.projectCode}`}
             </p>
             <p className="text-white/40 text-xs mt-1">
               {new Date(record.timestamp).toLocaleDateString('ru-RU', {
@@ -154,9 +161,22 @@ const ProjectsHistory = () => {
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   const { swipeHistory, getSwipesByAction, removeSwipe, clearHistory } = useProjectSwipes();
+  const { data: projects = [] } = useProjects();
   const [selectedRecord, setSelectedRecord] = useState<SwipeRecord | null>(null);
 
   const tabs: SwipeAction[] = ['like', 'respond', 'pass', 'skip'];
+
+  // Helper to get project description by ID
+  const getProjectDescription = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    return project?.description || null;
+  };
+
+  const getProjectTitle = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project?.description) return null;
+    return project.description.split('\n')[0]?.replace('Проект:', '').trim() || null;
+  };
 
   return (
     <div className="min-h-screen hero-gradient">
@@ -257,11 +277,12 @@ const ProjectsHistory = () => {
                             </p>
                           ) : (
                             getSwipesByAction(action)
-                              .sort((a, b) => b.timestamp - a.timestamp)
+                              .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                               .map((record) => (
                                 <HistoryItem
                                   key={record.projectId}
                                   record={record}
+                                  projectTitle={getProjectTitle(record.projectId) || undefined}
                                   onRemove={() => removeSwipe(record.projectId)}
                                   onClick={() => setSelectedRecord(record)}
                                 />
@@ -281,6 +302,7 @@ const ProjectsHistory = () => {
       {/* Project detail modal */}
       <ProjectDetailModal
         record={selectedRecord}
+        projectDescription={selectedRecord ? getProjectDescription(selectedRecord.projectId) || undefined : undefined}
         onClose={() => setSelectedRecord(null)}
       />
     </div>

@@ -57,12 +57,7 @@ const ProjectStack = ({ projects, isLoading }: ProjectStackProps) => {
     setExitDirection(directions[action]);
 
     // Add to history
-    addSwipe({
-      projectId: currentProject.id,
-      projectCode: currentProject.project_code,
-      description: currentProject.description?.split('\n')[0]?.replace('Проект:', '').trim() || '',
-      action,
-    });
+    addSwipe(currentProject.id, currentProject.project_code, action);
 
     // Move to next after animation
     setTimeout(() => {

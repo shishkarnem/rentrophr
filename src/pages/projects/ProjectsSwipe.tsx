@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import MobileLayout from '@/components/layout/MobileLayout';
 import PageTransition from '@/components/PageTransition';
@@ -8,13 +8,57 @@ import { useProjects } from '@/hooks/useProjects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import TelegramAccessRestriction from '@/components/TelegramAccessRestriction';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const ProjectsSwipe = () => {
   const { t } = useLanguage();
-  const { isTelegram } = useTelegram();
+  const { isTelegram, isLoading: isTelegramLoading } = useTelegram();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const showMobileNav = isTelegram || isMobile;
   const { data: projects = [], isLoading } = useProjects();
+
+  // Show loading while checking Telegram status
+  if (isTelegramLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center hero-gradient">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
+
+  // Restrict access if not in Telegram
+  if (!isTelegram) {
+    return (
+      <div 
+        className="min-h-screen relative z-10"
+        style={{
+          background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+        }}
+      >
+        {/* Header */}
+        <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              <h1 className="text-lg font-semibold text-white">{t('projects.selection') || 'Проекты'}</h1>
+            </div>
+            <LanguageSwitcher />
+          </div>
+        </div>
+
+        <main className="container mx-auto px-4 py-10 max-w-md">
+          <TelegramAccessRestriction />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen hero-gradient">

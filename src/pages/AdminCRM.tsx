@@ -74,6 +74,8 @@ const ALL_COLUMNS: { key: keyof CrmData; label: string; defaultVisible: boolean 
   { key: 'available_skills', label: 'Навыки', defaultVisible: false },
   { key: 'language_choice', label: 'Язык', defaultVisible: false },
   { key: 'interview', label: 'Интервью', defaultVisible: false },
+  { key: 'resume_text', label: 'Текст резюме', defaultVisible: false },
+  { key: 'checklist_answers', label: 'Текст анкеты', defaultVisible: false },
   { key: 'telegram_id', label: 'Telegram ID', defaultVisible: false },
   { key: 'created_at', label: 'Создано', defaultVisible: false },
   { key: 'updated_at', label: 'Обновлено', defaultVisible: false },

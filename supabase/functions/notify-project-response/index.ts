@@ -94,15 +94,35 @@ serve(async (req: Request): Promise<Response> => {
     // Extract @username from manager_link and dpr_link
     const extractUsername = (link: string | null): string => {
       if (!link) return "Не указан";
+      // Replace https://t.me/ with @
+      if (link.includes("https://t.me/")) {
+        return "@" + link.replace("https://t.me/", "");
+      }
+      if (link.includes("t.me/")) {
+        return "@" + link.replace("t.me/", "");
+      }
       const match = link.match(/@(\w+)/);
       return match ? `@${match[1]}` : link;
     };
 
+    // Format phone number: remove spaces, parentheses, dashes and add + if missing
+    const formatPhone = (phoneNumber: string | null): string => {
+      if (!phoneNumber) return "";
+      // Remove spaces, parentheses, dashes
+      let formatted = phoneNumber.replace(/[\s()\-]/g, "");
+      // Add + if missing at the beginning
+      if (formatted && !formatted.startsWith("+")) {
+        formatted = "+" + formatted;
+      }
+      return formatted;
+    };
+
     const managerUsername = extractUsername(project.manager_link);
     const dprUsername = extractUsername(project.dpr_link);
+    const formattedPhone = formatPhone(phone);
 
     // Build message using template or default
-    const phoneSection = phone ? `${phone}\n` : "";
+    const phoneSection = formattedPhone ? `${formattedPhone}\n` : "";
     const region = project.region || "Регион не указан";
     
     let message: string;

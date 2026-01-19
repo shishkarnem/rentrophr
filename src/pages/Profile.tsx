@@ -16,6 +16,7 @@ import MobileHeader from '@/components/MobileHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+import TelegramAccessRestriction from '@/components/TelegramAccessRestriction';
 
 // Inline language switcher for profile with DB sync
 const ProfileLanguageSwitcher = () => {
@@ -437,24 +438,7 @@ const Profile = () => {
         </div>
 
         <main className="container mx-auto px-4 py-10 max-w-md">
-          <section className="glass-dark rounded-2xl p-6">
-            <h2 className="text-white font-semibold text-lg">{t('profile.openViaBot')}</h2>
-            <p className="text-white/70 mt-2">
-              {t('profile.autofillHint')}
-            </p>
-            <Button
-              className="w-full mt-6 bg-accent hover:bg-accent/80 text-primary"
-              asChild
-            >
-              <a
-                href="https://t.me/RentROP_HR_bot/app"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t('profile.openButton')}
-              </a>
-            </Button>
-          </section>
+          <TelegramAccessRestriction />
         </main>
       </div>
     );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown, RefreshCw, FolderOpen, Bell } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown, RefreshCw, FolderOpen, Bell, Calculator } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import ProjectsAdmin from '@/components/admin/ProjectsAdmin';
 import NotificationTemplateEditor from '@/components/admin/NotificationTemplateEditor';
+import SalaryCalculatorAdmin from '@/components/admin/SalaryCalculatorAdmin';
 
 // Allowed statuses for admin access
 const ADMIN_STATUSES = ['ДПР', 'HR', 'Чат или канал', 'Менеджер'];
@@ -165,7 +166,7 @@ const AdminCRM = () => {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showColumnSettings, setShowColumnSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState<'data' | 'analytics' | 'projects' | 'notifications'>('data');
+  const [activeTab, setActiveTab] = useState<'data' | 'analytics' | 'projects' | 'notifications' | 'calculator'>('data');
   
   // Filter states
   const [statusFilter, setStatusFilter] = useState('Все');
@@ -563,7 +564,7 @@ const AdminCRM = () => {
 
       <div className={`container mx-auto px-4 py-6 ${showMobileNav ? 'pt-20 pb-24' : ''}`}>
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'data' | 'analytics' | 'projects' | 'notifications')} className="mb-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'data' | 'analytics' | 'projects' | 'notifications' | 'calculator')} className="mb-6">
           <TabsList className="bg-white/10 border-white/10 flex-wrap h-auto gap-1">
             <TabsTrigger value="data" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
               <User className="w-4 h-4 mr-2" />
@@ -580,6 +581,10 @@ const AdminCRM = () => {
             <TabsTrigger value="notifications" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
               <Bell className="w-4 h-4 mr-2" />
               Уведомления
+            </TabsTrigger>
+            <TabsTrigger value="calculator" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
+              <Calculator className="w-4 h-4 mr-2" />
+              Калькулятор
             </TabsTrigger>
           </TabsList>
 
@@ -1065,6 +1070,11 @@ const AdminCRM = () => {
           {/* Notifications Tab */}
           <TabsContent value="notifications" className="mt-4">
             <NotificationTemplateEditor />
+          </TabsContent>
+
+          {/* Calculator Tab */}
+          <TabsContent value="calculator" className="mt-4">
+            <SalaryCalculatorAdmin />
           </TabsContent>
         </Tabs>
       </div>

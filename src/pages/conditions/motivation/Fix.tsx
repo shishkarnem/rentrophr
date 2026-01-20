@@ -7,15 +7,18 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import tariffTableImg from '@/assets/tariff-table.jpg';
+import motivationTableImg from '@/assets/motivation-table.jpg';
+import SalaryCalculator from '@/components/salary/SalaryCalculator';
 
-// Lazy load images
-const TariffImage = lazy(() => import('@/assets/tariff-table.jpg').then(module => ({ default: () => (
-  <img src={module.default} alt="Tariff table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
-)})));
+// Lazy load image components
+const TariffImage = lazy(() => Promise.resolve({ default: () => (
+  <img src={tariffTableImg} alt="Tariff table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+)}));
 
-const MotivationImage = lazy(() => import('@/assets/motivation-table.jpg').then(module => ({ default: () => (
-  <img src={module.default} alt="Motivation table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
-)})));
+const MotivationImage = lazy(() => Promise.resolve({ default: () => (
+  <img src={motivationTableImg} alt="Motivation table" className="w-full rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer" />
+)}));
 
 // Section components for lazy loading
 const FixedPremiumSection = ({ t }: { t: (key: string) => string }) => (
@@ -180,13 +183,12 @@ const VATSection = ({ t }: { t: (key: string) => string }) => (
   </motion.div>
 );
 
-const TariffGridSection = ({ t }: { t: (key: string) => string }) => (
+const TariffGridSection = () => (
   <div>
-    <h3 className="text-xl font-bold text-accent mb-4">{t('fix.tariffGrid')}</h3>
     <div className="space-y-4">
       <Suspense fallback={<div className="w-full h-48 bg-white/5 rounded-xl animate-pulse" />}>
         <motion.a 
-          href="/assets/tariff-table.jpg" 
+          href={tariffTableImg}
           target="_blank" 
           rel="noopener noreferrer" 
           className="block"
@@ -197,7 +199,7 @@ const TariffGridSection = ({ t }: { t: (key: string) => string }) => (
       </Suspense>
       <Suspense fallback={<div className="w-full h-48 bg-white/5 rounded-xl animate-pulse" />}>
         <motion.a 
-          href="/assets/motivation-table.jpg" 
+          href={motivationTableImg}
           target="_blank" 
           rel="noopener noreferrer" 
           className="block"
@@ -321,6 +323,18 @@ const Fix = () => {
                 {visibleSections.vat || !showMobileNav ? <VATSection t={t} /> : <div className="h-64 animate-pulse bg-white/5 rounded-xl" />}
               </motion.div>
 
+              {/* Salary Calculator */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.3 }}
+                className="mb-6"
+              >
+                <SalaryCalculator />
+              </motion.div>
+
+              {/* Tariff Grid */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -329,7 +343,8 @@ const Fix = () => {
                 onViewportEnter={() => setVisibleSections(prev => ({ ...prev, grid: true }))}
               >
                 <CardGlassDark className="p-8" hover>
-                  {visibleSections.grid || !showMobileNav ? <TariffGridSection t={t} /> : <div className="h-96 animate-pulse bg-white/5 rounded-xl" />}
+                  <h3 className="text-xl font-bold text-accent mb-4">{t('fix.tariffGrid')}</h3>
+                  {visibleSections.grid || !showMobileNav ? <TariffGridSection /> : <div className="h-96 animate-pulse bg-white/5 rounded-xl" />}
                 </CardGlassDark>
               </motion.div>
             </div>

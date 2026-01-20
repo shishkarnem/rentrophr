@@ -474,6 +474,36 @@ export type Database = {
         }
         Relationships: []
       }
+      salary_calculator_params: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          param_key: string
+          param_value: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          param_key: string
+          param_value: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          param_key?: string
+          param_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       telegram_profiles: {
         Row: {
           created_at: string

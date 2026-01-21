@@ -167,7 +167,9 @@ const VATSection = ({
   t
 }: {
   t: (key: string) => string;
-}) => {};
+}) => {
+  return null;
+};
 const TariffGridSection = () => <div>
     <div className="space-y-4">
       <Suspense fallback={<div className="w-full h-48 bg-white/5 rounded-xl animate-pulse" />}>

@@ -10,6 +10,7 @@ import { PageTransition } from '@/components/PageTransition';
 import { AnimatedSection, AnimatedText, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedSection';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import SalaryCalculator from '@/components/salary/SalaryCalculator';
 
 const Motivation = () => {
   const { isTelegram } = useTelegram();
@@ -118,6 +119,11 @@ const Motivation = () => {
                   </div>
                 </AnimatedSection>
               </CardGlassDark>
+            </AnimatedSection>
+
+            {/* Salary Calculator */}
+            <AnimatedSection variant="fadeUp" delay={0.6} className="mt-6">
+              <SalaryCalculator />
             </AnimatedSection>
           </div>
         </div>

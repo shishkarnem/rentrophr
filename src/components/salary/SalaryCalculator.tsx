@@ -1,14 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, DollarSign, Briefcase, Clock, MapPin, TrendingUp, Info, Sparkles } from 'lucide-react';
+import { Calculator, DollarSign, Briefcase, Clock, MapPin, TrendingUp, Info, Sparkles, Coins } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+interface CurrencyRates {
+  tenge_rate: number;
+  usd_rate: number;
+  eur_rate: number;
+}
+
 interface CalculatorParams {
-  currency_rates?: { tenge_rate: number; usd_rate: number; eur_rate: number };
+  currency_rates?: CurrencyRates;
   [key: string]: unknown;
 }
 
@@ -69,6 +75,10 @@ const translations = {
     rule3: '* Амнистия на двух недельный штраф если ЛТВ проекта достиг 6 месяцев и более. Либо Совокупно Оплат с Проекта более 450 000 руб.',
     rule4: '* Одновременно может быть наложен двух недельный штраф и уменьшение фиксы до 30% в случае грубого нарушения работы у клиента',
     loading: 'Загрузка параметров...',
+    inOtherCurrencies: 'В других валютах',
+    tenge: 'Тенге',
+    usd: 'Доллары',
+    eur: 'Евро',
   },
   en: {
     title: 'Salary Calculator',
@@ -106,6 +116,10 @@ const translations = {
     rule3: '* Amnesty on the two-week penalty if project LTV reaches 6+ months or total payments exceed 450,000 rubles.',
     rule4: '* Both the two-week penalty and fix reduction to 30% can be applied simultaneously for serious violations.',
     loading: 'Loading parameters...',
+    inOtherCurrencies: 'In other currencies',
+    tenge: 'Tenge',
+    usd: 'Dollars',
+    eur: 'Euro',
   },
   kz: {
     title: 'Жалақы калькуляторы',
@@ -143,6 +157,10 @@ const translations = {
     rule3: '* Жоба ЛТВ 6+ ай болса немесе жалпы төлемдер 450 000 рубльден асса, 2 апталық айыппұлға рақымшылық.',
     rule4: '* Ауыр бұзушылықтар үшін 2 апталық айыппұл мен фиксты 30%-ға дейін азайту бір мезгілде қолданылуы мүмкін.',
     loading: 'Параметрлер жүктелуде...',
+    inOtherCurrencies: 'Басқа валюталарда',
+    tenge: 'Теңге',
+    usd: 'Доллар',
+    eur: 'Евро',
   },
 };
 
@@ -186,6 +204,16 @@ const SalaryCalculator = () => {
     
     loadParams();
   }, []);
+
+  // Get currency rates
+  const currencyRates = useMemo<CurrencyRates>(() => {
+    const rates = params.currency_rates as unknown as CurrencyRates | undefined;
+    return {
+      tenge_rate: rates?.tenge_rate || 7,
+      usd_rate: rates?.usd_rate || 75,
+      eur_rate: rates?.eur_rate || 85,
+    };
+  }, [params]);
 
   // Calculate salary
   const calculation = useMemo(() => {
@@ -260,6 +288,11 @@ const SalaryCalculator = () => {
     const variableAmount = Math.round(monthlyRevenue * (variablePercent / 100));
     const totalIncome = fixAmount + variableAmount;
 
+    // Calculate currency conversions
+    const totalInTenge = Math.round(totalIncome * currencyRates.tenge_rate);
+    const totalInUsd = Math.round(totalIncome / currencyRates.usd_rate);
+    const totalInEur = Math.round(totalIncome / currencyRates.eur_rate);
+
     return {
       baseTariff,
       fixPercent,
@@ -267,8 +300,11 @@ const SalaryCalculator = () => {
       fixAmount,
       variableAmount,
       totalIncome,
+      totalInTenge,
+      totalInUsd,
+      totalInEur,
     };
-  }, [isLoading, params, workFormat, workHours, projectsCount, region, projectDuration, monthlyRevenue]);
+  }, [isLoading, params, workFormat, workHours, projectsCount, region, projectDuration, monthlyRevenue, currencyRates]);
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('ru-RU').format(amount);
@@ -541,6 +577,42 @@ const SalaryCalculator = () => {
                       {formatMoney(calculation.totalIncome)} ₽
                     </motion.p>
                     <p className="text-primary/60 text-xs mt-1">{t.perMonth}</p>
+                  </motion.div>
+
+                  {/* Currency Conversion */}
+                  <motion.div 
+                    className="p-4 glass-dark rounded-xl"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Coins className="w-4 h-4 text-accent" />
+                      <p className="text-white/60 text-sm">{t.inOtherCurrencies}</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <motion.div 
+                        className="p-3 bg-white/5 rounded-lg text-center"
+                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                      >
+                        <p className="text-white/40 text-xs mb-1">{t.tenge}</p>
+                        <p className="text-white font-semibold text-sm">{formatMoney(calculation.totalInTenge)} ₸</p>
+                      </motion.div>
+                      <motion.div 
+                        className="p-3 bg-white/5 rounded-lg text-center"
+                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                      >
+                        <p className="text-white/40 text-xs mb-1">{t.usd}</p>
+                        <p className="text-white font-semibold text-sm">${formatMoney(calculation.totalInUsd)}</p>
+                      </motion.div>
+                      <motion.div 
+                        className="p-3 bg-white/5 rounded-lg text-center"
+                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                      >
+                        <p className="text-white/40 text-xs mb-1">{t.eur}</p>
+                        <p className="text-white font-semibold text-sm">€{formatMoney(calculation.totalInEur)}</p>
+                      </motion.div>
+                    </div>
                   </motion.div>
                 </motion.div>
               )}

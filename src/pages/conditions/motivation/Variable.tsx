@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import PageTransition from '@/components/PageTransition';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import SalaryCalculator from '@/components/salary/SalaryCalculator';
 
 const Variable = () => {
   const { t } = useLanguage();
@@ -133,6 +134,17 @@ const Variable = () => {
                       </div>
                     </div>
                   </CardGlassDark>
+                </motion.div>
+
+                {/* Salary Calculator */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="mt-6"
+                >
+                  <SalaryCalculator />
                 </motion.div>
               </div>
             </div>

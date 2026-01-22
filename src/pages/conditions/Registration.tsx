@@ -134,6 +134,7 @@ const Registration = () => {
                     <CardGlassDark className="p-8" hover>
                       <CardGlassDarkHeader icon={Download} title={t('registration.downloadContracts')} />
                       <div className="space-y-4">
+                        {/* Russia and World for IP */}
                         <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
                         scale: 1.02
                       }} transition={{
@@ -150,17 +151,18 @@ const Registration = () => {
                           }}>
                               <Globe className="w-5 h-5 text-accent" />
                             </motion.div>
-                            <span className="font-semibold text-accent">{t('registration.kzTax')}</span>
+                            <span className="font-semibold text-accent">{t('registration.contractRuWorldIp')}</span>
                           </div>
-                          <motion.a href="https://docs.google.com/document/d/1xZ4DUBOOdOegt4UTHmMP1oe9ZsC23ZoRjrHTFqlPyLw/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
+                          <motion.a href="https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
                           scale: 1.05,
                           x: 5
                         }}>
                             <Download className="w-4 h-4" />
-                            {t('registration.contractKzIp')}
+                            {t('registration.download')}
                           </motion.a>
                         </motion.div>
 
+                        {/* Russia for self-employed */}
                         <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
                         scale: 1.02
                       }} transition={{
@@ -177,50 +179,98 @@ const Registration = () => {
                           }}>
                               <Globe className="w-5 h-5 text-accent" />
                             </motion.div>
-                            <span className="font-semibold text-accent">{t('registration.rfTax')}</span>
+                            <span className="font-semibold text-accent">{t('registration.contractRuSz')}</span>
                           </div>
-                          <div className="space-y-2">
-                            <motion.a href="https://docs.google.com/document/d/10ipPClfoTGD30UdkrFvI4hnxSuWctTCB5w5sUvIe07w/export?format=pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-accent hover:underline" whileHover={{
-                            scale: 1.05,
-                            x: 5
-                          }}>
-                              <Download className="w-4 h-4" />
-                              {t('registration.contractRfSz')}
-                            </motion.a>
-                            <motion.a href="https://docs.google.com/document/d/1kxVKx4tsJiyqbdFnq_n3iGJcoxKvzMasSV6w5b4OIpo/export?format=pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-accent hover:underline" whileHover={{
-                            scale: 1.05,
-                            x: 5
-                          }}>
-                              <Download className="w-4 h-4" />
-                              {t('registration.contractRfIp')}
-                            </motion.a>
-                          </div>
-                        </motion.div>
-
-                        <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
-                        scale: 1.02
-                      }} transition={{
-                        type: 'spring',
-                        stiffness: 400
-                      }}>
-                          <div className="flex items-center gap-3 mb-3">
-                            <motion.div animate={{
-                            rotate: [0, 360]
-                          }} transition={{
-                            duration: 20,
-                            repeat: Infinity,
-                            ease: 'linear'
-                          }}>
-                              <Globe className="w-5 h-5 text-accent" />
-                            </motion.div>
-                            <span className="font-semibold text-accent">{t('registration.worldTax')}</span>
-                          </div>
-                          <motion.a href="https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/view" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
+                          <motion.a href="https://drive.google.com/file/d/1FDbZ5daP_esGZO5XNIHR6de08H6EnbLG/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
                           scale: 1.05,
                           x: 5
                         }}>
                             <Download className="w-4 h-4" />
-                            {t('registration.contractWorldIp')}
+                            {t('registration.download')}
+                          </motion.a>
+                        </motion.div>
+
+                        {/* Kazakhstan and CIS for IP */}
+                        <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
+                        scale: 1.02
+                      }} transition={{
+                        type: 'spring',
+                        stiffness: 400
+                      }}>
+                          <div className="flex items-center gap-3 mb-3">
+                            <motion.div animate={{
+                            rotate: [0, 360]
+                          }} transition={{
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: 'linear'
+                          }}>
+                              <Globe className="w-5 h-5 text-accent" />
+                            </motion.div>
+                            <span className="font-semibold text-accent">{t('registration.contractKzCisIp')}</span>
+                          </div>
+                          <motion.a href="https://drive.google.com/file/d/1alsd16UeR3uzKHs6wVYfJwboQ8wmzLRi/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
+                          scale: 1.05,
+                          x: 5
+                        }}>
+                            <Download className="w-4 h-4" />
+                            {t('registration.download')}
+                          </motion.a>
+                        </motion.div>
+
+                        {/* Kazakhstan and CIS for self-employed */}
+                        <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
+                        scale: 1.02
+                      }} transition={{
+                        type: 'spring',
+                        stiffness: 400
+                      }}>
+                          <div className="flex items-center gap-3 mb-3">
+                            <motion.div animate={{
+                            rotate: [0, 360]
+                          }} transition={{
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: 'linear'
+                          }}>
+                              <Globe className="w-5 h-5 text-accent" />
+                            </motion.div>
+                            <span className="font-semibold text-accent">{t('registration.contractKzCisSz')}</span>
+                          </div>
+                          <motion.a href="https://drive.google.com/file/d/14spSzxh4fiRrCNoPwsO4_-rpmcnHUSQu/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
+                          scale: 1.05,
+                          x: 5
+                        }}>
+                            <Download className="w-4 h-4" />
+                            {t('registration.download')}
+                          </motion.a>
+                        </motion.div>
+
+                        {/* World for IP */}
+                        <motion.div className="p-4 glass-dark rounded-xl" whileHover={{
+                        scale: 1.02
+                      }} transition={{
+                        type: 'spring',
+                        stiffness: 400
+                      }}>
+                          <div className="flex items-center gap-3 mb-3">
+                            <motion.div animate={{
+                            rotate: [0, 360]
+                          }} transition={{
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: 'linear'
+                          }}>
+                              <Globe className="w-5 h-5 text-accent" />
+                            </motion.div>
+                            <span className="font-semibold text-accent">{t('registration.contractWorldIp')}</span>
+                          </div>
+                          <motion.a href="https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/export?format=pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-accent hover:underline" whileHover={{
+                          scale: 1.05,
+                          x: 5
+                        }}>
+                            <Download className="w-4 h-4" />
+                            {t('registration.download')}
                           </motion.a>
                         </motion.div>
                       </div>

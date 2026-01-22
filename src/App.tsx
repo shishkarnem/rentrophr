@@ -65,6 +65,7 @@ import ContractFormIPRF from "./pages/contract/ContractFormIPRF";
 import ContractFormPhysRF from "./pages/contract/ContractFormPhysRF";
 import ContractFormIPWorld from "./pages/contract/ContractFormIPWorld";
 import ContractFormIPKZ from "./pages/contract/ContractFormIPKZ";
+import ContractFormPhysKZ from "./pages/contract/ContractFormPhysKZ";
 
 // Video Card page
 import VideoCardIntro from "./pages/video-card/VideoCardIntro";
@@ -142,6 +143,7 @@ const AppContent = () => {
         <Route path="/contract/ip-rf" element={<ContractFormIPRF />} />
         <Route path="/contract/phys-rf" element={<ContractFormPhysRF />} />
         <Route path="/contract/ip-kz" element={<ContractFormIPKZ />} />
+        <Route path="/contract/phys-kz" element={<ContractFormPhysKZ />} />
         <Route path="/contract/ip-world" element={<ContractFormIPWorld />} />
         
         {/* Video Card route */}

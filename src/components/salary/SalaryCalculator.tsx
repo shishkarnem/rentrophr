@@ -6,38 +6,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-
 interface CurrencyRates {
   tenge_rate: number;
   usd_rate: number;
   eur_rate: number;
 }
-
 interface CalculatorParams {
   currency_rates?: CurrencyRates;
   [key: string]: unknown;
 }
-
 interface TariffData {
   international: number;
   rf_cis: number | null;
   management?: boolean;
 }
-
 interface FixPercentData {
   up_to_1_month: number;
   '2_to_6_months': number;
   '7_to_12_months': number;
   over_12_months: number;
 }
-
 interface VariablePercentData {
-  up_to_1_month: { up_to_60k: number; '60_to_120k': number; '120k_plus': number };
-  '2_to_6_months': { up_to_60k: number; '60_to_120k': number; '120k_plus': number };
-  '7_to_12_months': { up_to_60k: number; '60_to_120k': number; '120k_plus': number };
-  over_12_months: { up_to_60k: number; '60_to_120k': number; '120k_plus': number };
+  up_to_1_month: {
+    up_to_60k: number;
+    '60_to_120k': number;
+    '120k_plus': number;
+  };
+  '2_to_6_months': {
+    up_to_60k: number;
+    '60_to_120k': number;
+    '120k_plus': number;
+  };
+  '7_to_12_months': {
+    up_to_60k: number;
+    '60_to_120k': number;
+    '120k_plus': number;
+  };
+  over_12_months: {
+    up_to_60k: number;
+    '60_to_120k': number;
+    '120k_plus': number;
+  };
 }
-
 const translations = {
   ru: {
     title: 'Калькулятор зарплаты',
@@ -78,7 +88,7 @@ const translations = {
     inOtherCurrencies: 'В других валютах',
     tenge: 'Тенге',
     usd: 'Доллары',
-    eur: 'Евро',
+    eur: 'Евро'
   },
   en: {
     title: 'Salary Calculator',
@@ -119,7 +129,7 @@ const translations = {
     inOtherCurrencies: 'In other currencies',
     tenge: 'Tenge',
     usd: 'Dollars',
-    eur: 'Euro',
+    eur: 'Euro'
   },
   kz: {
     title: 'Жалақы калькуляторы',
@@ -160,17 +170,17 @@ const translations = {
     inOtherCurrencies: 'Басқа валюталарда',
     tenge: 'Теңге',
     usd: 'Доллар',
-    eur: 'Евро',
-  },
+    eur: 'Евро'
+  }
 };
-
 const SalaryCalculator = () => {
-  const { language } = useLanguage();
+  const {
+    language
+  } = useLanguage();
   const t = translations[language as keyof typeof translations] || translations.ru;
-
   const [isLoading, setIsLoading] = useState(true);
   const [params, setParams] = useState<Record<string, CalculatorParams>>({});
-  
+
   // Calculator state
   const [workFormat, setWorkFormat] = useState<'online' | 'combined' | 'startup' | 'noDpr'>('online');
   const [workHours, setWorkHours] = useState<4 | 8>(8);
@@ -183,17 +193,15 @@ const SalaryCalculator = () => {
   useEffect(() => {
     const loadParams = async () => {
       try {
-        const { data, error } = await supabase
-          .from('salary_calculator_params')
-          .select('*');
-        
+        const {
+          data,
+          error
+        } = await supabase.from('salary_calculator_params').select('*');
         if (error) throw error;
-        
         const paramsMap: Record<string, CalculatorParams> = {};
         data?.forEach(item => {
           paramsMap[item.param_key] = item.param_value as CalculatorParams;
         });
-        
         setParams(paramsMap);
       } catch (err) {
         console.error('Error loading calculator params:', err);
@@ -201,7 +209,6 @@ const SalaryCalculator = () => {
         setIsLoading(false);
       }
     };
-    
     loadParams();
   }, []);
 
@@ -211,7 +218,7 @@ const SalaryCalculator = () => {
     return {
       tenge_rate: rates?.tenge_rate || 7,
       usd_rate: rates?.usd_rate || 75,
-      eur_rate: rates?.eur_rate || 85,
+      eur_rate: rates?.eur_rate || 85
     };
   }, [params]);
 
@@ -232,14 +239,11 @@ const SalaryCalculator = () => {
     } else {
       tariffKey = `tariff_no_dpr_${workHours}h`;
     }
-
     const tariffData = params[tariffKey] as unknown as TariffData;
     if (!tariffData) return null;
 
     // Get base tariff
-    let baseTariff = region === 'international' 
-      ? tariffData.international 
-      : (tariffData.rf_cis || tariffData.international);
+    let baseTariff = region === 'international' ? tariffData.international : tariffData.rf_cis || tariffData.international;
 
     // Adjust for 2 projects if 4 hours
     if (projectsCount === 2 && workHours === 4) {
@@ -255,7 +259,6 @@ const SalaryCalculator = () => {
     } else {
       fixPercentKey = 'fix_percent_8h_1proj';
     }
-
     const fixPercentData = params[fixPercentKey] as unknown as FixPercentData;
     const fixPercent = fixPercentData?.[projectDuration] || 50;
 
@@ -268,10 +271,8 @@ const SalaryCalculator = () => {
     } else {
       variablePercentKey = 'variable_by_age_8h_1proj';
     }
-
     const variableByAge = params[variablePercentKey] as unknown as VariablePercentData;
     const variableForDuration = variableByAge?.[projectDuration];
-    
     let variablePercent = 50;
     if (variableForDuration) {
       if (monthlyRevenue < 60000) {
@@ -292,7 +293,6 @@ const SalaryCalculator = () => {
     const totalInTenge = Math.round(totalIncome * currencyRates.tenge_rate);
     const totalInUsd = Math.round(totalIncome / currencyRates.usd_rate);
     const totalInEur = Math.round(totalIncome / currencyRates.eur_rate);
-
     return {
       baseTariff,
       fixPercent,
@@ -302,37 +302,39 @@ const SalaryCalculator = () => {
       totalIncome,
       totalInTenge,
       totalInUsd,
-      totalInEur,
+      totalInEur
     };
   }, [isLoading, params, workFormat, workHours, projectsCount, region, projectDuration, monthlyRevenue, currencyRates]);
-
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat('ru-RU').format(amount);
   };
-
   if (isLoading) {
-    return (
-      <CardGlassDark className="p-8">
+    return <CardGlassDark className="p-8">
         <div className="flex items-center justify-center gap-3 text-white/60">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          >
+          <motion.div animate={{
+          rotate: 360
+        }} transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: 'linear'
+        }}>
             <Sparkles className="w-6 h-6" />
           </motion.div>
           {t.loading}
         </div>
-      </CardGlassDark>
-    );
+      </CardGlassDark>;
   }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-    >
+  return <motion.div initial={{
+    opacity: 0,
+    y: 30
+  }} whileInView={{
+    opacity: 1,
+    y: 0
+  }} viewport={{
+    once: true
+  }} transition={{
+    duration: 0.5
+  }}>
       <CardGlassDark className="p-6 md:p-8" hover>
         <CardGlassDarkHeader icon={Calculator} title={t.title} />
         <p className="text-white/60 mb-6">{t.subtitle}</p>
@@ -346,7 +348,7 @@ const SalaryCalculator = () => {
                 <Briefcase className="w-4 h-4 text-accent" />
                 {t.workFormat}
               </label>
-              <Select value={workFormat} onValueChange={(v) => setWorkFormat(v as typeof workFormat)}>
+              <Select value={workFormat} onValueChange={v => setWorkFormat(v as typeof workFormat)}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -366,69 +368,58 @@ const SalaryCalculator = () => {
                 {t.workHours}
               </label>
               <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => { setWorkHours(4); setProjectsCount(2); }}
-                  className={`flex-1 py-3 rounded-xl transition-all ${
-                    workHours === 4 
-                      ? 'bg-accent text-primary font-semibold' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
+                <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => {
+                setWorkHours(4);
+                setProjectsCount(2);
+              }} className={`flex-1 py-3 rounded-xl transition-all ${workHours === 4 ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                   {t.hours4}
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => { setWorkHours(8); setProjectsCount(1); }}
-                  className={`flex-1 py-3 rounded-xl transition-all ${
-                    workHours === 8 
-                      ? 'bg-accent text-primary font-semibold' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
+                <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => {
+                setWorkHours(8);
+                setProjectsCount(1);
+              }} className={`flex-1 py-3 rounded-xl transition-all ${workHours === 8 ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                   {t.hours8}
                 </motion.button>
               </div>
             </div>
 
             {/* Projects Count - only for 4h */}
-            {workHours === 4 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-              >
+            {workHours === 4 && <motion.div initial={{
+            opacity: 0,
+            height: 0
+          }} animate={{
+            opacity: 1,
+            height: 'auto'
+          }} exit={{
+            opacity: 0,
+            height: 0
+          }}>
                 <label className="text-white/70 text-sm mb-2 block">{t.projectsCount}</label>
                 <div className="flex gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setProjectsCount(1)}
-                    className={`flex-1 py-3 rounded-xl transition-all ${
-                      projectsCount === 1 
-                        ? 'bg-accent text-primary font-semibold' 
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
-                    }`}
-                  >
+                  <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => setProjectsCount(1)} className={`flex-1 py-3 rounded-xl transition-all ${projectsCount === 1 ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                     {t.project1}
                   </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setProjectsCount(2)}
-                    className={`flex-1 py-3 rounded-xl transition-all ${
-                      projectsCount === 2 
-                        ? 'bg-accent text-primary font-semibold' 
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
-                    }`}
-                  >
+                  <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => setProjectsCount(2)} className={`flex-1 py-3 rounded-xl transition-all ${projectsCount === 2 ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                     {t.projects2}
                   </motion.button>
                 </div>
-              </motion.div>
-            )}
+              </motion.div>}
 
             {/* Region */}
             <div>
@@ -437,28 +428,18 @@ const SalaryCalculator = () => {
                 {t.region}
               </label>
               <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setRegion('international')}
-                  className={`flex-1 py-3 rounded-xl transition-all ${
-                    region === 'international' 
-                      ? 'bg-accent text-primary font-semibold' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
+                <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => setRegion('international')} className={`flex-1 py-3 rounded-xl transition-all ${region === 'international' ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                   {t.international}
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setRegion('rf_cis')}
-                  className={`flex-1 py-3 rounded-xl transition-all ${
-                    region === 'rf_cis' 
-                      ? 'bg-accent text-primary font-semibold' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
+                <motion.button whileHover={{
+                scale: 1.02
+              }} whileTap={{
+                scale: 0.98
+              }} onClick={() => setRegion('rf_cis')} className={`flex-1 py-3 rounded-xl transition-all ${region === 'rf_cis' ? 'bg-accent text-primary font-semibold' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                   {t.rfCis}
                 </motion.button>
               </div>
@@ -470,7 +451,7 @@ const SalaryCalculator = () => {
                 <TrendingUp className="w-4 h-4 text-accent" />
                 {t.projectDuration}
               </label>
-              <Select value={projectDuration} onValueChange={(v) => setProjectDuration(v as typeof projectDuration)}>
+              <Select value={projectDuration} onValueChange={v => setProjectDuration(v as typeof projectDuration)}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -492,14 +473,7 @@ const SalaryCalculator = () => {
                 </span>
                 <span className="text-accent font-semibold">{formatMoney(monthlyRevenue)} ₽</span>
               </label>
-              <Slider
-                value={[monthlyRevenue]}
-                onValueChange={([value]) => setMonthlyRevenue(value)}
-                min={0}
-                max={500000}
-                step={10000}
-                className="mt-2"
-              />
+              <Slider value={[monthlyRevenue]} onValueChange={([value]) => setMonthlyRevenue(value)} min={0} max={500000} step={10000} className="mt-2" />
               <div className="flex justify-between text-xs text-white/40 mt-1">
                 <span>0</span>
                 <span>250 000</span>
@@ -512,15 +486,18 @@ const SalaryCalculator = () => {
           <div className="space-y-4">
             {/* Results Display */}
             <AnimatePresence mode="wait">
-              {calculation && (
-                <motion.div
-                  key={`${calculation.totalIncome}-${calculation.fixPercent}`}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-4"
-                >
+              {calculation && <motion.div key={`${calculation.totalIncome}-${calculation.fixPercent}`} initial={{
+              opacity: 0,
+              scale: 0.95
+            }} animate={{
+              opacity: 1,
+              scale: 1
+            }} exit={{
+              opacity: 0,
+              scale: 0.95
+            }} transition={{
+              duration: 0.3
+            }} className="space-y-4">
                   {/* Base Tariff */}
                   <div className="p-4 glass-dark rounded-xl">
                     <p className="text-white/50 text-sm">{t.baseTariff}</p>
@@ -528,10 +505,9 @@ const SalaryCalculator = () => {
                   </div>
 
                   {/* Fix Part */}
-                  <motion.div 
-                    className="p-4 glass-dark rounded-xl border border-accent/30"
-                    whileHover={{ borderColor: 'rgba(255,215,0,0.6)' }}
-                  >
+                  <motion.div className="p-4 glass-dark rounded-xl border border-accent/30" whileHover={{
+                borderColor: 'rgba(255,215,0,0.6)'
+              }}>
                     <div className="flex justify-between items-center mb-2">
                       <p className="text-white/50 text-sm">{t.fixPart}</p>
                       <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
@@ -542,10 +518,9 @@ const SalaryCalculator = () => {
                   </motion.div>
 
                   {/* Variable Part */}
-                  <motion.div 
-                    className="p-4 glass-dark rounded-xl border border-accent/30"
-                    whileHover={{ borderColor: 'rgba(255,215,0,0.6)' }}
-                  >
+                  <motion.div className="p-4 glass-dark rounded-xl border border-accent/30" whileHover={{
+                borderColor: 'rgba(255,215,0,0.6)'
+              }}>
                     <div className="flex justify-between items-center mb-2">
                       <p className="text-white/50 text-sm">{t.variablePart}</p>
                       <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
@@ -556,77 +531,38 @@ const SalaryCalculator = () => {
                   </motion.div>
 
                   {/* Total */}
-                  <motion.div 
-                    className="p-6 gradient-gold rounded-2xl text-center"
-                    animate={{ 
-                      boxShadow: [
-                        '0 0 0 0 rgba(255,215,0,0)',
-                        '0 0 30px 10px rgba(255,215,0,0.15)',
-                        '0 0 0 0 rgba(255,215,0,0)'
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
+                  <motion.div className="p-6 gradient-gold rounded-2xl text-center" animate={{
+                boxShadow: ['0 0 0 0 rgba(255,215,0,0)', '0 0 30px 10px rgba(255,215,0,0.15)', '0 0 0 0 rgba(255,215,0,0)']
+              }} transition={{
+                duration: 2,
+                repeat: Infinity
+              }}>
                     <p className="text-primary/70 text-sm font-medium mb-1">{t.totalIncome}</p>
-                    <motion.p 
-                      className="text-3xl font-black text-primary"
-                      key={calculation.totalIncome}
-                      initial={{ scale: 1.1 }}
-                      animate={{ scale: 1 }}
-                    >
+                    <motion.p className="text-3xl font-black text-primary" key={calculation.totalIncome} initial={{
+                  scale: 1.1
+                }} animate={{
+                  scale: 1
+                }}>
                       {formatMoney(calculation.totalIncome)} ₽
                     </motion.p>
                     <p className="text-primary/60 text-xs mt-1">{t.perMonth}</p>
                   </motion.div>
 
                   {/* Currency Conversion */}
-                  <motion.div 
-                    className="p-4 glass-dark rounded-xl"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Coins className="w-4 h-4 text-accent" />
-                      <p className="text-white/60 text-sm">{t.inOtherCurrencies}</p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <motion.div 
-                        className="p-3 bg-white/5 rounded-lg text-center"
-                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
-                      >
-                        <p className="text-white/40 text-xs mb-1">{t.tenge}</p>
-                        <p className="text-white font-semibold text-sm">{formatMoney(calculation.totalInTenge)} ₸</p>
-                      </motion.div>
-                      <motion.div 
-                        className="p-3 bg-white/5 rounded-lg text-center"
-                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
-                      >
-                        <p className="text-white/40 text-xs mb-1">{t.usd}</p>
-                        <p className="text-white font-semibold text-sm">${formatMoney(calculation.totalInUsd)}</p>
-                      </motion.div>
-                      <motion.div 
-                        className="p-3 bg-white/5 rounded-lg text-center"
-                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
-                      >
-                        <p className="text-white/40 text-xs mb-1">{t.eur}</p>
-                        <p className="text-white font-semibold text-sm">€{formatMoney(calculation.totalInEur)}</p>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
+                  
+                </motion.div>}
             </AnimatePresence>
           </div>
         </div>
 
         {/* Rules Section */}
-        <motion.div 
-          className="mt-8 p-4 glass-dark rounded-xl border border-white/10"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
+        <motion.div className="mt-8 p-4 glass-dark rounded-xl border border-white/10" initial={{
+        opacity: 0
+      }} whileInView={{
+        opacity: 1
+      }} viewport={{
+        once: true
+      }}>
           <CardGlassDarkTitle icon={Info} className="mb-3 text-base">
             {t.rules}
           </CardGlassDarkTitle>
@@ -638,8 +574,6 @@ const SalaryCalculator = () => {
           </div>
         </motion.div>
       </CardGlassDark>
-    </motion.div>
-  );
+    </motion.div>;
 };
-
 export default SalaryCalculator;

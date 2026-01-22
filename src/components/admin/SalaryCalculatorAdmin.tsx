@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Save, RefreshCw, DollarSign, Percent, Clock, MapPin, TrendingUp, Coins } from 'lucide-react';
+import { Loader2, Save, RefreshCw, DollarSign, Percent, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Card,
@@ -59,11 +59,6 @@ interface VariableByAge {
   over_12_months: VariablePercent;
 }
 
-interface CurrencyRates {
-  tenge_rate: number;
-  usd_rate: number;
-  eur_rate: number;
-}
 
 const DURATION_LABELS: Record<string, string> = {
   up_to_1_month: 'До 1 месяца',
@@ -358,67 +353,6 @@ const SalaryCalculatorAdmin = () => {
     );
   };
 
-  // Currency rates input component
-  const CurrencyRatesInput = () => {
-    const paramKey = 'currency_rates';
-    
-    return (
-      <div className="p-4 glass-dark rounded-xl space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-accent" />
-            <div>
-              <h4 className="font-semibold text-white">Курсы валют</h4>
-              <p className="text-white/50 text-sm">Для конвертации результатов калькулятора</p>
-            </div>
-          </div>
-          {hasChanges(paramKey) && (
-            <Button
-              size="sm"
-              onClick={() => saveParam(paramKey)}
-              disabled={isSaving === paramKey}
-              className="bg-accent hover:bg-accent/80 text-primary"
-            >
-              {isSaving === paramKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            </Button>
-          )}
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="text-white/60 text-sm block mb-1">1₽ = X₸ (Тенге)</label>
-            <Input
-              type="number"
-              step="0.1"
-              value={(getLocalValue(paramKey, ['tenge_rate']) as number) || 7}
-              onChange={(e) => handleLocalChange(paramKey, ['tenge_rate'], Number(e.target.value))}
-              className="bg-white/5 border-white/10 text-white"
-            />
-          </div>
-          <div>
-            <label className="text-white/60 text-sm block mb-1">1$ = X₽ (Доллар)</label>
-            <Input
-              type="number"
-              step="0.1"
-              value={(getLocalValue(paramKey, ['usd_rate']) as number) || 75}
-              onChange={(e) => handleLocalChange(paramKey, ['usd_rate'], Number(e.target.value))}
-              className="bg-white/5 border-white/10 text-white"
-            />
-          </div>
-          <div>
-            <label className="text-white/60 text-sm block mb-1">1€ = X₽ (Евро)</label>
-            <Input
-              type="number"
-              step="0.1"
-              value={(getLocalValue(paramKey, ['eur_rate']) as number) || 85}
-              onChange={(e) => handleLocalChange(paramKey, ['eur_rate'], Number(e.target.value))}
-              className="bg-white/5 border-white/10 text-white"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -437,7 +371,7 @@ const SalaryCalculatorAdmin = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-white">Настройки калькулятора зарплаты</h2>
-          <p className="text-white/50 text-sm mt-1">Редактируйте тарифы, проценты и курсы валют</p>
+          <p className="text-white/50 text-sm mt-1">Редактируйте тарифы и проценты</p>
         </div>
         <Button
           variant="ghost"
@@ -463,10 +397,6 @@ const SalaryCalculatorAdmin = () => {
           <TabsTrigger value="variable" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
             <TrendingUp className="w-4 h-4 mr-2" />
             Переменная %
-          </TabsTrigger>
-          <TabsTrigger value="currency" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
-            <Coins className="w-4 h-4 mr-2" />
-            Валюты
           </TabsTrigger>
         </TabsList>
 
@@ -523,23 +453,6 @@ const SalaryCalculatorAdmin = () => {
               {variablePercentKeys.map(key => (
                 getParamByKey(key) && <VariablePercentInput key={key} paramKey={key} />
               ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="currency" className="space-y-4">
-          <Card className="bg-white/5 border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Coins className="w-5 h-5 text-accent" />
-                Курсы валют для конвертации
-              </CardTitle>
-              <CardDescription className="text-white/50">
-                Установите курсы для отображения результатов калькулятора в тенге, долларах и евро.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CurrencyRatesInput />
             </CardContent>
           </Card>
         </TabsContent>

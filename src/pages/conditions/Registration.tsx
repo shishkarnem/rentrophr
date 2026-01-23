@@ -184,7 +184,7 @@ const Registration = () => {
                             <span className="font-semibold text-accent">{t("registration.contractRuWorldIp")}</span>
                           </div>
                           <motion.a
-                            href="https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/export?format=pdf"
+                            href="https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/view"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-accent hover:underline"
@@ -307,7 +307,7 @@ const Registration = () => {
                             <span className="font-semibold text-accent">{t("registration.contractKzCisSz")}</span>
                           </div>
                           <motion.a
-                            href="https://drive.google.com/file/d/14spSzxh4fiRrCNoPwsO4_-rpmcnHUSQu/export?format=pdf"
+                            href="https://drive.google.com/file/d/14spSzxh4fiRrCNoPwsO4_-rpmcnHUSQu/view"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-accent hover:underline"
@@ -348,7 +348,7 @@ const Registration = () => {
                             <span className="font-semibold text-accent">{t("registration.contractWorldIp")}</span>
                           </div>
                           <motion.a
-                            href="https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/export?format=pdf"
+                            href="https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/view"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-accent hover:underline"

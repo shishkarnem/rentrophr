@@ -52,6 +52,48 @@ export type Database = {
           },
         ]
       }
+      contract_faq: {
+        Row: {
+          answer: string
+          answer_en: string | null
+          answer_kz: string | null
+          category: string | null
+          created_at: string
+          id: string
+          question: string
+          question_en: string | null
+          question_kz: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          answer_en?: string | null
+          answer_kz?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          question_en?: string | null
+          question_kz?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          answer_en?: string | null
+          answer_kz?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          question_en?: string | null
+          question_kz?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_data: {
         Row: {
           add_to_experts: string | null

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type MouseEvent as ReactMouseEvent } from 'react';
 import { HelpCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 interface CalculatorTooltipProps {
   content: string;
@@ -83,7 +84,7 @@ const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
     }
   }, [isOpen, updatePosition]);
 
-  const handleToggle = (e: React.MouseEvent) => {
+  const handleToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsOpen(prev => !prev);
@@ -101,36 +102,51 @@ const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
       >
         <HelpCircle className="w-4 h-4" />
       </button>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={tooltipRef}
-            initial={{ opacity: 0, scale: 0.9, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed w-80 p-4 bg-primary/95 backdrop-blur-md border border-accent/40 rounded-2xl shadow-2xl"
-            style={{ 
-              zIndex: 99999,
-              top: position.top,
-              left: position.left,
-              maxHeight: 'min(300px, 50vh)'
-            }}
-          >
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors z-10"
-              type="button"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="max-h-60 overflow-y-auto pr-6 custom-scrollbar">
-              <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{content}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              {/* click-catcher to close on outside click (also ensures we're above all blocks) */}
+              <div
+                className="fixed inset-0"
+                style={{ zIndex: 99998 }}
+                onClick={() => setIsOpen(false)}
+              />
+
+              <motion.div
+                ref={tooltipRef}
+                initial={{ opacity: 0, scale: 0.96, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="fixed w-80 p-4 bg-primary/95 backdrop-blur-md border border-accent/40 rounded-2xl shadow-2xl"
+                style={{
+                  zIndex: 99999,
+                  top: position.top,
+                  left: position.left,
+                  maxHeight: 'min(360px, 60vh)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors z-10"
+                  type="button"
+                  aria-label="Закрыть"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="max-h-72 overflow-y-auto pr-6">
+                  <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{content}</p>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 };

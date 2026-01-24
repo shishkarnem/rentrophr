@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect, useCallback, type MouseEvent as ReactMouseEvent } from 'react';
+import { useState } from 'react';
 import { HelpCircle, X } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CalculatorTooltipProps {
   content: string;
@@ -9,121 +8,42 @@ interface CalculatorTooltipProps {
 
 const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  const updatePosition = useCallback(() => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const tooltipWidth = 320;
-      const padding = 16;
-      
-      let left = rect.left;
-      // Ensure tooltip doesn't go off-screen on the right
-      if (left + tooltipWidth > window.innerWidth - padding) {
-        left = window.innerWidth - tooltipWidth - padding;
-      }
-      // Ensure tooltip doesn't go off-screen on the left
-      if (left < padding) {
-        left = padding;
-      }
-      
-      setPosition({
-        top: rect.bottom + 8 + window.scrollY,
-        left: left
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      updatePosition();
-    }
-  }, [isOpen, updatePosition]);
-
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-
-    const handleScroll = () => {
-      if (isOpen) updatePosition();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      window.addEventListener('scroll', handleScroll, true);
-
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-        window.removeEventListener('scroll', handleScroll, true);
-      };
-    }
-  }, [isOpen, updatePosition]);
-
-  const handleToggle = (e: ReactMouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen(prev => !prev);
-  };
 
   return (
-    <>
+    <div className="relative inline-block">
       <button
-        ref={buttonRef}
-        onClick={handleToggle}
-        className="ml-1 text-accent/70 hover:text-accent transition-colors focus:outline-none inline-flex items-center justify-center"
+        onClick={() => setIsOpen(!isOpen)}
+        className="ml-1 text-accent/70 hover:text-accent transition-colors"
         type="button"
-        aria-label="Показать подсказку"
-        aria-expanded={isOpen}
       >
         <HelpCircle className="w-4 h-4" />
       </button>
-
-      {isOpen &&
-        createPortal(
+      
+      <AnimatePresence>
+        {isOpen && (
           <>
-            {/* click-catcher to close on outside click */}
-            <div
-              className="fixed inset-0"
-              style={{ zIndex: 99998 }}
+            <div 
+              className="fixed inset-0 z-40" 
               onClick={() => setIsOpen(false)}
             />
-
             <motion.div
-              ref={tooltipRef}
-              initial={{ opacity: 0, scale: 0.96, y: -8 }}
+              initial={{ opacity: 0, scale: 0.9, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.18 }}
-              className="fixed w-80 p-4 bg-primary/95 backdrop-blur-md border border-accent/40 rounded-2xl shadow-2xl"
-              style={{
-                zIndex: 99999,
-                top: position.top,
-                left: position.left,
-                maxHeight: 'min(360px, 60vh)',
-              }}
-              onClick={(e) => e.stopPropagation()}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              className="absolute z-50 left-0 top-6 w-64 p-3 bg-primary border border-accent/30 rounded-xl shadow-xl"
             >
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors z-10"
-                type="button"
-                aria-label="Закрыть"
+                className="absolute top-2 right-2 text-white/50 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
-
-              <div className="max-h-72 overflow-y-auto pr-6">
-                <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{content}</p>
-              </div>
+              <p className="text-white/80 text-xs pr-4">{content}</p>
             </motion.div>
-          </>,
-          document.body
+          </>
         )}
-    </>
+      </AnimatePresence>
+    </div>
   );
 };
 

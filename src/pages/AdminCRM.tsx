@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown, RefreshCw, FolderOpen, Bell, Calculator } from 'lucide-react';
 import { useTelegram } from '@/contexts/TelegramContext';
@@ -37,15 +37,47 @@ import SalaryCalculatorAdmin from '@/components/admin/SalaryCalculatorAdmin';
 // Allowed statuses for admin access
 const ADMIN_STATUSES = ['ДПР', 'HR', 'Чат или канал', 'Менеджер'];
 
-// All status options from database
-const STATUS_OPTIONS = [
-  'Все',
-  'HR', 'ДПР', 'Дубль', 'Заблокировано', 'Запись Портфолио', 'Интервью',
-  'Менеджер', 'На паузе', 'Не на связи', 'Ожидает проект', 'Отказ',
-  'Подготовка документов', 'Работает', 'Тест Отчет', 'Тест Портал',
-  'Тест Робот', 'Тест Условия', 'Уволен(а)', 'Хочет вернуться',
-  'Чат или канал', 'Черный список'
+// All status options with default enabled state
+const ALL_STATUSES = [
+  'Интервью',
+  'Тест Условия',
+  'Тест Портал',
+  'Тест Отчет',
+  'Тест Робот',
+  'Подготовка документов',
+  'Запись Портфолио',
+  'Ожидает проект',
+  'Работает',
+  'Отказ',
+  'Не на связи',
+  'На паузе',
+  'Уволен(а)',
+  'ДПР',
+  'HR',
+  'Чат или канал',
+  'Хочет вернуться',
+  'Менеджер',
+  'Заблокировано',
+  'Черный список',
+  'Дубль',
 ];
+
+// Default enabled statuses
+const DEFAULT_ENABLED_STATUSES = new Set([
+  'Интервью',
+  'Тест Условия',
+  'Тест Портал',
+  'Тест Отчет',
+  'Тест Робот',
+  'Подготовка документов',
+  'Запись Портфолио',
+  'Ожидает проект',
+  'Работает',
+  'ДПР',
+  'HR',
+  'Хочет вернуться',
+  'Менеджер',
+]);
 
 // All available columns with labels
 const ALL_COLUMNS: { key: keyof CrmData; label: string; defaultVisible: boolean }[] = [
@@ -168,8 +200,21 @@ const AdminCRM = () => {
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const [activeTab, setActiveTab] = useState<'data' | 'analytics' | 'projects' | 'notifications' | 'calculator'>('data');
   
-  // Filter states
-  const [statusFilter, setStatusFilter] = useState('Все');
+  // Filter states - multi-select for status
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('admin-crm-selected-statuses');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as string[];
+        return new Set(parsed);
+      } catch {
+        return new Set(DEFAULT_ENABLED_STATUSES);
+      }
+    }
+    return new Set(DEFAULT_ENABLED_STATUSES);
+  });
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
   const [hrFilter, setHrFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [regionFilter, setRegionFilter] = useState('');
@@ -306,9 +351,9 @@ const AdminCRM = () => {
   const filteredRecords = useMemo(() => {
     let filtered = [...allRecords];
 
-    // Apply status filter
-    if (statusFilter && statusFilter !== 'Все') {
-      filtered = filtered.filter(r => r.status === statusFilter);
+    // Apply multi-select status filter
+    if (selectedStatuses.size > 0) {
+      filtered = filtered.filter(r => r.status && selectedStatuses.has(r.status));
     }
     
     // Apply HR filter
@@ -387,7 +432,7 @@ const AdminCRM = () => {
     }
 
     return filtered;
-  }, [allRecords, statusFilter, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, sortColumn, sortDirection]);
+  }, [allRecords, selectedStatuses, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, sortColumn, sortDirection]);
 
   // Paginated records - pageSize -1 means show all
   const paginatedRecords = useMemo(() => {
@@ -401,7 +446,7 @@ const AdminCRM = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, pageSize]);
+  }, [selectedStatuses, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, pageSize]);
 
   // AI Search function - prioritize resume_text and checklist_answers
   const handleAiSearch = async () => {
@@ -418,7 +463,7 @@ const AdminCRM = () => {
         body: {
           query: searchQuery,
           filters: {
-            status: statusFilter !== 'Все' ? statusFilter : undefined,
+            statuses: selectedStatuses.size > 0 ? Array.from(selectedStatuses) : undefined,
             hr: hrFilter || undefined,
             city: cityFilter || undefined,
             region: regionFilter || undefined,
@@ -446,7 +491,7 @@ const AdminCRM = () => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setStatusFilter('Все');
+    setSelectedStatuses(new Set(DEFAULT_ENABLED_STATUSES));
     setHrFilter('');
     setCityFilter('');
     setRegionFilter('');
@@ -456,6 +501,50 @@ const AdminCRM = () => {
     setAiSummary(null);
     setSortColumn(null);
   };
+  
+  // Persist selected statuses
+  useEffect(() => {
+    localStorage.setItem('admin-crm-selected-statuses', JSON.stringify([...selectedStatuses]));
+  }, [selectedStatuses]);
+  
+  // Toggle status in multi-select
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses(prev => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
+  };
+  
+  // Select/deselect all statuses
+  const selectAllStatuses = () => {
+    setSelectedStatuses(new Set(ALL_STATUSES));
+  };
+  
+  const deselectAllStatuses = () => {
+    setSelectedStatuses(new Set());
+  };
+  
+  // Close status dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setShowStatusDropdown(false);
+      }
+    };
+    
+    if (showStatusDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showStatusDropdown]);
   
   const resetColumnWidths = () => {
     setColumnWidths({});
@@ -673,22 +762,7 @@ const AdminCRM = () => {
 
               {/* Filters Panel */}
               {showFilters && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-2 border-t border-white/10">
-                  <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.statusFilter') || 'Статус'}</label>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-primary border-white/10 max-h-60">
-                        {STATUS_OPTIONS.map(status => (
-                          <SelectItem key={status} value={status} className="text-white hover:bg-white/10 text-sm">
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 pt-2 border-t border-white/10">
                   
                   <div>
                     <label className="text-xs text-white/50 mb-1 block">{t('admin.hrFilter') || 'HR'}</label>
@@ -888,22 +962,90 @@ const AdminCRM = () => {
                           >
                             <div className="space-y-1 pr-2">
                               <button
-                                onClick={() => handleSort(col.key)}
+                                onClick={() => col.key !== 'status' && handleSort(col.key)}
                                 className="flex items-center gap-1 hover:text-white transition-colors text-left w-full"
                               >
                                 <span className="truncate">{col.label}</span>
                                 {sortColumn === col.key ? (
                                   sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 shrink-0" /> : <ChevronDown className="w-3 h-3 shrink-0" />
                                 ) : (
-                                  <ArrowUpDown className="w-3 h-3 opacity-30 shrink-0" />
+                                  col.key !== 'status' && <ArrowUpDown className="w-3 h-3 opacity-30 shrink-0" />
                                 )}
                               </button>
-                              <Input
-                                value={columnSearches[col.key] || ''}
-                                onChange={(e) => setColumnSearches(prev => ({ ...prev, [col.key]: e.target.value }))}
-                                placeholder="..."
-                                className="h-6 text-xs bg-white/5 border-white/10 text-white placeholder:text-white/30"
-                              />
+                              
+                              {/* Status column - multi-select dropdown */}
+                              {col.key === 'status' ? (
+                                <div className="relative" ref={statusDropdownRef}>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowStatusDropdown(!showStatusDropdown);
+                                    }}
+                                    className="h-6 w-full text-xs bg-white/5 border border-white/10 rounded px-2 flex items-center justify-between text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                                  >
+                                    <span className="truncate">{selectedStatuses.size}/{ALL_STATUSES.length}</span>
+                                    <ChevronDown className="w-3 h-3 shrink-0" />
+                                  </button>
+                                  
+                                  {showStatusDropdown && (
+                                    <div 
+                                      className="absolute z-[100] top-7 left-0 w-56 bg-primary border border-white/20 rounded-lg shadow-2xl overflow-hidden"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {/* Header with select/deselect all */}
+                                      <div className="flex items-center justify-between px-2 py-1.5 border-b border-white/10 bg-white/5">
+                                        <button
+                                          onClick={selectAllStatuses}
+                                          className="text-[10px] text-accent hover:text-accent/80 transition-colors"
+                                        >
+                                          Все
+                                        </button>
+                                        <button
+                                          onClick={deselectAllStatuses}
+                                          className="text-[10px] text-white/50 hover:text-white transition-colors"
+                                        >
+                                          Нет
+                                        </button>
+                                        <button
+                                          onClick={() => setSelectedStatuses(new Set(DEFAULT_ENABLED_STATUSES))}
+                                          className="text-[10px] text-accent/70 hover:text-accent transition-colors"
+                                        >
+                                          По умолч.
+                                        </button>
+                                        <button
+                                          onClick={() => setShowStatusDropdown(false)}
+                                          className="text-white/50 hover:text-white transition-colors ml-1"
+                                        >
+                                          <X className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                      {/* Scrollable checkboxes */}
+                                      <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                                        {ALL_STATUSES.map(status => (
+                                          <label
+                                            key={status}
+                                            className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer transition-colors"
+                                          >
+                                            <Checkbox
+                                              checked={selectedStatuses.has(status)}
+                                              onCheckedChange={() => toggleStatus(status)}
+                                              className="border-white/30 data-[state=checked]:bg-accent data-[state=checked]:border-accent h-3.5 w-3.5"
+                                            />
+                                            <span className="text-xs text-white/80 truncate">{status}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <Input
+                                  value={columnSearches[col.key] || ''}
+                                  onChange={(e) => setColumnSearches(prev => ({ ...prev, [col.key]: e.target.value }))}
+                                  placeholder="..."
+                                  className="h-6 text-xs bg-white/5 border-white/10 text-white placeholder:text-white/30"
+                                />
+                              )}
                             </div>
                             {/* Resize handle */}
                             <div

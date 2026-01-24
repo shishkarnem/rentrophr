@@ -51,37 +51,152 @@ interface VariablePercentData {
 }
 const tooltipTexts = {
   ru: {
-    workFormat: 'Согласно Приложению №1: Онлайн — полностью удаленная работа. Комбинированный — с выездами. Стартап — работа с новыми проектами. Без ДПР — без документооборота по проекту.',
-    workHours: 'Согласно Приложению №1: 4 часа — неполный рабочий день, 8 часов — полный рабочий день. При 4 часах можно вести 2 проекта одновременно.',
-    projectsCount: 'Согласно Приложению №1: При неполном рабочем дне (4 часа) возможно ведение 1 или 2 проектов. При 2 проектах базовый тариф удваивается.',
-    region: 'Согласно Приложению №1: Международный — проекты вне СНГ (тариф выше). РФ/СНГ — проекты в России и странах СНГ.',
-    projectDuration: 'Согласно Приложению №1: Чем дольше вы работаете на проекте, тем выше ваш процент с фикса и переменной части.',
-    monthlyRevenue: 'Согласно Приложению №1: Оборот клиента влияет на размер переменной части. Градации: до 60к, 60-120к, свыше 120к рублей.',
-    baseTariff: 'Согласно Приложению №1: Базовый тариф зависит от формата работы, часов и региона. Это основа для расчета фиксированной части.',
-    fixPart: 'Согласно Приложению №1: Фиксированная часть = Базовый тариф × Процент фикса. Процент зависит от срока работы на проекте.',
-    variablePart: 'Согласно Приложению №1: Переменная часть = Оборот клиента × Процент переменной. Зависит от срока и оборота.',
+    workFormat:
+      'Приложение №1 (формат работы)\n\n' +
+      '• Онлайн — полностью удалённо, коммуникация и задачи ведутся в цифровых каналах.\n' +
+      '• Комбинированный — удалённо + возможны выезды/встречи по необходимости.\n' +
+      '• Стартап — работа с новыми/запускаемыми проектами (обычно больше хаоса и задач).\n' +
+      '• Без ДПР — без ведения документооборота/отчетности по проекту (упрощенный контур).\n\n' +
+      'Пример: при одинаковых часах и регионе тариф «Комбинированный» может быть выше «Онлайн» из‑за дополнительных обязательств.',
+    workHours:
+      'Приложение №1 (часы)\n\n' +
+      '• 4 часа — неполная занятость.\n' +
+      '• 8 часов — полная занятость.\n\n' +
+      'Важно: при 4 часах допускается вести 2 проекта (если выбран 2 проекта — базовый тариф для 4 часов удваивается).\n\n' +
+      'Пример: базовый тариф 35 000 ₽ при 4ч/1 проект → при 4ч/2 проекта = 70 000 ₽ (×2).',
+    projectsCount:
+      'Приложение №1 (количество проектов)\n\n' +
+      '• 1 проект — стандартная нагрузка.\n' +
+      '• 2 проекта — допускается только при 4 часах и отражается увеличением базового тарифа.\n\n' +
+      'Пример: 4 часа + 2 проекта → базовый тариф удваивается, а проценты фикса/переменной применяются уже к новой базе.',
+    region:
+      'Приложение №1 (регион проекта)\n\n' +
+      '• Международный — проекты вне СНГ (как правило, выше требования/ставки).\n' +
+      '• РФ/СНГ — проекты в России и странах СНГ.\n\n' +
+      'Пример: база 40 000 ₽ (РФ/СНГ) vs 55 000 ₽ (Международный) при одинаковых формате/часах.',
+    projectDuration:
+      'Приложение №1 (срок работы на проекте)\n\n' +
+      'Чем дольше вы ведете проект, тем выше процент фикса и/или переменной части (ступени по сроку).\n\n' +
+      'Пример: база 60 000 ₽ и фикс 50% → фикс = 30 000 ₽. Если по сроку фикс вырос до 60% → фикс = 36 000 ₽.',
+    monthlyRevenue:
+      'Приложение №1 (оборот в месяц)\n\n' +
+      'Оборот клиента влияет на процент переменной части: используются пороги (например: до 60k, 60–120k, 120k+).\n\n' +
+      'Пример: оборот 100 000 ₽, переменная 10% → переменная = 10 000 ₽.\n' +
+      'Если оборот 130 000 ₽ и переменная 12% → переменная = 15 600 ₽.',
+    baseTariff:
+      'Базовый тариф (Приложение №1)\n\n' +
+      'Это база для расчёта фиксированной части. Зависит от формата работы, часов и региона.\n' +
+      'Если выбрано 4 часа и 2 проекта — база удваивается.\n\n' +
+      'Пример: база 50 000 ₽. Фикс 55% → 27 500 ₽. Переменная отдельно от оборота.',
+    fixPart:
+      'Фиксированная часть (Приложение №1)\n\n' +
+      'Фикс = Базовый тариф × % фикса.\n' +
+      'Процент зависит от срока работы на проекте (ступени).\n\n' +
+      'Пример: база 70 000 ₽ × 50% = 35 000 ₽.',
+    variablePart:
+      'Переменная часть (Приложение №1)\n\n' +
+      'Переменная = Оборот клиента × % переменной.\n' +
+      'Процент зависит от срока на проекте и диапазона оборота.\n\n' +
+      'Пример: оборот 120 000 ₽ × 8% = 9 600 ₽.\n' +
+      'Итого доход = фикс + переменная.',
   },
   en: {
-    workFormat: 'Per Annex 1: Online — fully remote work. Combined — with on-site visits. Startup — new projects. Without DPR — no project documentation.',
-    workHours: 'Per Annex 1: 4 hours — part-time, 8 hours — full-time. With 4 hours, you can manage 2 projects simultaneously.',
-    projectsCount: 'Per Annex 1: With part-time (4 hours), you can manage 1 or 2 projects. With 2 projects, the base tariff doubles.',
-    region: 'Per Annex 1: International — projects outside CIS (higher tariff). RF/CIS — projects in Russia and CIS countries.',
-    projectDuration: 'Per Annex 1: The longer you work on a project, the higher your fix and variable percentages.',
-    monthlyRevenue: 'Per Annex 1: Client turnover affects the variable part. Tiers: up to 60k, 60-120k, over 120k rubles.',
-    baseTariff: 'Per Annex 1: Base tariff depends on work format, hours, and region. This is the basis for calculating the fixed part.',
-    fixPart: 'Per Annex 1: Fixed part = Base tariff × Fix percentage. Percentage depends on project tenure.',
-    variablePart: 'Per Annex 1: Variable part = Client turnover × Variable percentage. Depends on tenure and turnover.',
+    workFormat:
+      'Annex 1 (work format)\n\n' +
+      '• Online — fully remote.\n' +
+      '• Combined — remote + occasional on-site visits/meetings.\n' +
+      '• Startup — new/launch-stage projects.\n' +
+      '• Without DPR — without project paperwork/reporting.\n\n' +
+      'Example: with the same hours/region, “Combined” may have a higher base tariff than “Online”.',
+    workHours:
+      'Annex 1 (hours)\n\n' +
+      '• 4 hours — part-time.\n' +
+      '• 8 hours — full-time.\n\n' +
+      'Important: with 4 hours you may manage 2 projects; if you choose 2 projects, the base tariff for 4 hours doubles.\n\n' +
+      'Example: base 35,000 ₽ at 4h/1 project → 70,000 ₽ at 4h/2 projects (×2).',
+    projectsCount:
+      'Annex 1 (projects count)\n\n' +
+      '• 1 project — standard workload.\n' +
+      '• 2 projects — allowed only at 4 hours and increases the base tariff.\n\n' +
+      'Example: 4h + 2 projects → base tariff doubles, then fix/variable % apply to that new base.',
+    region:
+      'Annex 1 (region)\n\n' +
+      '• International — projects outside CIS (often higher requirements/rates).\n' +
+      '• RF/CIS — projects in Russia and CIS countries.\n\n' +
+      'Example: base 40,000 ₽ (RF/CIS) vs 55,000 ₽ (International) at the same format/hours.',
+    projectDuration:
+      'Annex 1 (project tenure)\n\n' +
+      'The longer you work on a project, the higher your fix/variable percentages (tiered by duration).\n\n' +
+      'Example: base 60,000 ₽ and fix 50% → 30,000 ₽. If the fix tier becomes 60% → 36,000 ₽.',
+    monthlyRevenue:
+      'Annex 1 (monthly turnover)\n\n' +
+      'Turnover affects the variable percentage via thresholds (e.g., up to 60k, 60–120k, 120k+).\n\n' +
+      'Example: 100,000 ₽ turnover, 10% variable → 10,000 ₽.\n' +
+      '130,000 ₽ turnover, 12% variable → 15,600 ₽.',
+    baseTariff:
+      'Base tariff (Annex 1)\n\n' +
+      'This is the base for the fixed part. It depends on format, hours, and region.\n' +
+      'If 4 hours + 2 projects is selected, the base doubles.\n\n' +
+      'Example: base 50,000 ₽, fix 55% → 27,500 ₽.',
+    fixPart:
+      'Fixed part (Annex 1)\n\n' +
+      'Fixed = Base tariff × Fix %.\n' +
+      'Fix % depends on project tenure (tiered).\n\n' +
+      'Example: 70,000 ₽ × 50% = 35,000 ₽.',
+    variablePart:
+      'Variable part (Annex 1)\n\n' +
+      'Variable = Client turnover × Variable %.\n' +
+      'Variable % depends on tenure and turnover tier.\n\n' +
+      'Example: 120,000 ₽ × 8% = 9,600 ₽.\n' +
+      'Total income = fixed + variable.',
   },
   kz: {
-    workFormat: 'Қосымша №1 бойынша: Онлайн — толық қашықтан жұмыс. Аралас — шығумен. Стартап — жаңа жобалар. ДПР-сіз — жоба құжаттамасынсыз.',
-    workHours: 'Қосымша №1 бойынша: 4 сағат — толық емес жұмыс күні, 8 сағат — толық жұмыс күні. 4 сағатта 2 жобаны бір мезгілде жүргізуге болады.',
-    projectsCount: 'Қосымша №1 бойынша: Толық емес жұмыс күнінде (4 сағат) 1 немесе 2 жобаны жүргізуге болады. 2 жобада базалық тариф екі есе артады.',
-    region: 'Қосымша №1 бойынша: Халықаралық — ТМД-дан тыс жобалар (жоғары тариф). РФ/ТМД — Ресей және ТМД елдеріндегі жобалар.',
-    projectDuration: 'Қосымша №1 бойынша: Жобада неғұрлым ұзақ жұмыс істесеңіз, фикс пен айнымалы пайызыңыз соғұрлым жоғары.',
-    monthlyRevenue: 'Қосымша №1 бойынша: Клиент айналымы айнымалы бөлікке әсер етеді. Деңгейлер: 60к дейін, 60-120к, 120к рубльден жоғары.',
-    baseTariff: 'Қосымша №1 бойынша: Базалық тариф жұмыс форматына, сағаттарға және аймаққа байланысты. Бұл тұрақты бөлікті есептеу негізі.',
-    fixPart: 'Қосымша №1 бойынша: Тұрақты бөлік = Базалық тариф × Фикс пайызы. Пайыз жобадағы жұмыс мерзіміне байланысты.',
-    variablePart: 'Қосымша №1 бойынша: Айнымалы бөлік = Клиент айналымы × Айнымалы пайыз. Мерзім мен айналымға байланысты.',
+    workFormat:
+      'Қосымша №1 (жұмыс форматы)\n\n' +
+      '• Онлайн — толық қашықтан.\n' +
+      '• Аралас — қашықтан + қажет болса шығу/кездесу.\n' +
+      '• Стартап — жаңа/іске қосылатын жобалар.\n' +
+      '• ДПР-сіз — жоба құжаттамасын/есепті жүргізбей.\n\n' +
+      'Мысал: бірдей сағат/аймақта «Аралас» тарифі «Онлайннан» жоғары болуы мүмкін.',
+    workHours:
+      'Қосымша №1 (сағат)\n\n' +
+      '• 4 сағат — толық емес жұмыс күні.\n' +
+      '• 8 сағат — толық жұмыс күні.\n\n' +
+      'Маңызды: 4 сағатта 2 жобаны жүргізуге болады; 2 жоба таңдалса, базалық тариф екі есе өседі.\n\n' +
+      'Мысал: 4сағ/1 жоба 35 000 ₽ → 4сағ/2 жоба 70 000 ₽ (×2).',
+    projectsCount:
+      'Қосымша №1 (жобалар саны)\n\n' +
+      '• 1 жоба — стандартты жүктеме.\n' +
+      '• 2 жоба — тек 4 сағатта және базалық тарифті арттырады.\n\n' +
+      'Мысал: 4 сағат + 2 жоба → базалық тариф ×2, содан кейін фикс/айнымалы пайызы қолданылады.',
+    region:
+      'Қосымша №1 (аймақ)\n\n' +
+      '• Халықаралық — ТМД-дан тыс жобалар.\n' +
+      '• РФ/ТМД — Ресей және ТМД елдеріндегі жобалар.\n\n' +
+      'Мысал: база 40 000 ₽ (РФ/ТМД) vs 55 000 ₽ (Халықаралық).',
+    projectDuration:
+      'Қосымша №1 (жобадағы мерзім)\n\n' +
+      'Жобада ұзақ жұмыс істеген сайын фикс/айнымалы пайыз жоғарылайды (сатылы түрде).\n\n' +
+      'Мысал: база 60 000 ₽ және фикс 50% → 30 000 ₽. Фикс 60% болса → 36 000 ₽.',
+    monthlyRevenue:
+      'Қосымша №1 (айлық айналым)\n\n' +
+      'Айналым айнымалы пайызға шектер арқылы әсер етеді (мысалы: 60k дейін, 60–120k, 120k+).\n\n' +
+      'Мысал: айналым 100 000 ₽, 10% → 10 000 ₽.\n' +
+      'Айналым 130 000 ₽, 12% → 15 600 ₽.',
+    baseTariff:
+      'Базалық тариф (Қосымша №1)\n\n' +
+      'Бұл фикс бөлігін есептеудің негізі. Формат/сағат/аймаққа байланысты.\n' +
+      '4 сағат + 2 жоба болса — база ×2.\n\n' +
+      'Мысал: база 50 000 ₽, фикс 55% → 27 500 ₽.',
+    fixPart:
+      'Фикс бөлігі (Қосымша №1)\n\n' +
+      'Фикс = Базалық тариф × Фикс %.\n\n' +
+      'Мысал: 70 000 ₽ × 50% = 35 000 ₽.',
+    variablePart:
+      'Айнымалы бөлік (Қосымша №1)\n\n' +
+      'Айнымалы = Клиент айналымы × Айнымалы %.\n\n' +
+      'Мысал: 120 000 ₽ × 8% = 9 600 ₽.\n' +
+      'Жалпы табыс = фикс + айнымалы.',
   }
 };
 

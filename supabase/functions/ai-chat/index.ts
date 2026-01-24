@@ -130,73 +130,103 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       .map(term => `search_keywords.ilike.%${term}%,question.ilike.%${term}%`)
       .join(',');
 
-    // Получаем все потенциальные совпадения (с запасом)
+    // Получаем все потенциальные совпадения из faq_knowledge (с запасом)
     const { data: faqs, error } = await supabase
       .from('faq_knowledge')
       .select('question, answer, search_keywords')
       .or(orConditions)
-      .limit(50); // Берём больше для ранжирования
+      .limit(50);
 
     if (error) {
       console.error("FAQ search error:", error);
-      return "";
     }
 
-    if (!faqs || faqs.length === 0) {
-      console.log("No relevant FAQs found");
-      return "";
-    }
+    // Также ищем в contract_faq
+    const contractOrConditions = searchKeywords
+      .map(term => `question.ilike.%${term}%,answer.ilike.%${term}%`)
+      .join(',');
 
-    console.log(`Found ${faqs.length} potential FAQs, ranking by relevance...`);
+    const { data: contractFaqs, error: contractError } = await supabase
+      .from('contract_faq')
+      .select('question, answer, category')
+      .or(contractOrConditions)
+      .limit(30);
+
+    if (contractError) {
+      console.error("Contract FAQ search error:", contractError);
+    }
 
     // Тип для ранжированного FAQ
     interface RankedFaq {
       question: string;
       answer: string;
-      search_keywords: string | null;
+      search_keywords?: string | null;
+      category?: string | null;
       matchCount: number;
       relevanceScore: number;
+      source: 'faq' | 'contract';
     }
 
-    // Ранжируем FAQ по количеству совпавших ключевых слов
-    const rankedFaqs: RankedFaq[] = faqs
-      .map((faq: { question: string; answer: string; search_keywords: string | null }) => {
+    const allFaqs: RankedFaq[] = [];
+
+    // Ранжируем FAQ из faq_knowledge
+    if (faqs && faqs.length > 0) {
+      faqs.forEach((faq: { question: string; answer: string; search_keywords: string | null }) => {
         const faqText = `${faq.question} ${faq.search_keywords || ''}`.toLowerCase();
+        const matchCount = searchKeywords.filter(keyword => faqText.includes(keyword)).length;
+        const startsWithBonus = searchKeywords.some(kw => faq.question.toLowerCase().startsWith(kw)) ? 1 : 0;
         
-        // Подсчитываем количество совпавших ключевых слов
-        const matchCount = searchKeywords.filter(keyword => 
-          faqText.includes(keyword)
-        ).length;
+        if (matchCount > 0) {
+          allFaqs.push({
+            ...faq,
+            matchCount,
+            relevanceScore: matchCount + startsWithBonus,
+            source: 'faq'
+          });
+        }
+      });
+    }
 
-        // Бонус за совпадение в начале вопроса
-        const startsWithBonus = searchKeywords.some(kw => 
-          faq.question.toLowerCase().startsWith(kw)
-        ) ? 1 : 0;
+    // Ранжируем FAQ из contract_faq
+    if (contractFaqs && contractFaqs.length > 0) {
+      contractFaqs.forEach((faq: { question: string; answer: string; category: string | null }) => {
+        const faqText = `${faq.question} ${faq.answer} ${faq.category || ''}`.toLowerCase();
+        const matchCount = searchKeywords.filter(keyword => faqText.includes(keyword)).length;
+        const startsWithBonus = searchKeywords.some(kw => faq.question.toLowerCase().startsWith(kw)) ? 1 : 0;
+        // Бонус за вопросы о договоре
+        const contractBonus = searchKeywords.some(kw => 
+          ['договор', 'контракт', 'contract', 'шарт', 'оплата', 'payment', 'санкц', 'штраф'].includes(kw)
+        ) ? 2 : 0;
+        
+        if (matchCount > 0) {
+          allFaqs.push({
+            ...faq,
+            matchCount,
+            relevanceScore: matchCount + startsWithBonus + contractBonus,
+            source: 'contract'
+          });
+        }
+      });
+    }
 
-        return { 
-          ...faq, 
-          matchCount,
-          relevanceScore: matchCount + startsWithBonus
-        };
-      })
-      .filter((faq: RankedFaq) => faq.matchCount > 0) // Только FAQ с совпадениями
-      .sort((a: RankedFaq, b: RankedFaq) => b.relevanceScore - a.relevanceScore) // Сортируем по релевантности
-      .slice(0, limit); // Берём топ-N
-
-    if (rankedFaqs.length === 0) {
+    if (allFaqs.length === 0) {
       console.log("No FAQs matched after ranking");
       return "";
     }
 
+    // Сортируем по релевантности и берём топ-N
+    const rankedFaqs = allFaqs
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, limit);
+
     console.log(`Top ${rankedFaqs.length} FAQs after ranking:`);
-    rankedFaqs.forEach((faq: RankedFaq, i: number) => {
-      console.log(`  ${i + 1}. Score: ${faq.relevanceScore} (${faq.matchCount} matches) - ${faq.question.substring(0, 50)}...`);
+    rankedFaqs.forEach((faq, i) => {
+      console.log(`  ${i + 1}. Score: ${faq.relevanceScore} (${faq.matchCount} matches, ${faq.source}) - ${faq.question.substring(0, 50)}...`);
     });
 
     // Форматируем найденные FAQ
     const faqContext = rankedFaqs
-      .map((faq: { question: string; answer: string }) => 
-        `Вопрос: ${faq.question}\nОтвет: ${faq.answer}`)
+      .map(faq => `Вопрос: ${faq.question}\nОтвет: ${faq.answer}`)
       .join('\n\n---\n\n');
 
     return `\n\n=== РЕЛЕВАНТНЫЕ FAQ ИЗ БАЗЫ ЗНАНИЙ ===\n\n${faqContext}`;

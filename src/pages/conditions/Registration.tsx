@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import PageTransition from "@/components/PageTransition";
 import { useTelegram } from "@/contexts/TelegramContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ContractFAQ from "@/components/ContractFAQ";
 const Registration = () => {
   const { t } = useLanguage();
   const { isTelegram } = useTelegram();
@@ -396,6 +397,11 @@ const Registration = () => {
                         ))}
                       </ul>
                     </CardGlassDark>
+                  </motion.div>
+
+                  {/* Contract FAQ Section */}
+                  <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
+                    <ContractFAQ />
                   </motion.div>
                 </div>
               </div>

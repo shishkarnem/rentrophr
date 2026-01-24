@@ -7,6 +7,7 @@ import { useCrmData } from '@/hooks/useCrmData';
 import { Button } from '@/components/ui/button';
 import MobileNavbar from '@/components/MobileNavbar';
 import MobileHeader from '@/components/MobileHeader';
+import ContractFAQ from '@/components/ContractFAQ';
 const translations = {
   ru: {
     title: 'Создание договора',
@@ -269,6 +270,9 @@ const ContractIntro = () => {
               </a>
             </Button>
           </div>
+
+          {/* Contract FAQ */}
+          <ContractFAQ />
         </div>
       </main>
 

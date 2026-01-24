@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, DollarSign, Briefcase, Clock, MapPin, TrendingUp, Info, Sparkles, Coins } from 'lucide-react';
+import { Calculator, DollarSign, Briefcase, Clock, MapPin, TrendingUp, Info, Sparkles } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardGlassDark, CardGlassDarkHeader, CardGlassDarkTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import CalculatorTooltip from './CalculatorTooltip';
 interface CurrencyRates {
   tenge_rate: number;
   usd_rate: number;
@@ -48,6 +49,42 @@ interface VariablePercentData {
     '120k_plus': number;
   };
 }
+const tooltipTexts = {
+  ru: {
+    workFormat: 'Согласно Приложению №1: Онлайн — полностью удаленная работа. Комбинированный — с выездами. Стартап — работа с новыми проектами. Без ДПР — без документооборота по проекту.',
+    workHours: 'Согласно Приложению №1: 4 часа — неполный рабочий день, 8 часов — полный рабочий день. При 4 часах можно вести 2 проекта одновременно.',
+    projectsCount: 'Согласно Приложению №1: При неполном рабочем дне (4 часа) возможно ведение 1 или 2 проектов. При 2 проектах базовый тариф удваивается.',
+    region: 'Согласно Приложению №1: Международный — проекты вне СНГ (тариф выше). РФ/СНГ — проекты в России и странах СНГ.',
+    projectDuration: 'Согласно Приложению №1: Чем дольше вы работаете на проекте, тем выше ваш процент с фикса и переменной части.',
+    monthlyRevenue: 'Согласно Приложению №1: Оборот клиента влияет на размер переменной части. Градации: до 60к, 60-120к, свыше 120к рублей.',
+    baseTariff: 'Согласно Приложению №1: Базовый тариф зависит от формата работы, часов и региона. Это основа для расчета фиксированной части.',
+    fixPart: 'Согласно Приложению №1: Фиксированная часть = Базовый тариф × Процент фикса. Процент зависит от срока работы на проекте.',
+    variablePart: 'Согласно Приложению №1: Переменная часть = Оборот клиента × Процент переменной. Зависит от срока и оборота.',
+  },
+  en: {
+    workFormat: 'Per Annex 1: Online — fully remote work. Combined — with on-site visits. Startup — new projects. Without DPR — no project documentation.',
+    workHours: 'Per Annex 1: 4 hours — part-time, 8 hours — full-time. With 4 hours, you can manage 2 projects simultaneously.',
+    projectsCount: 'Per Annex 1: With part-time (4 hours), you can manage 1 or 2 projects. With 2 projects, the base tariff doubles.',
+    region: 'Per Annex 1: International — projects outside CIS (higher tariff). RF/CIS — projects in Russia and CIS countries.',
+    projectDuration: 'Per Annex 1: The longer you work on a project, the higher your fix and variable percentages.',
+    monthlyRevenue: 'Per Annex 1: Client turnover affects the variable part. Tiers: up to 60k, 60-120k, over 120k rubles.',
+    baseTariff: 'Per Annex 1: Base tariff depends on work format, hours, and region. This is the basis for calculating the fixed part.',
+    fixPart: 'Per Annex 1: Fixed part = Base tariff × Fix percentage. Percentage depends on project tenure.',
+    variablePart: 'Per Annex 1: Variable part = Client turnover × Variable percentage. Depends on tenure and turnover.',
+  },
+  kz: {
+    workFormat: 'Қосымша №1 бойынша: Онлайн — толық қашықтан жұмыс. Аралас — шығумен. Стартап — жаңа жобалар. ДПР-сіз — жоба құжаттамасынсыз.',
+    workHours: 'Қосымша №1 бойынша: 4 сағат — толық емес жұмыс күні, 8 сағат — толық жұмыс күні. 4 сағатта 2 жобаны бір мезгілде жүргізуге болады.',
+    projectsCount: 'Қосымша №1 бойынша: Толық емес жұмыс күнінде (4 сағат) 1 немесе 2 жобаны жүргізуге болады. 2 жобада базалық тариф екі есе артады.',
+    region: 'Қосымша №1 бойынша: Халықаралық — ТМД-дан тыс жобалар (жоғары тариф). РФ/ТМД — Ресей және ТМД елдеріндегі жобалар.',
+    projectDuration: 'Қосымша №1 бойынша: Жобада неғұрлым ұзақ жұмыс істесеңіз, фикс пен айнымалы пайызыңыз соғұрлым жоғары.',
+    monthlyRevenue: 'Қосымша №1 бойынша: Клиент айналымы айнымалы бөлікке әсер етеді. Деңгейлер: 60к дейін, 60-120к, 120к рубльден жоғары.',
+    baseTariff: 'Қосымша №1 бойынша: Базалық тариф жұмыс форматына, сағаттарға және аймаққа байланысты. Бұл тұрақты бөлікті есептеу негізі.',
+    fixPart: 'Қосымша №1 бойынша: Тұрақты бөлік = Базалық тариф × Фикс пайызы. Пайыз жобадағы жұмыс мерзіміне байланысты.',
+    variablePart: 'Қосымша №1 бойынша: Айнымалы бөлік = Клиент айналымы × Айнымалы пайыз. Мерзім мен айналымға байланысты.',
+  }
+};
+
 const translations = {
   ru: {
     title: 'Калькулятор зарплаты',
@@ -178,6 +215,7 @@ const SalaryCalculator = () => {
     language
   } = useLanguage();
   const t = translations[language as keyof typeof translations] || translations.ru;
+  const tt = tooltipTexts[language as keyof typeof tooltipTexts] || tooltipTexts.ru;
   const [isLoading, setIsLoading] = useState(true);
   const [params, setParams] = useState<Record<string, CalculatorParams>>({});
 
@@ -347,6 +385,7 @@ const SalaryCalculator = () => {
               <label className="text-white/70 text-sm mb-2 flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-accent" />
                 {t.workFormat}
+                <CalculatorTooltip content={tt.workFormat} />
               </label>
               <Select value={workFormat} onValueChange={v => setWorkFormat(v as typeof workFormat)}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
@@ -366,6 +405,7 @@ const SalaryCalculator = () => {
               <label className="text-white/70 text-sm mb-2 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-accent" />
                 {t.workHours}
+                <CalculatorTooltip content={tt.workHours} />
               </label>
               <div className="flex gap-2">
                 <motion.button whileHover={{
@@ -402,7 +442,7 @@ const SalaryCalculator = () => {
             opacity: 0,
             height: 0
           }}>
-                <label className="text-white/70 text-sm mb-2 block">{t.projectsCount}</label>
+                <label className="text-white/70 text-sm mb-2 flex items-center gap-2">{t.projectsCount}<CalculatorTooltip content={tt.projectsCount} /></label>
                 <div className="flex gap-2">
                   <motion.button whileHover={{
                 scale: 1.02
@@ -426,6 +466,7 @@ const SalaryCalculator = () => {
               <label className="text-white/70 text-sm mb-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-accent" />
                 {t.region}
+                <CalculatorTooltip content={tt.region} />
               </label>
               <div className="flex gap-2">
                 <motion.button whileHover={{
@@ -450,6 +491,7 @@ const SalaryCalculator = () => {
               <label className="text-white/70 text-sm mb-2 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
                 {t.projectDuration}
+                <CalculatorTooltip content={tt.projectDuration} />
               </label>
               <Select value={projectDuration} onValueChange={v => setProjectDuration(v as typeof projectDuration)}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
@@ -470,6 +512,7 @@ const SalaryCalculator = () => {
                 <span className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-accent" />
                   {t.monthlyRevenue}
+                  <CalculatorTooltip content={tt.monthlyRevenue} />
                 </span>
                 <span className="text-accent font-semibold">{formatMoney(monthlyRevenue)} ₽</span>
               </label>
@@ -500,7 +543,7 @@ const SalaryCalculator = () => {
             }} className="space-y-4">
                   {/* Base Tariff */}
                   <div className="p-4 glass-dark rounded-xl">
-                    <p className="text-white/50 text-sm">{t.baseTariff}</p>
+                    <p className="text-white/50 text-sm flex items-center gap-1">{t.baseTariff}<CalculatorTooltip content={tt.baseTariff} /></p>
                     <p className="text-xl font-bold text-white">{formatMoney(calculation.baseTariff)} ₽</p>
                   </div>
 
@@ -509,7 +552,7 @@ const SalaryCalculator = () => {
                 borderColor: 'rgba(255,215,0,0.6)'
               }}>
                     <div className="flex justify-between items-center mb-2">
-                      <p className="text-white/50 text-sm">{t.fixPart}</p>
+                      <p className="text-white/50 text-sm flex items-center gap-1">{t.fixPart}<CalculatorTooltip content={tt.fixPart} /></p>
                       <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
                         {calculation.fixPercent}%
                       </span>
@@ -522,7 +565,7 @@ const SalaryCalculator = () => {
                 borderColor: 'rgba(255,215,0,0.6)'
               }}>
                     <div className="flex justify-between items-center mb-2">
-                      <p className="text-white/50 text-sm">{t.variablePart}</p>
+                      <p className="text-white/50 text-sm flex items-center gap-1">{t.variablePart}<CalculatorTooltip content={tt.variablePart} /></p>
                       <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
                         {calculation.variablePercent}%
                       </span>

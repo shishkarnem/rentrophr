@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, type MouseEvent as ReactMouseEvent } from 'react';
 import { HelpCircle, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 interface CalculatorTooltipProps {
@@ -43,18 +43,6 @@ const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
   }, [isOpen, updatePosition]);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (
-        tooltipRef.current && 
-        !tooltipRef.current.contains(target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsOpen(false);
@@ -62,22 +50,14 @@ const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
     };
 
     const handleScroll = () => {
-      if (isOpen) {
-        updatePosition();
-      }
+      if (isOpen) updatePosition();
     };
 
     if (isOpen) {
-      // Use setTimeout to avoid immediate close on click
-      const timer = setTimeout(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-      }, 0);
       document.addEventListener('keydown', handleEscape);
       window.addEventListener('scroll', handleScroll, true);
 
       return () => {
-        clearTimeout(timer);
-        document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('keydown', handleEscape);
         window.removeEventListener('scroll', handleScroll, true);
       };
@@ -103,50 +83,46 @@ const CalculatorTooltip = ({ content }: CalculatorTooltipProps) => {
         <HelpCircle className="w-4 h-4" />
       </button>
 
-      {createPortal(
-        <AnimatePresence>
-          {isOpen && (
-            <>
-              {/* click-catcher to close on outside click (also ensures we're above all blocks) */}
-              <div
-                className="fixed inset-0"
-                style={{ zIndex: 99998 }}
+      {isOpen &&
+        createPortal(
+          <>
+            {/* click-catcher to close on outside click */}
+            <div
+              className="fixed inset-0"
+              style={{ zIndex: 99998 }}
+              onClick={() => setIsOpen(false)}
+            />
+
+            <motion.div
+              ref={tooltipRef}
+              initial={{ opacity: 0, scale: 0.96, y: -8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed w-80 p-4 bg-primary/95 backdrop-blur-md border border-accent/40 rounded-2xl shadow-2xl"
+              style={{
+                zIndex: 99999,
+                top: position.top,
+                left: position.left,
+                maxHeight: 'min(360px, 60vh)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
                 onClick={() => setIsOpen(false)}
-              />
-
-              <motion.div
-                ref={tooltipRef}
-                initial={{ opacity: 0, scale: 0.96, y: -8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -8 }}
-                transition={{ duration: 0.18 }}
-                className="fixed w-80 p-4 bg-primary/95 backdrop-blur-md border border-accent/40 rounded-2xl shadow-2xl"
-                style={{
-                  zIndex: 99999,
-                  top: position.top,
-                  left: position.left,
-                  maxHeight: 'min(360px, 60vh)',
-                }}
-                onClick={(e) => e.stopPropagation()}
+                className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors z-10"
+                type="button"
+                aria-label="Закрыть"
               >
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="absolute top-3 right-3 text-white/50 hover:text-white transition-colors z-10"
-                  type="button"
-                  aria-label="Закрыть"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <X className="w-5 h-5" />
+              </button>
 
-                <div className="max-h-72 overflow-y-auto pr-6">
-                  <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{content}</p>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+              <div className="max-h-72 overflow-y-auto pr-6">
+                <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{content}</p>
+              </div>
+            </motion.div>
+          </>,
+          document.body
+        )}
     </>
   );
 };

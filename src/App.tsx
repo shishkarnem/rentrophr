@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TelegramProvider, useTelegram } from "@/contexts/TelegramContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSyncFaq } from "@/hooks/useSyncFaq";
+import { useSyncCrm } from "@/hooks/useSyncCrm";
+import { useSyncProjects } from "@/hooks/useSyncProjects";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -78,6 +82,29 @@ const AppContent = () => {
   const { isLoading, isTelegram } = useTelegram();
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
+  
+  // Sync hooks for auto-sync on app load
+  const { syncOnAppLoad: syncFaq } = useSyncFaq();
+  const { syncOnAppLoad: syncCrm } = useSyncCrm();
+  const { syncOnAppLoad: syncProjects } = useSyncProjects();
+  const syncInitiatedRef = useRef(false);
+
+  // Auto-sync all data on app load (replaces cron jobs)
+  useEffect(() => {
+    if (!syncInitiatedRef.current && !isLoading) {
+      syncInitiatedRef.current = true;
+      console.log('[App] Initiating auto-sync on app load...');
+      
+      // Run syncs in parallel
+      Promise.allSettled([
+        syncFaq(),
+        syncCrm(),
+        syncProjects()
+      ]).then(results => {
+        console.log('[App] Auto-sync completed:', results);
+      });
+    }
+  }, [isLoading, syncFaq, syncCrm, syncProjects]);
 
   // Show loader while Telegram is initializing (only in first ~5 seconds)
   if (isLoading) {

@@ -1,10 +1,34 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// ProTalk API configuration
+const PROTALK_URL = "https://eu1.api.pro-talk.ru/api/v1.0/ask";
+
+const generateChatId = () => `ask${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+async function askProTalk(message: string, token: string, botId: number): Promise<string> {
+  const response = await fetch(`${PROTALK_URL}/${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bot_id: botId,
+      chat_id: generateChatId(),
+      message
+    })
+  });
+
+  if (!response.ok) {
+    console.error('ProTalk API error:', response.status);
+    throw new Error(`ProTalk API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.done || '';
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,74 +45,47 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const PROTALK_BOT_TOKEN = Deno.env.get('PROTALK_BOT_TOKEN');
+    const PROTALK_BOT_ID = Deno.env.get('PROTALK_BOT_ID');
+    
+    if (!PROTALK_BOT_TOKEN || !PROTALK_BOT_ID) {
+      throw new Error('ProTalk credentials are not configured');
     }
 
     // Build context from FAQ items
     const faqContext = faqItems
-      .slice(0, 20) // Limit to prevent token overflow
+      .slice(0, 20)
       .map((item: { question: string; answer: string; category: string | null }, index: number) => 
         `${index + 1}. [${item.category || 'Общее'}] Вопрос: ${item.question}\nОтвет: ${item.answer}`
       )
       .join('\n\n');
 
-    const languageInstructions = {
+    const languageInstructions: Record<string, string> = {
       ru: 'Отвечай на русском языке.',
       en: 'Answer in English.',
       kz: 'Қазақ тілінде жауап беріңіз.',
     };
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'system',
-            content: `Ты умный помощник по базе знаний FAQ. Твоя задача - найти релевантную информацию и дать точный, полезный ответ на вопрос пользователя.
+    const prompt = `Ты умный помощник по базе знаний FAQ. Твоя задача - найти релевантную информацию и дать точный, полезный ответ на вопрос пользователя.
 
 Правила:
 - Отвечай только на основе предоставленного контекста FAQ
 - Если точного ответа нет в базе, скажи об этом честно и предложи посмотреть похожие вопросы
 - Будь кратким, но информативным (максимум 3-4 предложения)
 - Если есть ссылки в ответах FAQ, обязательно включи их в ответ
-- ${languageInstructions[language as keyof typeof languageInstructions] || languageInstructions.ru}`
-          },
-          {
-            role: 'user',
-            content: `База знаний FAQ:\n\n${faqContext}\n\n---\n\nВопрос пользователя: "${query}"\n\nНайди наиболее релевантный ответ из базы знаний и сформулируй краткий полезный ответ.`
-          }
-        ],
-      }),
-    });
+- ${languageInstructions[language] || languageInstructions.ru}
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded, please try again later.', aiResponse: null }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'Payment required', aiResponse: null }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
-    }
+База знаний FAQ:
 
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || null;
+${faqContext}
+
+---
+
+Вопрос пользователя: "${query}"
+
+Найди наиболее релевантный ответ из базы знаний и сформулируй краткий полезный ответ.`;
+
+    const aiResponse = await askProTalk(prompt, PROTALK_BOT_TOKEN, parseInt(PROTALK_BOT_ID));
 
     return new Response(
       JSON.stringify({ aiResponse }),

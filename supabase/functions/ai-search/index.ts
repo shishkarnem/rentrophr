@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -6,17 +5,39 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ProTalk API configuration
+const PROTALK_URL = "https://eu1.api.pro-talk.ru/api/v1.0/ask";
+
+const generateChatId = () => `ask${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+async function askProTalk(message: string, token: string, botId: number): Promise<string> {
+  const response = await fetch(`${PROTALK_URL}/${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bot_id: botId,
+      chat_id: generateChatId(),
+      message
+    })
+  });
+
+  if (!response.ok) {
+    console.error('ProTalk API error:', response.status);
+    throw new Error(`ProTalk API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.done || '';
+}
+
 // Page content database for search
 const pageContent: Record<string, { title: string; path: string; category: string; content: string }> = {
-  // Main pages
   'home': {
     title: 'Главная',
     path: '/',
     category: 'Главная',
     content: 'RentROP HR портал вакансий. Удаленный отдел продаж. Работа менеджером по продажам. Зарплата от 100 000 рублей. Гибкий график работы.'
   },
-  
-  // Work pages
   'arenda-ropov': {
     title: 'Аренда РОПов',
     path: '/work/arenda-ropov',
@@ -53,8 +74,6 @@ const pageContent: Record<string, { title: string; path: string; category: strin
     category: 'Работа',
     content: 'Сотрудники компании. Менеджеры по продажам. Руководители. Команда поддержки.'
   },
-  
-  // Conditions pages
   'motivation': {
     title: 'Мотивация',
     path: '/conditions/motivation',
@@ -85,8 +104,6 @@ const pageContent: Record<string, { title: string; path: string; category: strin
     category: 'Условия',
     content: 'Выплаты зарплаты. График выплат. Способы получения. Налоги. Бонусы.'
   },
-  
-  // Motivation sub-pages
   'fix': {
     title: 'Фикс',
     path: '/conditions/motivation/fix',
@@ -143,13 +160,11 @@ serve(async (req) => {
         const contentMatch = page.content.toLowerCase().includes(lowerQuery);
         const categoryMatch = page.category.toLowerCase().includes(lowerQuery);
         
-        // Calculate relevance score
         let score = 0;
         if (titleMatch) score += 10;
         if (categoryMatch) score += 5;
         if (contentMatch) score += 3;
         
-        // Count keyword occurrences in content
         const occurrences = (page.content.toLowerCase().match(new RegExp(lowerQuery, 'g')) || []).length;
         score += occurrences;
         
@@ -159,41 +174,35 @@ serve(async (req) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
-    // Generate AI summary using Lovable AI
+    // Generate AI summary using ProTalk
     let aiSummary = null;
     
     if (searchResults.length > 0) {
       try {
-        const contextText = searchResults
-          .map(r => `${r.title}: ${r.content}`)
-          .join('\n');
+        const PROTALK_BOT_TOKEN = Deno.env.get('PROTALK_BOT_TOKEN');
+        const PROTALK_BOT_ID = Deno.env.get('PROTALK_BOT_ID');
 
-        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
-            messages: [
-              {
-                role: 'system',
-                content: `Ты помощник по поиску на HR-портале RentROP. Отвечай кратко и по делу на ${language === 'ru' ? 'русском' : language === 'en' ? 'английском' : 'казахском'} языке. Максимум 2 предложения.`
-              },
-              {
-                role: 'user',
-                content: `Пользователь ищет: "${query}"\n\nНайденная информация:\n${contextText}\n\nДай краткий полезный ответ на запрос пользователя.`
-              }
-            ],
-            max_tokens: 150,
-            temperature: 0.7,
-          }),
-        });
+        if (PROTALK_BOT_TOKEN && PROTALK_BOT_ID) {
+          const contextText = searchResults
+            .map(r => `${r.title}: ${r.content}`)
+            .join('\n');
 
-        if (response.ok) {
-          const data = await response.json();
-          aiSummary = data.choices?.[0]?.message?.content || null;
+          const langNames: Record<string, string> = {
+            'ru': 'русском',
+            'en': 'английском',
+            'kz': 'казахском'
+          };
+
+          const prompt = `Ты помощник по поиску на HR-портале RentROP. Отвечай кратко и по делу на ${langNames[language] || 'русском'} языке. Максимум 2 предложения.
+
+Пользователь ищет: "${query}"
+
+Найденная информация:
+${contextText}
+
+Дай краткий полезный ответ на запрос пользователя.`;
+
+          aiSummary = await askProTalk(prompt, PROTALK_BOT_TOKEN, parseInt(PROTALK_BOT_ID));
         }
       } catch (aiError) {
         console.error('AI summary error:', aiError);

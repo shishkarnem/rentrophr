@@ -6,6 +6,32 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// ProTalk API configuration
+const PROTALK_URL = "https://eu1.api.pro-talk.ru/api/v1.0/ask";
+
+const generateChatId = () => `ask${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+async function askProTalk(message: string, token: string, botId: number): Promise<string> {
+  const response = await fetch(`${PROTALK_URL}/${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bot_id: botId,
+      chat_id: generateChatId(),
+      message
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('ProTalk API error:', response.status, errorText);
+    throw new Error(`ProTalk API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.done || '';
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,9 +47,11 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const PROTALK_BOT_TOKEN = Deno.env.get("PROTALK_BOT_TOKEN");
+    const PROTALK_BOT_ID = Deno.env.get("PROTALK_BOT_ID");
+    
+    if (!PROTALK_BOT_TOKEN || !PROTALK_BOT_ID) {
+      throw new Error("ProTalk credentials are not configured");
     }
 
     const languageNames: Record<string, string> = {
@@ -34,7 +62,7 @@ serve(async (req) => {
 
     const targetLang = languageNames[targetLanguage] || languageNames.ru;
 
-    const systemPrompt = `Ты профессиональный переводчик. Переведи текст резюме на ${targetLang}.
+    const prompt = `Ты профессиональный переводчик. Переведи текст резюме на ${targetLang}.
 
 Требования:
 - Сохраняй структуру и форматирование оригинала
@@ -43,43 +71,13 @@ serve(async (req) => {
 - Даты и цифры не меняй
 - Если текст уже на нужном языке - верни его без изменений с небольшими улучшениями стиля
 
-Верни только переведённый текст без дополнительных комментариев.`;
+Верни только переведённый текст без дополнительных комментариев.
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: resumeText }
-        ],
-      }),
-    });
+Текст резюме для перевода:
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Слишком много запросов. Попробуйте позже." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Превышен лимит использования AI." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
-    }
+${resumeText}`;
 
-    const data = await response.json();
-    const translatedText = data.choices?.[0]?.message?.content;
+    const translatedText = await askProTalk(prompt, PROTALK_BOT_TOKEN, parseInt(PROTALK_BOT_ID));
 
     if (!translatedText) {
       throw new Error("No translation generated");

@@ -6,6 +6,32 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// ProTalk API configuration
+const PROTALK_URL = "https://eu1.api.pro-talk.ru/api/v1.0/ask";
+
+const generateChatId = () => `ask${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+async function askProTalk(message: string, token: string, botId: number): Promise<string> {
+  const response = await fetch(`${PROTALK_URL}/${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bot_id: botId,
+      chat_id: generateChatId(),
+      message
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('ProTalk API error:', response.status, errorText);
+    throw new Error(`ProTalk API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.done || '';
+}
+
 // Базовая информация о компании (сокращенная версия)
 const BASE_KNOWLEDGE_RU = `
 Ты - AI-ассистент компании РентРОП. Отвечай на вопросы кандидатов о вакансии и компании.
@@ -86,21 +112,18 @@ const getErrorMessages = (language: string) => {
     case 'en':
       return {
         rateLimit: 'Too many requests, please try again later.',
-        paymentRequired: 'Payment required.',
         aiError: 'AI service error',
         unknownError: 'Unknown error'
       };
     case 'kz':
       return {
         rateLimit: 'Сұраулар тым көп, кейінірек қайталап көріңіз.',
-        paymentRequired: 'Төлем қажет.',
         aiError: 'AI қызметінің қатесі',
         unknownError: 'Белгісіз қате'
       };
     default:
       return {
         rateLimit: 'Слишком много запросов, попробуйте позже.',
-        paymentRequired: 'Требуется пополнение баланса.',
         aiError: 'Ошибка AI сервиса',
         unknownError: 'Неизвестная ошибка'
       };
@@ -110,7 +133,6 @@ const getErrorMessages = (language: string) => {
 // Функция для поиска и ранжирования релевантных FAQ
 async function findRelevantFAQs(supabase: any, userQuery: string, limit: number = 5): Promise<string> {
   try {
-    // Извлекаем ключевые слова для поиска (до 10 слов)
     const searchKeywords = userQuery
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
@@ -125,12 +147,10 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
 
     console.log(`Searching FAQ with terms: ${searchKeywords.join(' | ')}`);
 
-    // Формируем OR-условия для каждого ключевого слова
     const orConditions = searchKeywords
       .map(term => `search_keywords.ilike.%${term}%,question.ilike.%${term}%`)
       .join(',');
 
-    // Получаем все потенциальные совпадения из faq_knowledge (с запасом)
     const { data: faqs, error } = await supabase
       .from('faq_knowledge')
       .select('question, answer, search_keywords')
@@ -141,7 +161,6 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       console.error("FAQ search error:", error);
     }
 
-    // Также ищем в contract_faq
     const contractOrConditions = searchKeywords
       .map(term => `question.ilike.%${term}%,answer.ilike.%${term}%`)
       .join(',');
@@ -156,7 +175,6 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       console.error("Contract FAQ search error:", contractError);
     }
 
-    // Тип для ранжированного FAQ
     interface RankedFaq {
       question: string;
       answer: string;
@@ -169,7 +187,6 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
 
     const allFaqs: RankedFaq[] = [];
 
-    // Ранжируем FAQ из faq_knowledge
     if (faqs && faqs.length > 0) {
       faqs.forEach((faq: { question: string; answer: string; search_keywords: string | null }) => {
         const faqText = `${faq.question} ${faq.search_keywords || ''}`.toLowerCase();
@@ -187,13 +204,11 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       });
     }
 
-    // Ранжируем FAQ из contract_faq
     if (contractFaqs && contractFaqs.length > 0) {
       contractFaqs.forEach((faq: { question: string; answer: string; category: string | null }) => {
         const faqText = `${faq.question} ${faq.answer} ${faq.category || ''}`.toLowerCase();
         const matchCount = searchKeywords.filter(keyword => faqText.includes(keyword)).length;
         const startsWithBonus = searchKeywords.some(kw => faq.question.toLowerCase().startsWith(kw)) ? 1 : 0;
-        // Бонус за вопросы о договоре
         const contractBonus = searchKeywords.some(kw => 
           ['договор', 'контракт', 'contract', 'шарт', 'оплата', 'payment', 'санкц', 'штраф'].includes(kw)
         ) ? 2 : 0;
@@ -214,17 +229,12 @@ async function findRelevantFAQs(supabase: any, userQuery: string, limit: number 
       return "";
     }
 
-    // Сортируем по релевантности и берём топ-N
     const rankedFaqs = allFaqs
       .sort((a, b) => b.relevanceScore - a.relevanceScore)
       .slice(0, limit);
 
-    console.log(`Top ${rankedFaqs.length} FAQs after ranking:`);
-    rankedFaqs.forEach((faq, i) => {
-      console.log(`  ${i + 1}. Score: ${faq.relevanceScore} (${faq.matchCount} matches, ${faq.source}) - ${faq.question.substring(0, 50)}...`);
-    });
+    console.log(`Top ${rankedFaqs.length} FAQs after ranking`);
 
-    // Форматируем найденные FAQ
     const faqContext = rankedFaqs
       .map(faq => `Вопрос: ${faq.question}\nОтвет: ${faq.answer}`)
       .join('\n\n---\n\n');
@@ -247,10 +257,10 @@ serve(async (req) => {
     const messages = body.messages;
     const language = body.language || 'ru';
     
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const PROTALK_BOT_TOKEN = Deno.env.get("PROTALK_BOT_TOKEN");
+    const PROTALK_BOT_ID = Deno.env.get("PROTALK_BOT_ID");
     const errorMessages = getErrorMessages(language);
     
-    // Валидация messages
     if (!messages || !Array.isArray(messages)) {
       console.error("Invalid request: messages is missing or not an array");
       return new Response(JSON.stringify({ error: "Invalid request: messages array is required" }), {
@@ -259,11 +269,10 @@ serve(async (req) => {
       });
     }
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!PROTALK_BOT_TOKEN || !PROTALK_BOT_ID) {
+      throw new Error("ProTalk credentials are not configured");
     }
 
-    // Создаем Supabase клиент
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
@@ -272,7 +281,6 @@ serve(async (req) => {
     if (supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
-      // Получаем последнее сообщение пользователя для поиска
       const userMessages = messages.filter((m: { role: string }) => m.role === 'user');
       const lastUserMessage = userMessages.length > 0 ? userMessages[userMessages.length - 1] : null;
       
@@ -281,54 +289,35 @@ serve(async (req) => {
       }
     }
 
-    // Формируем полный системный промпт
+    // Build full prompt with context and conversation history
     const baseKnowledge = getBaseKnowledge(language);
     const systemPrompt = baseKnowledge + faqContext;
 
-    console.log(`Processing chat request with language: ${language}, messages count: ${messages.length}, FAQ context length: ${faqContext.length}`);
+    // Format conversation history for context
+    const conversationHistory = messages
+      .map((m: { role: string; content: string }) => 
+        m.role === 'user' ? `Пользователь: ${m.content}` : `Ассистент: ${m.content}`
+      )
+      .join('\n');
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: true,
-      }),
-    });
+    const fullPrompt = `${systemPrompt}\n\n=== ИСТОРИЯ ДИАЛОГА ===\n${conversationHistory}\n\n=== ЗАДАЧА ===\nОтветь на последнее сообщение пользователя, учитывая контекст диалога и базу знаний.`;
 
-    if (!response.ok) {
-      console.error(`AI gateway error: ${response.status}`);
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: errorMessages.rateLimit }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: errorMessages.paymentRequired }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error details:", t);
+    console.log(`Processing chat request with language: ${language}, messages count: ${messages.length}`);
+
+    const aiResponse = await askProTalk(fullPrompt, PROTALK_BOT_TOKEN, parseInt(PROTALK_BOT_ID));
+
+    if (!aiResponse) {
       return new Response(JSON.stringify({ error: errorMessages.aiError }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log("AI gateway response received, streaming...");
+    console.log("ProTalk response received");
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    // Return JSON response (no streaming with ProTalk)
+    return new Response(JSON.stringify({ response: aiResponse }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("chat error:", e);

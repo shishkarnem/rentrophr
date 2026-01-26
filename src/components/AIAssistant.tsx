@@ -272,8 +272,6 @@ const AIAssistant = ({ defaultOpen = false }: AIAssistantProps) => {
     setIsLoading(true);
     setShowQuickReplies(false);
 
-    let assistantContent = '';
-
     try {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
         method: 'POST',
@@ -294,55 +292,15 @@ const AIAssistant = ({ defaultOpen = false }: AIAssistantProps) => {
         throw new Error('Failed to get response');
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      // ProTalk returns JSON response (no streaming)
+      const data = await response.json();
+      const assistantContent = data.response || data.error || t('ai.error');
 
-      if (!reader) throw new Error('No reader');
-
-      // Add empty assistant message
-      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-
-      let textBuffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (line.startsWith(':') || line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === '[DONE]') break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = { role: 'assistant', content: assistantContent };
-                return newMessages;
-              });
-            }
-          } catch {
-            // Incomplete JSON, put it back
-            textBuffer = line + '\n' + textBuffer;
-            break;
-          }
-        }
-      }
+      // Add assistant message
+      setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
 
       // Log to database after response is complete
-      if (assistantContent) {
+      if (assistantContent && !data.error) {
         logChatToDatabase(textToSend, assistantContent, language, telegramId);
       }
     } catch (error) {

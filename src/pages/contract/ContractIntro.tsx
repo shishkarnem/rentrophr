@@ -134,19 +134,19 @@ const ContractIntro = () => {
   const userCode = crmData?.code || '—';
   const contractLinks = [{
     label: t.contract1,
-    url: 'https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/export?format=pdf'
+    url: 'https://drive.google.com/file/d/1HVxHj1m2DSO-GER8SiZ10MjXoQqR0er3/view'
   }, {
     label: t.contract2,
-    url: 'https://drive.google.com/file/d/1FDbZ5daP_esGZO5XNIHR6de08H6EnbLG/export?format=pdf'
+    url: 'https://drive.google.com/file/d/1FDbZ5daP_esGZO5XNIHR6de08H6EnbLG/view'
   }, {
     label: t.contract3,
-    url: 'https://drive.google.com/file/d/1alsd16UeR3uzKHs6wVYfJwboQ8wmzLRi/export?format=pdf'
+    url: 'https://drive.google.com/file/d/1alsd16UeR3uzKHs6wVYfJwboQ8wmzLRi/view'
   }, {
     label: t.contract4,
-    url: 'https://drive.google.com/file/d/14spSzxh4fiRrCNoPwsO4_-rpmcnHUSQu/export?format=pdf'
+    url: 'https://drive.google.com/file/d/14spSzxh4fiRrCNoPwsO4_-rpmcnHUSQu/view'
   }, {
     label: t.contract5,
-    url: 'https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/export?format=pdf'
+    url: 'https://drive.google.com/file/d/15z-5IIqbKd38kneIi3khDtLU3MVOpkF8/view'
   }];
   return <div className="min-h-screen relative z-10" style={{
     background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'

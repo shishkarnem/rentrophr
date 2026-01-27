@@ -1,117 +1,124 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, Sparkles, User, X, ChevronDown, ChevronUp, Loader2, Settings2, BarChart3, Download, Eye, EyeOff, ArrowUpDown, RefreshCw, FolderOpen, Bell, Calculator } from 'lucide-react';
-import { useTelegram } from '@/contexts/TelegramContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useCrmData, CrmData } from '@/hooks/useCrmData';
-import { useSyncCrm } from '@/hooks/useSyncCrm';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import MobileNavbar from '@/components/MobileNavbar';
-import MobileHeader from '@/components/MobileHeader';
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import ProjectsAdmin from '@/components/admin/ProjectsAdmin';
-import NotificationTemplateEditor from '@/components/admin/NotificationTemplateEditor';
-import SalaryCalculatorAdmin from '@/components/admin/SalaryCalculatorAdmin';
+  ArrowLeft,
+  Search,
+  Filter,
+  Sparkles,
+  User,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Settings2,
+  BarChart3,
+  Download,
+  Eye,
+  EyeOff,
+  ArrowUpDown,
+  RefreshCw,
+  FolderOpen,
+  Bell,
+  Calculator,
+} from "lucide-react";
+import { useTelegram } from "@/contexts/TelegramContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useCrmData, CrmData } from "@/hooks/useCrmData";
+import { useSyncCrm } from "@/hooks/useSyncCrm";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import MobileNavbar from "@/components/MobileNavbar";
+import MobileHeader from "@/components/MobileHeader";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import ProjectsAdmin from "@/components/admin/ProjectsAdmin";
+import NotificationTemplateEditor from "@/components/admin/NotificationTemplateEditor";
+import SalaryCalculatorAdmin from "@/components/admin/SalaryCalculatorAdmin";
 
 // Allowed statuses for admin access
-const ADMIN_STATUSES = ['ДПР', 'HR', 'Чат или канал', 'Менеджер'];
+const ADMIN_STATUSES = ["ДПР", "HR", "Чат или канал", "Менеджер"];
 
 // All status options with default enabled state
 const ALL_STATUSES = [
-  'Интервью',
-  'Тест Условия',
-  'Тест Портал',
-  'Тест Отчет',
-  'Тест Робот',
-  'Подготовка документов',
-  'Запись Портфолио',
-  'Ожидает проект',
-  'Работает',
-  'Отказ',
-  'Не на связи',
-  'На паузе',
-  'Уволен(а)',
-  'ДПР',
-  'HR',
-  'Чат или канал',
-  'Хочет вернуться',
-  'Менеджер',
-  'Заблокировано',
-  'Черный список',
-  'Дубль',
+  "Интервью",
+  "Тест Условия",
+  "Тест Портал",
+  "Тест Отчет",
+  "Тест Робот",
+  "Подготовка документов",
+  "Запись Портфолио",
+  "Ожидает проект",
+  "Работает",
+  "Отказ",
+  "Не на связи",
+  "На паузе",
+  "Уволен(а)",
+  "ДПР",
+  "HR",
+  "Чат или канал",
+  "Хочет вернуться",
+  "Менеджер",
+  "Заблокировано",
+  "Черный список",
+  "Дубль",
 ];
 
 // Default enabled statuses
 const DEFAULT_ENABLED_STATUSES = new Set([
-  'Интервью',
-  'Тест Условия',
-  'Тест Портал',
-  'Тест Отчет',
-  'Тест Робот',
-  'Подготовка документов',
-  'Запись Портфолио',
-  'Ожидает проект',
-  'Работает',
-  'ДПР',
-  'HR',
-  'Хочет вернуться',
-  'Менеджер',
+  "Интервью",
+  "Тест Условия",
+  "Тест Портал",
+  "Тест Отчет",
+  "Тест Робот",
+  "Подготовка документов",
+  "Запись Портфолио",
+  "Ожидает проект",
+  "Работает",
+  "ДПР",
+  "HR",
+  "Хочет вернуться",
+  "Менеджер",
 ]);
 
 // All available columns with labels
 const ALL_COLUMNS: { key: keyof CrmData; label: string; defaultVisible: boolean }[] = [
-  { key: 'telegram_name', label: 'Имя Telegram', defaultVisible: true },
-  { key: 'full_info', label: 'ФИО', defaultVisible: false },
-  { key: 'code', label: 'Код', defaultVisible: true },
-  { key: 'status', label: 'Статус', defaultVisible: true },
-  { key: 'hr', label: 'HR', defaultVisible: true },
-  { key: 'city', label: 'Город', defaultVisible: true },
-  { key: 'region', label: 'Регион', defaultVisible: false },
-  { key: 'rop_name', label: 'РОП', defaultVisible: false },
-  { key: 'rating', label: 'Рейтинг', defaultVisible: false },
-  { key: 'result', label: 'Результат', defaultVisible: false },
-  { key: 'phone', label: 'Телефон', defaultVisible: false },
-  { key: 'birth_date', label: 'Дата рождения', defaultVisible: false },
-  { key: 'contract_date', label: 'Дата договора', defaultVisible: false },
-  { key: 'work_start_date', label: 'Старт работы', defaultVisible: false },
-  { key: 'start_date', label: 'Дата добавления', defaultVisible: true },
-  { key: 'interview_date', label: 'Дата интервью', defaultVisible: false },
-  { key: 'dismissal_date', label: 'Увольнение', defaultVisible: false },
-  { key: 'rejection_date', label: 'Дата отказа', defaultVisible: false },
-  { key: 'feedback_date', label: 'Дата обратной связи', defaultVisible: false },
-  { key: 'days_worked', label: 'Дней работы', defaultVisible: false },
-  { key: 'tests_passed', label: 'Тесты', defaultVisible: false },
-  { key: 'waiting_period', label: 'Ожидание', defaultVisible: false },
-  { key: 'training_completed', label: 'Обучение', defaultVisible: false },
-  { key: 'available_skills', label: 'Навыки', defaultVisible: false },
-  { key: 'language_choice', label: 'Язык', defaultVisible: false },
-  { key: 'interview', label: 'Интервью', defaultVisible: false },
-  { key: 'resume_text', label: 'Текст резюме', defaultVisible: false },
-  { key: 'checklist_answers', label: 'Текст анкеты', defaultVisible: false },
-  { key: 'telegram_id', label: 'Telegram ID', defaultVisible: false },
-  { key: 'created_at', label: 'Создано', defaultVisible: false },
-  { key: 'updated_at', label: 'Обновлено', defaultVisible: false },
+  { key: "telegram_name", label: "Имя Telegram", defaultVisible: true },
+  { key: "full_info", label: "ФИО", defaultVisible: false },
+  { key: "code", label: "Код", defaultVisible: true },
+  { key: "status", label: "Статус", defaultVisible: true },
+  { key: "hr", label: "HR", defaultVisible: true },
+  { key: "city", label: "Город", defaultVisible: true },
+  { key: "region", label: "Регион", defaultVisible: false },
+  { key: "rop_name", label: "РОП", defaultVisible: false },
+  { key: "rating", label: "Рейтинг", defaultVisible: false },
+  { key: "result", label: "Результат", defaultVisible: false },
+  { key: "phone", label: "Телефон", defaultVisible: false },
+  { key: "birth_date", label: "Дата рождения", defaultVisible: false },
+  { key: "contract_date", label: "Дата договора", defaultVisible: false },
+  { key: "work_start_date", label: "Старт работы", defaultVisible: false },
+  { key: "start_date", label: "Дата добавления", defaultVisible: true },
+  { key: "interview_date", label: "Дата интервью", defaultVisible: false },
+  { key: "dismissal_date", label: "Увольнение", defaultVisible: false },
+  { key: "rejection_date", label: "Дата отказа", defaultVisible: false },
+  { key: "feedback_date", label: "Дата обратной связи", defaultVisible: false },
+  { key: "days_worked", label: "Дней работы", defaultVisible: false },
+  { key: "tests_passed", label: "Тесты", defaultVisible: false },
+  { key: "waiting_period", label: "Ожидание", defaultVisible: false },
+  { key: "training_completed", label: "Обучение", defaultVisible: false },
+  { key: "available_skills", label: "Навыки", defaultVisible: false },
+  { key: "language_choice", label: "Язык", defaultVisible: false },
+  { key: "interview", label: "Интервью", defaultVisible: false },
+  { key: "resume_text", label: "Текст резюме", defaultVisible: false },
+  { key: "checklist_answers", label: "Текст анкеты", defaultVisible: false },
+  { key: "telegram_id", label: "Telegram ID", defaultVisible: false },
+  { key: "created_at", label: "Создано", defaultVisible: false },
+  { key: "updated_at", label: "Обновлено", defaultVisible: false },
 ];
 
 // Page size options - including "all" option
@@ -123,64 +130,62 @@ const AdminCRM = () => {
   const { t, language } = useLanguage();
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
-  
+
   const telegramId = profile?.telegram_id ? Number(profile.telegram_id) : null;
   const { crmData: currentUserCrm, isLoading: isUserLoading } = useCrmData(telegramId);
-  
+
   // Sync functionality
   const { isSyncing, syncNow, formatLastSyncTime, canSync } = useSyncCrm();
-  
+
   // Handle manual sync with data reload
   const loadAllRecords = useCallback(async () => {
     try {
       setIsLoadingAll(true);
-      
-      const { count, error: countError } = await supabase
-        .from('crm_data')
-        .select('*', { count: 'exact', head: true });
-      
+
+      const { count, error: countError } = await supabase.from("crm_data").select("*", { count: "exact", head: true });
+
       if (countError) throw countError;
-      
-      console.log('[AdminCRM] Total records in DB:', count);
-      
+
+      console.log("[AdminCRM] Total records in DB:", count);
+
       const allData: CrmData[] = [];
       const batchSize = 1000;
       const totalBatches = Math.ceil((count || 0) / batchSize);
-      
+
       for (let i = 0; i < totalBatches; i++) {
         const { data, error } = await supabase
-          .from('crm_data')
-          .select('*')
+          .from("crm_data")
+          .select("*")
           .range(i * batchSize, (i + 1) * batchSize - 1)
-          .order('start_date', { ascending: false, nullsFirst: false });
+          .order("start_date", { ascending: false, nullsFirst: false });
 
         if (error) throw error;
         if (data) allData.push(...(data as CrmData[]));
       }
-      
-      console.log('[AdminCRM] Loaded records:', allData.length);
+
+      console.log("[AdminCRM] Loaded records:", allData.length);
       setAllRecords(allData);
-      
+
       // Extract unique values for filters
-      const hrs = [...new Set(allData.filter(r => r.hr).map(r => r.hr!) || [])].sort();
-      const cities = [...new Set(allData.filter(r => r.city).map(r => r.city!) || [])].sort();
-      const regions = [...new Set(allData.filter(r => r.region).map(r => r.region!) || [])].sort();
-      const rops = [...new Set(allData.filter(r => r.rop_name).map(r => r.rop_name!) || [])].sort();
-      const ratings = [...new Set(allData.filter(r => r.rating).map(r => r.rating!) || [])].sort();
-      
+      const hrs = [...new Set(allData.filter((r) => r.hr).map((r) => r.hr!) || [])].sort();
+      const cities = [...new Set(allData.filter((r) => r.city).map((r) => r.city!) || [])].sort();
+      const regions = [...new Set(allData.filter((r) => r.region).map((r) => r.region!) || [])].sort();
+      const rops = [...new Set(allData.filter((r) => r.rop_name).map((r) => r.rop_name!) || [])].sort();
+      const ratings = [...new Set(allData.filter((r) => r.rating).map((r) => r.rating!) || [])].sort();
+
       setUniqueHrs(hrs);
       setUniqueCities(cities);
       setUniqueRegions(regions);
       setUniqueRops(rops);
       setUniqueRatings(ratings);
     } catch (err) {
-      console.error('Error loading CRM records:', err);
-      toast.error(t('admin.loadError') || 'Ошибка загрузки данных');
+      console.error("Error loading CRM records:", err);
+      toast.error(t("admin.loadError") || "Ошибка загрузки данных");
     } finally {
       setIsLoadingAll(false);
     }
   }, [t]);
-  
+
   const handleSync = async () => {
     const result = await syncNow(false);
     if (result.success) {
@@ -191,18 +196,20 @@ const AdminCRM = () => {
       toast.error(result.message);
     }
   };
-  
+
   // Search & Filter state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAiSearching, setIsAiSearching] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showColumnSettings, setShowColumnSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState<'data' | 'analytics' | 'projects' | 'notifications' | 'calculator'>('data');
-  
+  const [activeTab, setActiveTab] = useState<"data" | "analytics" | "projects" | "notifications" | "calculator">(
+    "data",
+  );
+
   // Filter states - multi-select for status
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem('admin-crm-selected-statuses');
+    const saved = localStorage.getItem("admin-crm-selected-statuses");
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as string[];
@@ -215,23 +222,23 @@ const AdminCRM = () => {
   });
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
-  const [hrFilter, setHrFilter] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
-  const [regionFilter, setRegionFilter] = useState('');
-  const [ropFilter, setRopFilter] = useState('');
-  const [ratingFilter, setRatingFilter] = useState('');
-  
+  const [hrFilter, setHrFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
+  const [ropFilter, setRopFilter] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("");
+
   // Column search states
   const [columnSearches, setColumnSearches] = useState<Record<string, string>>({});
-  
+
   // Data state
   const [selectedProfile, setSelectedProfile] = useState<CrmData | null>(null);
   const [allRecords, setAllRecords] = useState<CrmData[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(true);
-  
+
   // Column visibility - persist to localStorage
   const [visibleColumns, setVisibleColumns] = useState<Set<keyof CrmData>>(() => {
-    const saved = localStorage.getItem('admin-crm-visible-columns');
+    const saved = localStorage.getItem("admin-crm-visible-columns");
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as string[];
@@ -240,29 +247,29 @@ const AdminCRM = () => {
         // fallback to defaults
       }
     }
-    return new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key));
+    return new Set(ALL_COLUMNS.filter((c) => c.defaultVisible).map((c) => c.key));
   });
-  
+
   // Pagination - persist to localStorage
   const [pageSize, setPageSize] = useState(() => {
-    const saved = localStorage.getItem('admin-crm-page-size');
+    const saved = localStorage.getItem("admin-crm-page-size");
     return saved ? Number(saved) : 25;
   });
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Sorting - persist to localStorage, default by created_at descending (newest first)
   const [sortColumn, setSortColumn] = useState<keyof CrmData | null>(() => {
-    const saved = localStorage.getItem('admin-crm-sort-column');
-    return saved ? (saved as keyof CrmData) : 'created_at';
+    const saved = localStorage.getItem("admin-crm-sort-column");
+    return saved ? (saved as keyof CrmData) : "created_at";
   });
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(() => {
-    const saved = localStorage.getItem('admin-crm-sort-direction');
-    return saved === 'asc' ? 'asc' : 'desc';
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(() => {
+    const saved = localStorage.getItem("admin-crm-sort-direction");
+    return saved === "asc" ? "asc" : "desc";
   });
-  
+
   // Column widths - persist to localStorage
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
-    const saved = localStorage.getItem('admin-crm-column-widths');
+    const saved = localStorage.getItem("admin-crm-column-widths");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -272,32 +279,32 @@ const AdminCRM = () => {
     }
     return {};
   });
-  
+
   // Column resize state
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [resizeStartX, setResizeStartX] = useState(0);
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
-  
+
   // Persist settings to localStorage
   useEffect(() => {
-    localStorage.setItem('admin-crm-visible-columns', JSON.stringify([...visibleColumns]));
+    localStorage.setItem("admin-crm-visible-columns", JSON.stringify([...visibleColumns]));
   }, [visibleColumns]);
-  
+
   useEffect(() => {
-    localStorage.setItem('admin-crm-page-size', String(pageSize));
+    localStorage.setItem("admin-crm-page-size", String(pageSize));
   }, [pageSize]);
-  
+
   useEffect(() => {
     if (sortColumn) {
-      localStorage.setItem('admin-crm-sort-column', sortColumn);
+      localStorage.setItem("admin-crm-sort-column", sortColumn);
     }
-    localStorage.setItem('admin-crm-sort-direction', sortDirection);
+    localStorage.setItem("admin-crm-sort-direction", sortDirection);
   }, [sortColumn, sortDirection]);
-  
+
   useEffect(() => {
-    localStorage.setItem('admin-crm-column-widths', JSON.stringify(columnWidths));
+    localStorage.setItem("admin-crm-column-widths", JSON.stringify(columnWidths));
   }, [columnWidths]);
-  
+
   // Handle column resize
   const handleResizeStart = (e: React.MouseEvent, columnKey: string) => {
     e.preventDefault();
@@ -306,26 +313,26 @@ const AdminCRM = () => {
     setResizeStartX(e.clientX);
     setResizeStartWidth(columnWidths[columnKey] || 150);
   };
-  
+
   useEffect(() => {
     if (!resizingColumn) return;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       const diff = e.clientX - resizeStartX;
       const newWidth = Math.max(80, resizeStartWidth + diff);
-      setColumnWidths(prev => ({ ...prev, [resizingColumn]: newWidth }));
+      setColumnWidths((prev) => ({ ...prev, [resizingColumn]: newWidth }));
     };
-    
+
     const handleMouseUp = () => {
       setResizingColumn(null);
     };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [resizingColumn, resizeStartX, resizeStartWidth]);
 
@@ -353,38 +360,38 @@ const AdminCRM = () => {
 
     // Apply multi-select status filter
     if (selectedStatuses.size > 0) {
-      filtered = filtered.filter(r => r.status && selectedStatuses.has(r.status));
+      filtered = filtered.filter((r) => r.status && selectedStatuses.has(r.status));
     }
-    
+
     // Apply HR filter
     if (hrFilter) {
-      filtered = filtered.filter(r => r.hr === hrFilter);
+      filtered = filtered.filter((r) => r.hr === hrFilter);
     }
-    
+
     // Apply city filter
     if (cityFilter) {
-      filtered = filtered.filter(r => r.city === cityFilter);
+      filtered = filtered.filter((r) => r.city === cityFilter);
     }
-    
+
     // Apply region filter
     if (regionFilter) {
-      filtered = filtered.filter(r => r.region === regionFilter);
+      filtered = filtered.filter((r) => r.region === regionFilter);
     }
-    
+
     // Apply ROP filter
     if (ropFilter) {
-      filtered = filtered.filter(r => r.rop_name === ropFilter);
+      filtered = filtered.filter((r) => r.rop_name === ropFilter);
     }
-    
+
     // Apply rating filter
     if (ratingFilter) {
-      filtered = filtered.filter(r => r.rating === ratingFilter);
+      filtered = filtered.filter((r) => r.rating === ratingFilter);
     }
 
     // Apply global search filter
     if (searchQuery && searchQuery.length >= 2) {
       const lowerQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(r => {
+      filtered = filtered.filter((r) => {
         return (
           r.telegram_name?.toLowerCase().includes(lowerQuery) ||
           r.full_info?.toLowerCase().includes(lowerQuery) ||
@@ -399,12 +406,12 @@ const AdminCRM = () => {
         );
       });
     }
-    
+
     // Apply column-specific searches
     Object.entries(columnSearches).forEach(([column, search]) => {
       if (search && search.length >= 1) {
         const lowerSearch = search.toLowerCase();
-        filtered = filtered.filter(r => {
+        filtered = filtered.filter((r) => {
           const value = r[column as keyof CrmData];
           if (value === null || value === undefined) return false;
           return String(value).toLowerCase().includes(lowerSearch);
@@ -417,22 +424,34 @@ const AdminCRM = () => {
       filtered.sort((a, b) => {
         const aVal = a[sortColumn];
         const bVal = b[sortColumn];
-        
-        if (aVal === null || aVal === undefined) return sortDirection === 'asc' ? 1 : -1;
-        if (bVal === null || bVal === undefined) return sortDirection === 'asc' ? -1 : 1;
-        
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+
+        if (aVal === null || aVal === undefined) return sortDirection === "asc" ? 1 : -1;
+        if (bVal === null || bVal === undefined) return sortDirection === "asc" ? -1 : 1;
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+          return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
         }
-        
+
         const aStr = String(aVal).toLowerCase();
         const bStr = String(bVal).toLowerCase();
-        return sortDirection === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
+        return sortDirection === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
       });
     }
 
     return filtered;
-  }, [allRecords, selectedStatuses, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, sortColumn, sortDirection]);
+  }, [
+    allRecords,
+    selectedStatuses,
+    hrFilter,
+    cityFilter,
+    regionFilter,
+    ropFilter,
+    ratingFilter,
+    searchQuery,
+    columnSearches,
+    sortColumn,
+    sortDirection,
+  ]);
 
   // Paginated records - pageSize -1 means show all
   const paginatedRecords = useMemo(() => {
@@ -446,12 +465,22 @@ const AdminCRM = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedStatuses, hrFilter, cityFilter, regionFilter, ropFilter, ratingFilter, searchQuery, columnSearches, pageSize]);
+  }, [
+    selectedStatuses,
+    hrFilter,
+    cityFilter,
+    regionFilter,
+    ropFilter,
+    ratingFilter,
+    searchQuery,
+    columnSearches,
+    pageSize,
+  ]);
 
   // AI Search function - prioritize resume_text and checklist_answers
   const handleAiSearch = async () => {
     if (!searchQuery || searchQuery.trim().length < 2) {
-      toast.error(t('admin.enterSearchQuery') || 'Введите запрос для AI поиска');
+      toast.error(t("admin.enterSearchQuery") || "Введите запрос для AI поиска");
       return;
     }
 
@@ -459,7 +488,7 @@ const AdminCRM = () => {
     setAiSummary(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('crm-ai-search', {
+      const { data, error } = await supabase.functions.invoke("crm-ai-search", {
         body: {
           query: searchQuery,
           filters: {
@@ -469,7 +498,7 @@ const AdminCRM = () => {
             region: regionFilter || undefined,
           },
           language,
-          priorityFields: ['resume_text', 'checklist_answers'],
+          priorityFields: ["resume_text", "checklist_answers"],
         },
       });
 
@@ -482,34 +511,34 @@ const AdminCRM = () => {
         setAiSummary(data.aiSummary);
       }
     } catch (err) {
-      console.error('AI search error:', err);
-      toast.error(t('admin.aiSearchError') || 'Ошибка AI поиска');
+      console.error("AI search error:", err);
+      toast.error(t("admin.aiSearchError") || "Ошибка AI поиска");
     } finally {
       setIsAiSearching(false);
     }
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setSelectedStatuses(new Set(DEFAULT_ENABLED_STATUSES));
-    setHrFilter('');
-    setCityFilter('');
-    setRegionFilter('');
-    setRopFilter('');
-    setRatingFilter('');
+    setHrFilter("");
+    setCityFilter("");
+    setRegionFilter("");
+    setRopFilter("");
+    setRatingFilter("");
     setColumnSearches({});
     setAiSummary(null);
     setSortColumn(null);
   };
-  
+
   // Persist selected statuses
   useEffect(() => {
-    localStorage.setItem('admin-crm-selected-statuses', JSON.stringify([...selectedStatuses]));
+    localStorage.setItem("admin-crm-selected-statuses", JSON.stringify([...selectedStatuses]));
   }, [selectedStatuses]);
-  
+
   // Toggle status in multi-select
   const toggleStatus = (status: string) => {
-    setSelectedStatuses(prev => {
+    setSelectedStatuses((prev) => {
       const next = new Set(prev);
       if (next.has(status)) {
         next.delete(status);
@@ -519,16 +548,16 @@ const AdminCRM = () => {
       return next;
     });
   };
-  
+
   // Select/deselect all statuses
   const selectAllStatuses = () => {
     setSelectedStatuses(new Set(ALL_STATUSES));
   };
-  
+
   const deselectAllStatuses = () => {
     setSelectedStatuses(new Set());
   };
-  
+
   // Close status dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -536,20 +565,20 @@ const AdminCRM = () => {
         setShowStatusDropdown(false);
       }
     };
-    
+
     if (showStatusDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showStatusDropdown]);
-  
+
   const resetColumnWidths = () => {
     setColumnWidths({});
-    localStorage.removeItem('admin-crm-column-widths');
-    toast.success('Ширина колонок сброшена');
+    localStorage.removeItem("admin-crm-column-widths");
+    toast.success("Ширина колонок сброшена");
   };
 
   const toggleColumn = (column: keyof CrmData) => {
@@ -564,10 +593,10 @@ const AdminCRM = () => {
 
   const handleSort = (column: keyof CrmData) => {
     if (sortColumn === column) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortColumn(column);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -580,8 +609,8 @@ const AdminCRM = () => {
     let withResume = 0;
     let withChecklist = 0;
     let withPhone = 0;
-    
-    allRecords.forEach(r => {
+
+    allRecords.forEach((r) => {
       if (r.status) statusCounts[r.status] = (statusCounts[r.status] || 0) + 1;
       if (r.city) cityCounts[r.city] = (cityCounts[r.city] || 0) + 1;
       if (r.hr) hrCounts[r.hr] = (hrCounts[r.hr] || 0) + 1;
@@ -606,7 +635,10 @@ const AdminCRM = () => {
   // Redirect if no access
   if (!isPreview && isUserLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "linear-gradient(180deg, #17344F 0%, #265582 100%)" }}
+      >
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
@@ -614,13 +646,18 @@ const AdminCRM = () => {
 
   if (!hasAdminAccess && !isUserLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "linear-gradient(180deg, #17344F 0%, #265582 100%)" }}
+      >
         <div className="glass-dark rounded-2xl p-8 text-center max-w-md mx-4">
-          <h2 className="text-xl font-bold text-white mb-4">{t('admin.accessDenied') || 'Доступ запрещён'}</h2>
-          <p className="text-white/70 mb-6">{t('admin.noPermission') || 'У вас нет прав для просмотра этой страницы'}</p>
-          <Button onClick={() => navigate('/profile')} className="bg-accent hover:bg-accent/80 text-primary">
+          <h2 className="text-xl font-bold text-white mb-4">{t("admin.accessDenied") || "Доступ запрещён"}</h2>
+          <p className="text-white/70 mb-6">
+            {t("admin.noPermission") || "У вас нет прав для просмотра этой страницы"}
+          </p>
+          <Button onClick={() => navigate("/profile")} className="bg-accent hover:bg-accent/80 text-primary">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('admin.backToProfile') || 'Назад в профиль'}
+            {t("admin.backToProfile") || "Назад в профиль"}
           </Button>
         </div>
       </div>
@@ -628,10 +665,10 @@ const AdminCRM = () => {
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen relative z-10"
       style={{
-        background: 'linear-gradient(180deg, #17344F 0%, #265582 100%)'
+        background: "linear-gradient(180deg, #17344F 0%, #265582 100%)",
       }}
     >
       {/* Header */}
@@ -640,34 +677,38 @@ const AdminCRM = () => {
       ) : (
         <div className="glass-dark border-b border-white/10 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
+            <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h1 className="text-lg font-semibold text-white">{t('admin.title') || 'Админ-панель CRM'}</h1>
+            <h1 className="text-lg font-semibold text-white">{t("admin.title") || "Админ-панель CRM"}</h1>
           </div>
         </div>
       )}
 
-      <div className={`container mx-auto px-4 py-6 ${showMobileNav ? 'pt-20 pb-24' : ''}`}>
+      <div className={`container mx-auto px-4 py-6 ${showMobileNav ? "pt-20 pb-24" : ""}`}>
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'data' | 'analytics' | 'projects' | 'notifications' | 'calculator')} className="mb-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "data" | "analytics" | "projects" | "notifications" | "calculator")}
+          className="mb-6"
+        >
           <TabsList className="bg-white/10 border-white/10 flex-wrap h-auto gap-1">
             <TabsTrigger value="data" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
               <User className="w-4 h-4 mr-2" />
-              {t('admin.dataTab') || 'Данные'}
+              {t("admin.dataTab") || "Данные"}
             </TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
               <BarChart3 className="w-4 h-4 mr-2" />
-              {t('admin.analyticsTab') || 'Аналитика'}
+              {t("admin.analyticsTab") || "Аналитика"}
             </TabsTrigger>
             <TabsTrigger value="projects" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
               <FolderOpen className="w-4 h-4 mr-2" />
               Проекты
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-accent data-[state=active]:text-primary">
+            <TabsTrigger
+              value="notifications"
+              className="data-[state=active]:bg-accent data-[state=active]:text-primary"
+            >
               <Bell className="w-4 h-4 mr-2" />
               Уведомления
             </TabsTrigger>
@@ -688,13 +729,13 @@ const AdminCRM = () => {
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('admin.searchPlaceholder') || 'Поиск по имени, резюме, чек-листу...'}
+                    placeholder={t("admin.searchPlaceholder") || "Поиск по имени, резюме, чек-листу..."}
                     className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/50"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAiSearch()}
+                    onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
                   />
                   {searchQuery && (
                     <button
-                      onClick={() => setSearchQuery('')}
+                      onClick={() => setSearchQuery("")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full"
                     >
                       <X className="w-4 h-4 text-white/50" />
@@ -711,7 +752,7 @@ const AdminCRM = () => {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 mr-2" />
-                      {t('admin.aiSearch') || 'AI поиск'}
+                      {t("admin.aiSearch") || "AI поиск"}
                     </>
                   )}
                 </Button>
@@ -724,17 +765,17 @@ const AdminCRM = () => {
                   className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors px-3 py-1.5 bg-white/5 rounded-lg"
                 >
                   <Filter className="w-4 h-4" />
-                  {t('admin.filters') || 'Фильтры'}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                  {t("admin.filters") || "Фильтры"}
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
                 </button>
-                
+
                 <button
                   onClick={() => setShowColumnSettings(!showColumnSettings)}
                   className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors px-3 py-1.5 bg-white/5 rounded-lg"
                 >
                   <Settings2 className="w-4 h-4" />
-                  {t('admin.columns') || 'Колонки'}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showColumnSettings ? 'rotate-180' : ''}`} />
+                  {t("admin.columns") || "Колонки"}
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showColumnSettings ? "rotate-180" : ""}`} />
                 </button>
 
                 <button
@@ -742,37 +783,38 @@ const AdminCRM = () => {
                   className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors px-3 py-1.5 bg-white/5 rounded-lg"
                 >
                   <X className="w-4 h-4" />
-                  {t('admin.clearFilters') || 'Сбросить'}
+                  {t("admin.clearFilters") || "Сбросить"}
                 </button>
-                
+
                 <button
                   onClick={handleSync}
                   disabled={isSyncing || !canSync}
                   className={`flex items-center gap-2 text-sm transition-colors px-3 py-1.5 rounded-lg ${
-                    isSyncing || !canSync 
-                      ? 'text-white/30 bg-white/5 cursor-not-allowed' 
-                      : 'text-accent bg-accent/10 hover:bg-accent/20'
+                    isSyncing || !canSync
+                      ? "text-white/30 bg-white/5 cursor-not-allowed"
+                      : "text-accent bg-accent/10 hover:bg-accent/20"
                   }`}
-                  title={canSync ? 'Синхронизировать с Google Sheets' : 'Подождите 5 минут'}
+                  title={canSync ? "Синхронизировать с Google Sheets" : "Подождите 5 минут"}
                 >
-                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Обновление...' : (formatLastSyncTime() || 'Обновить')}
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+                  {isSyncing ? "Обновление..." : formatLastSyncTime() || "Обновить"}
                 </button>
               </div>
 
               {/* Filters Panel */}
               {showFilters && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 pt-2 border-t border-white/10">
-                  
                   <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.hrFilter') || 'HR'}</label>
-                    <Select value={hrFilter || 'all'} onValueChange={(v) => setHrFilter(v === 'all' ? '' : v)}>
+                    <label className="text-xs text-white/50 mb-1 block">{t("admin.hrFilter") || "HR"}</label>
+                    <Select value={hrFilter || "all"} onValueChange={(v) => setHrFilter(v === "all" ? "" : v)}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
                         <SelectValue placeholder="Все" />
                       </SelectTrigger>
                       <SelectContent className="bg-primary border-white/10 max-h-60">
-                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">Все</SelectItem>
-                        {uniqueHrs.map(hr => (
+                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">
+                          Все
+                        </SelectItem>
+                        {uniqueHrs.map((hr) => (
                           <SelectItem key={hr} value={hr} className="text-white hover:bg-white/10 text-sm">
                             {hr}
                           </SelectItem>
@@ -780,16 +822,18 @@ const AdminCRM = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.cityFilter') || 'Город'}</label>
-                    <Select value={cityFilter || 'all'} onValueChange={(v) => setCityFilter(v === 'all' ? '' : v)}>
+                    <label className="text-xs text-white/50 mb-1 block">{t("admin.cityFilter") || "Город"}</label>
+                    <Select value={cityFilter || "all"} onValueChange={(v) => setCityFilter(v === "all" ? "" : v)}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
                         <SelectValue placeholder="Все" />
                       </SelectTrigger>
                       <SelectContent className="bg-primary border-white/10 max-h-60">
-                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">Все</SelectItem>
-                        {uniqueCities.map(city => (
+                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">
+                          Все
+                        </SelectItem>
+                        {uniqueCities.map((city) => (
                           <SelectItem key={city} value={city} className="text-white hover:bg-white/10 text-sm">
                             {city}
                           </SelectItem>
@@ -797,16 +841,18 @@ const AdminCRM = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.regionFilter') || 'Регион'}</label>
-                    <Select value={regionFilter || 'all'} onValueChange={(v) => setRegionFilter(v === 'all' ? '' : v)}>
+                    <label className="text-xs text-white/50 mb-1 block">{t("admin.regionFilter") || "Регион"}</label>
+                    <Select value={regionFilter || "all"} onValueChange={(v) => setRegionFilter(v === "all" ? "" : v)}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
                         <SelectValue placeholder="Все" />
                       </SelectTrigger>
                       <SelectContent className="bg-primary border-white/10 max-h-60">
-                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">Все</SelectItem>
-                        {uniqueRegions.map(region => (
+                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">
+                          Все
+                        </SelectItem>
+                        {uniqueRegions.map((region) => (
                           <SelectItem key={region} value={region} className="text-white hover:bg-white/10 text-sm">
                             {region}
                           </SelectItem>
@@ -814,16 +860,18 @@ const AdminCRM = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.ropFilter') || 'РОП'}</label>
-                    <Select value={ropFilter || 'all'} onValueChange={(v) => setRopFilter(v === 'all' ? '' : v)}>
+                    <label className="text-xs text-white/50 mb-1 block">{t("admin.ropFilter") || "РОП"}</label>
+                    <Select value={ropFilter || "all"} onValueChange={(v) => setRopFilter(v === "all" ? "" : v)}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
                         <SelectValue placeholder="Все" />
                       </SelectTrigger>
                       <SelectContent className="bg-primary border-white/10 max-h-60">
-                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">Все</SelectItem>
-                        {uniqueRops.map(rop => (
+                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">
+                          Все
+                        </SelectItem>
+                        {uniqueRops.map((rop) => (
                           <SelectItem key={rop} value={rop} className="text-white hover:bg-white/10 text-sm">
                             {rop}
                           </SelectItem>
@@ -831,16 +879,18 @@ const AdminCRM = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-xs text-white/50 mb-1 block">{t('admin.ratingFilter') || 'Рейтинг'}</label>
-                    <Select value={ratingFilter || 'all'} onValueChange={(v) => setRatingFilter(v === 'all' ? '' : v)}>
+                    <label className="text-xs text-white/50 mb-1 block">{t("admin.ratingFilter") || "Рейтинг"}</label>
+                    <Select value={ratingFilter || "all"} onValueChange={(v) => setRatingFilter(v === "all" ? "" : v)}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
                         <SelectValue placeholder="Все" />
                       </SelectTrigger>
                       <SelectContent className="bg-primary border-white/10 max-h-60">
-                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">Все</SelectItem>
-                        {uniqueRatings.map(rating => (
+                        <SelectItem value="all" className="text-white hover:bg-white/10 text-sm">
+                          Все
+                        </SelectItem>
+                        {uniqueRatings.map((rating) => (
                           <SelectItem key={rating} value={rating} className="text-white hover:bg-white/10 text-sm">
                             {rating}
                           </SelectItem>
@@ -855,7 +905,7 @@ const AdminCRM = () => {
               {showColumnSettings && (
                 <div className="pt-2 border-t border-white/10">
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {ALL_COLUMNS.map(col => (
+                    {ALL_COLUMNS.map((col) => (
                       <label
                         key={col.key}
                         className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors px-3 py-1.5 bg-white/5 rounded-lg cursor-pointer"
@@ -873,7 +923,7 @@ const AdminCRM = () => {
                     onClick={resetColumnWidths}
                     className="text-xs text-white/50 hover:text-white transition-colors underline"
                   >
-                    {t('admin.resetColumnWidths') || 'Сбросить ширину колонок'}
+                    {t("admin.resetColumnWidths") || "Сбросить ширину колонок"}
                   </button>
                 </div>
               )}
@@ -884,7 +934,7 @@ const AdminCRM = () => {
                   <div className="flex items-start gap-2">
                     <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-accent mb-1">{t('admin.aiSummary') || 'AI результат'}</p>
+                      <p className="text-sm font-medium text-accent mb-1">{t("admin.aiSummary") || "AI результат"}</p>
                       <p className="text-white/90 text-sm">{aiSummary}</p>
                     </div>
                   </div>
@@ -895,28 +945,30 @@ const AdminCRM = () => {
             {/* Pagination Controls */}
             <div className="flex flex-wrap items-center justify-between mb-4 gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-white/70 text-sm">{t('admin.found') || 'Найдено'}: {filteredRecords.length}</span>
+                <span className="text-white/70 text-sm">
+                  {t("admin.found") || "Найдено"}: {filteredRecords.length}
+                </span>
                 <span className="text-white/50 text-sm">|</span>
-                <span className="text-white/70 text-sm">{t('admin.pageSize') || 'На странице'}:</span>
+                <span className="text-white/70 text-sm">{t("admin.pageSize") || "На странице"}:</span>
                 <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
                   <SelectTrigger className="w-24 bg-white/5 border-white/10 text-white h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-primary border-white/10">
-                    {PAGE_SIZE_OPTIONS.map(size => (
+                    {PAGE_SIZE_OPTIONS.map((size) => (
                       <SelectItem key={size} value={String(size)} className="text-white hover:bg-white/10 text-sm">
-                        {size === -1 ? (t('admin.allRecords') || 'Все') : size}
+                        {size === -1 ? t("admin.allRecords") || "Все" : size}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="text-white/70 hover:text-white"
                 >
@@ -928,7 +980,7 @@ const AdminCRM = () => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
                   className="text-white/70 hover:text-white"
                 >
@@ -943,38 +995,42 @@ const AdminCRM = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-accent" />
               </div>
             ) : (
-              <div className={`glass-dark rounded-2xl overflow-hidden ${resizingColumn ? 'select-none' : ''}`}>
+              <div className={`glass-dark rounded-2xl overflow-hidden ${resizingColumn ? "select-none" : ""}`}>
                 <div className="overflow-x-auto">
-                  <Table style={{ tableLayout: 'fixed' }}>
+                  <Table style={{ tableLayout: "fixed" }}>
                     <TableHeader>
                       <TableRow className="border-white/10 hover:bg-transparent">
                         {/* Profile button column - always first */}
                         <TableHead className="text-white/70 sticky left-0 bg-primary/90" style={{ width: 50 }}>
-                          {t('admin.colActions') || ''}
+                          {t("admin.colActions") || ""}
                         </TableHead>
-                        
+
                         {/* Dynamic columns with resize handles */}
-                        {ALL_COLUMNS.filter(c => visibleColumns.has(c.key)).map(col => (
-                          <TableHead 
-                            key={col.key} 
+                        {ALL_COLUMNS.filter((c) => visibleColumns.has(c.key)).map((col) => (
+                          <TableHead
+                            key={col.key}
                             className="text-white/70 relative group"
                             style={{ width: columnWidths[col.key] || 150, minWidth: 80 }}
                           >
                             <div className="space-y-1 pr-2">
                               <button
-                                onClick={() => col.key !== 'status' && handleSort(col.key)}
+                                onClick={() => col.key !== "status" && handleSort(col.key)}
                                 className="flex items-center gap-1 hover:text-white transition-colors text-left w-full"
                               >
                                 <span className="truncate">{col.label}</span>
                                 {sortColumn === col.key ? (
-                                  sortDirection === 'asc' ? <ChevronUp className="w-3 h-3 shrink-0" /> : <ChevronDown className="w-3 h-3 shrink-0" />
+                                  sortDirection === "asc" ? (
+                                    <ChevronUp className="w-3 h-3 shrink-0" />
+                                  ) : (
+                                    <ChevronDown className="w-3 h-3 shrink-0" />
+                                  )
                                 ) : (
-                                  col.key !== 'status' && <ArrowUpDown className="w-3 h-3 opacity-30 shrink-0" />
+                                  col.key !== "status" && <ArrowUpDown className="w-3 h-3 opacity-30 shrink-0" />
                                 )}
                               </button>
-                              
+
                               {/* Status column - multi-select dropdown */}
-                              {col.key === 'status' ? (
+                              {col.key === "status" ? (
                                 <div className="relative" ref={statusDropdownRef}>
                                   <button
                                     onClick={(e) => {
@@ -983,12 +1039,14 @@ const AdminCRM = () => {
                                     }}
                                     className="h-6 w-full text-xs bg-white/5 border border-white/10 rounded px-2 flex items-center justify-between text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                                   >
-                                    <span className="truncate">{selectedStatuses.size}/{ALL_STATUSES.length}</span>
+                                    <span className="truncate">
+                                      {selectedStatuses.size}/{ALL_STATUSES.length}
+                                    </span>
                                     <ChevronDown className="w-3 h-3 shrink-0" />
                                   </button>
-                                  
+
                                   {showStatusDropdown && (
-                                    <div 
+                                    <div
                                       className="absolute z-[100] top-7 left-0 w-56 bg-primary border border-white/20 rounded-lg shadow-2xl overflow-hidden"
                                       onClick={(e) => e.stopPropagation()}
                                     >
@@ -1021,7 +1079,7 @@ const AdminCRM = () => {
                                       </div>
                                       {/* Scrollable checkboxes */}
                                       <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                                        {ALL_STATUSES.map(status => (
+                                        {ALL_STATUSES.map((status) => (
                                           <label
                                             key={status}
                                             className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer transition-colors"
@@ -1040,8 +1098,10 @@ const AdminCRM = () => {
                                 </div>
                               ) : (
                                 <Input
-                                  value={columnSearches[col.key] || ''}
-                                  onChange={(e) => setColumnSearches(prev => ({ ...prev, [col.key]: e.target.value }))}
+                                  value={columnSearches[col.key] || ""}
+                                  onChange={(e) =>
+                                    setColumnSearches((prev) => ({ ...prev, [col.key]: e.target.value }))
+                                  }
                                   placeholder="..."
                                   className="h-6 text-xs bg-white/5 border-white/10 text-white placeholder:text-white/30"
                                 />
@@ -1051,7 +1111,7 @@ const AdminCRM = () => {
                             <div
                               className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize bg-transparent hover:bg-accent/50 transition-colors group-hover:bg-white/20"
                               onMouseDown={(e) => handleResizeStart(e, col.key)}
-                              style={{ touchAction: 'none' }}
+                              style={{ touchAction: "none" }}
                             />
                           </TableHead>
                         ))}
@@ -1061,7 +1121,7 @@ const AdminCRM = () => {
                       {paginatedRecords.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={visibleColumns.size + 1} className="text-center text-white/50 py-8">
-                            {t('admin.noResults') || 'Нет результатов'}
+                            {t("admin.noResults") || "Нет результатов"}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -1078,27 +1138,33 @@ const AdminCRM = () => {
                                 <User className="w-4 h-4" />
                               </Button>
                             </TableCell>
-                            
+
                             {/* Dynamic columns */}
-                            {ALL_COLUMNS.filter(c => visibleColumns.has(c.key)).map(col => (
-                              <TableCell 
-                                key={col.key} 
+                            {ALL_COLUMNS.filter((c) => visibleColumns.has(c.key)).map((col) => (
+                              <TableCell
+                                key={col.key}
                                 className="text-white/80 text-sm overflow-hidden"
                                 style={{ width: columnWidths[col.key] || 150, maxWidth: columnWidths[col.key] || 150 }}
                               >
-                                {col.key === 'status' ? (
-                                  <span className={`px-2 py-0.5 rounded-full text-xs whitespace-nowrap ${
-                                    record.status === 'Работает' ? 'bg-green-500/20 text-green-400' :
-                                    record.status === 'Ожидает проект' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    record.status === 'Уволен(а)' ? 'bg-red-500/20 text-red-400' :
-                                    ADMIN_STATUSES.includes(record.status || '') ? 'bg-accent/20 text-accent' :
-                                    'bg-white/10 text-white/70'
-                                  }`}>
-                                    {record[col.key] || '—'}
+                                {col.key === "status" ? (
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-xs whitespace-nowrap ${
+                                      record.status === "Работает"
+                                        ? "bg-green-500/20 text-green-400"
+                                        : record.status === "Ожидает проект"
+                                          ? "bg-yellow-500/20 text-yellow-400"
+                                          : record.status === "Уволен(а)"
+                                            ? "bg-red-500/20 text-red-400"
+                                            : ADMIN_STATUSES.includes(record.status || "")
+                                              ? "bg-accent/20 text-accent"
+                                              : "bg-white/10 text-white/70"
+                                    }`}
+                                  >
+                                    {record[col.key] || "—"}
                                   </span>
                                 ) : (
-                                  <span className="truncate block" title={String(record[col.key] ?? '')}>
-                                    {String(record[col.key] ?? '—')}
+                                  <span className="truncate block" title={String(record[col.key] ?? "")}>
+                                    {String(record[col.key] ?? "—")}
                                   </span>
                                 )}
                               </TableCell>
@@ -1118,21 +1184,23 @@ const AdminCRM = () => {
             {/* Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="glass-dark rounded-xl p-4">
-                <p className="text-white/50 text-sm">{t('admin.totalRecords') || 'Всего записей'}</p>
+                <p className="text-white/50 text-sm">{t("admin.totalRecords") || "Всего записей"}</p>
                 <p className="text-2xl font-bold text-white">{analytics.total}</p>
               </div>
               <div className="glass-dark rounded-xl p-4">
-                <p className="text-white/50 text-sm">{t('admin.withResume') || 'С резюме'}</p>
+                <p className="text-white/50 text-sm">{t("admin.withResume") || "С резюме"}</p>
                 <p className="text-2xl font-bold text-accent">{analytics.withResume}</p>
                 <p className="text-xs text-white/40">{((analytics.withResume / analytics.total) * 100).toFixed(1)}%</p>
               </div>
               <div className="glass-dark rounded-xl p-4">
-                <p className="text-white/50 text-sm">{t('admin.withChecklist') || 'С чек-листом'}</p>
+                <p className="text-white/50 text-sm">{t("admin.withChecklist") || "С чек-листом"}</p>
                 <p className="text-2xl font-bold text-accent">{analytics.withChecklist}</p>
-                <p className="text-xs text-white/40">{((analytics.withChecklist / analytics.total) * 100).toFixed(1)}%</p>
+                <p className="text-xs text-white/40">
+                  {((analytics.withChecklist / analytics.total) * 100).toFixed(1)}%
+                </p>
               </div>
               <div className="glass-dark rounded-xl p-4">
-                <p className="text-white/50 text-sm">{t('admin.withPhone') || 'С телефоном'}</p>
+                <p className="text-white/50 text-sm">{t("admin.withPhone") || "С телефоном"}</p>
                 <p className="text-2xl font-bold text-accent">{analytics.withPhone}</p>
                 <p className="text-xs text-white/40">{((analytics.withPhone / analytics.total) * 100).toFixed(1)}%</p>
               </div>
@@ -1140,7 +1208,9 @@ const AdminCRM = () => {
 
             {/* Status Distribution */}
             <div className="glass-dark rounded-xl p-4">
-              <h3 className="text-white font-medium mb-4">{t('admin.statusDistribution') || 'Распределение по статусам'}</h3>
+              <h3 className="text-white font-medium mb-4">
+                {t("admin.statusDistribution") || "Распределение по статусам"}
+              </h3>
               <div className="space-y-2">
                 {Object.entries(analytics.statusCounts)
                   .sort((a, b) => b[1] - a[1])
@@ -1148,7 +1218,7 @@ const AdminCRM = () => {
                     <div key={status} className="flex items-center gap-3">
                       <div className="w-32 text-sm text-white/70 truncate">{status}</div>
                       <div className="flex-1 h-4 bg-white/10 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-accent rounded-full"
                           style={{ width: `${(count / analytics.total) * 100}%` }}
                         />
@@ -1161,7 +1231,7 @@ const AdminCRM = () => {
 
             {/* HR Distribution */}
             <div className="glass-dark rounded-xl p-4">
-              <h3 className="text-white font-medium mb-4">{t('admin.hrDistribution') || 'Распределение по HR'}</h3>
+              <h3 className="text-white font-medium mb-4">{t("admin.hrDistribution") || "Распределение по HR"}</h3>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {Object.entries(analytics.hrCounts)
                   .sort((a, b) => b[1] - a[1])
@@ -1170,7 +1240,7 @@ const AdminCRM = () => {
                     <div key={hr} className="flex items-center gap-3">
                       <div className="w-40 text-sm text-white/70 truncate">{hr}</div>
                       <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-green-500 rounded-full"
                           style={{ width: `${(count / Math.max(...Object.values(analytics.hrCounts))) * 100}%` }}
                         />
@@ -1183,7 +1253,9 @@ const AdminCRM = () => {
 
             {/* City Distribution */}
             <div className="glass-dark rounded-xl p-4">
-              <h3 className="text-white font-medium mb-4">{t('admin.cityDistribution') || 'Распределение по городам'}</h3>
+              <h3 className="text-white font-medium mb-4">
+                {t("admin.cityDistribution") || "Распределение по городам"}
+              </h3>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {Object.entries(analytics.cityCounts)
                   .sort((a, b) => b[1] - a[1])
@@ -1192,7 +1264,7 @@ const AdminCRM = () => {
                     <div key={city} className="flex items-center gap-3">
                       <div className="w-40 text-sm text-white/70 truncate">{city}</div>
                       <div className="flex-1 h-3 bg-white/10 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-blue-500 rounded-full"
                           style={{ width: `${(count / Math.max(...Object.values(analytics.cityCounts))) * 100}%` }}
                         />
@@ -1222,11 +1294,7 @@ const AdminCRM = () => {
       </div>
 
       {/* Profile Dialog */}
-      <ProfileDialog 
-        profile={selectedProfile} 
-        isOpen={!!selectedProfile} 
-        onClose={() => setSelectedProfile(null)} 
-      />
+      <ProfileDialog profile={selectedProfile} isOpen={!!selectedProfile} onClose={() => setSelectedProfile(null)} />
 
       {showMobileNav && <MobileNavbar />}
     </div>
@@ -1234,17 +1302,17 @@ const AdminCRM = () => {
 };
 
 // Profile Dialog Component with Photos
-const ProfileDialog = ({ 
-  profile, 
-  isOpen, 
-  onClose 
-}: { 
-  profile: CrmData | null; 
-  isOpen: boolean; 
+const ProfileDialog = ({
+  profile,
+  isOpen,
+  onClose,
+}: {
+  profile: CrmData | null;
+  isOpen: boolean;
   onClose: () => void;
 }) => {
   const { t } = useLanguage();
-  
+
   if (!profile) return null;
 
   return (
@@ -1253,56 +1321,65 @@ const ProfileDialog = ({
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             <User className="w-5 h-5 text-accent" />
-            {profile.telegram_name || profile.full_info?.split(',')[0] || t('admin.unknownUser') || 'Пользователь'}
+            {profile.telegram_name || profile.full_info?.split(",")[0] || t("admin.unknownUser") || "Пользователь"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
           {/* Telegram Section */}
           <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('admin.telegramInfo') || 'Telegram'}</h4>
+            <h4 className="text-accent font-medium text-sm">{t("admin.telegramInfo") || "Telegram"}</h4>
             <div className="flex items-start gap-4">
               {/* Telegram photo from telegram_profiles table or photo_link */}
               {profile.photo_link && (
                 <div className="shrink-0">
                   <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                    <img 
-                      src={profile.photo_link} 
-                      alt="Telegram Photo" 
+                    <img
+                      src={profile.photo_link}
+                      alt="Telegram Photo"
                       className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
                     />
                   </div>
                 </div>
               )}
-              
+
               <div className="flex-1 space-y-2">
                 <div>
                   <p className="text-white/50 text-xs">Telegram ID</p>
-                  <p className="text-white text-sm">{profile.telegram_id || '—'}</p>
+                  <p className="text-white text-sm">{profile.telegram_id || "—"}</p>
                 </div>
-                
+
                 {/* Telegram link - try to extract username from full_info or telegram_name */}
                 {(() => {
                   // Extract username from full_info (format: "@username" or "(@username)")
-                  const usernameMatch = profile.full_info?.match(/@(\w+)/) || 
-                                        profile.full_info?.match(/\((@?\w+)\)/);
-                  const username = usernameMatch ? usernameMatch[1].replace('@', '') : 
-                                   (profile.telegram_name?.startsWith('@') ? profile.telegram_name.slice(1) : null);
-                  
+                  const usernameMatch = profile.full_info?.match(/@(\w+)/) || profile.full_info?.match(/\((@?\w+)\)/);
+                  const username = usernameMatch
+                    ? usernameMatch[1].replace("@", "")
+                    : profile.telegram_name?.startsWith("@")
+                      ? profile.telegram_name.slice(1)
+                      : null;
+
                   if (username) {
                     return (
                       <div>
-                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
-                        <a 
+                        <p className="text-white/50 text-xs">{t("admin.telegramProfile") || "Профиль Telegram"}</p>
+                        <a
                           href={`https://t.me/${username}`}
-                          target="_blank" 
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
                         >
                           @{username}
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                         </a>
                       </div>
@@ -1310,14 +1387,19 @@ const ProfileDialog = ({
                   } else if (profile.telegram_id) {
                     return (
                       <div>
-                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
-                        <a 
+                        <p className="text-white/50 text-xs">{t("admin.telegramProfile") || "Профиль Telegram"}</p>
+                        <a
                           href={`tg://user?id=${profile.telegram_id}`}
                           className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
                         >
-                          {t('admin.openTelegram') || 'Открыть в Telegram'}
+                          {t("admin.openTelegram") || "Открыть в Telegram"}
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                         </a>
                       </div>
@@ -1325,63 +1407,69 @@ const ProfileDialog = ({
                   }
                   return null;
                 })()}
-                
+
                 {profile.telegram_name && (
                   <div>
-                    <p className="text-white/50 text-xs">{t('admin.telegramName') || 'Имя в Telegram'}</p>
+                    <p className="text-white/50 text-xs">{t("admin.telegramName") || "Имя в Telegram"}</p>
                     <p className="text-white text-sm">{profile.telegram_name}</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          
+
           {/* Resume photo */}
-          {profile.resume_link && (profile.resume_link.includes('.jpg') || profile.resume_link.includes('.png') || profile.resume_link.includes('.jpeg') || profile.resume_link.includes('drive.google.com')) && (
-            <div>
-              <p className="text-white/50 text-xs mb-2">{t('profile.resumePhoto') || 'Фото резюме'}</p>
-              <div className="w-40 aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                <img 
-                  src={profile.resume_link} 
-                  alt="Resume" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
+          {profile.resume_link &&
+            (profile.resume_link.includes(".jpg") ||
+              profile.resume_link.includes(".png") ||
+              profile.resume_link.includes(".jpeg") ||
+              profile.resume_link.includes("drive.google.com")) && (
+              <div>
+                <p className="text-white/50 text-xs mb-2">{t("profile.resumePhoto") || "Фото резюме"}</p>
+                <div className="w-40 aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                  <img
+                    src={profile.resume_link}
+                    alt="Resume"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Basic Info */}
           <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('profile.workData') || 'Рабочие данные'}</h4>
+            <h4 className="text-accent font-medium text-sm">{t("profile.workData") || "Рабочие данные"}</h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoItem label={t('profile.code') || 'Код'} value={profile.code} />
-              <InfoItem label={t('profile.fullInfo') || 'ФИО'} value={profile.full_info} />
-              <InfoItem label={t('profile.status') || 'Статус'} value={profile.status} />
-              <InfoItem label={t('profile.hr') || 'HR'} value={profile.hr} />
-              <InfoItem label={t('profile.rating') || 'Рейтинг'} value={profile.rating} />
-              <InfoItem label={t('profile.result') || 'Результат'} value={profile.result} />
-              <InfoItem label={t('profile.contractDate') || 'Дата договора'} value={profile.contract_date} />
-              <InfoItem label={t('profile.workStart') || 'Старт работы'} value={profile.work_start_date} />
-              <InfoItem label={t('admin.startDate') || 'Дата добавления'} value={profile.start_date} />
-              <InfoItem label={t('profile.dismissalDate') || 'Дата увольнения'} value={profile.dismissal_date} />
-              <InfoItem label={t('profile.daysWorked') || 'Дней работы'} value={profile.days_worked?.toString()} />
-              <InfoItem label={t('profile.testsPassed') || 'Тесты'} value={profile.tests_passed} />
+              <InfoItem label={t("profile.code") || "Код"} value={profile.code} />
+              <InfoItem label={t("profile.fullInfo") || "ФИО"} value={profile.full_info} />
+              <InfoItem label={t("profile.status") || "Статус"} value={profile.status} />
+              <InfoItem label={t("profile.hr") || "HR"} value={profile.hr} />
+              <InfoItem label={t("profile.rating") || "Рейтинг"} value={profile.rating} />
+              <InfoItem label={t("profile.result") || "Результат"} value={profile.result} />
+              <InfoItem label={t("profile.contractDate") || "Дата договора"} value={profile.contract_date} />
+              <InfoItem label={t("profile.workStart") || "Старт работы"} value={profile.work_start_date} />
+              <InfoItem label={t("admin.startDate") || "Дата добавления"} value={profile.start_date} />
+              <InfoItem label={t("profile.dismissalDate") || "Дата увольнения"} value={profile.dismissal_date} />
+              <InfoItem label={t("profile.daysWorked") || "Дней работы"} value={profile.days_worked?.toString()} />
+              <InfoItem label={t("profile.testsPassed") || "Тесты"} value={profile.tests_passed} />
             </div>
           </div>
 
           {/* Interview Info */}
           {(profile.rop_name || profile.city || profile.region || profile.checklist_answers) && (
             <div className="space-y-3">
-              <h4 className="text-accent font-medium text-sm">{t('profile.interviewSection') || 'Интервью'}</h4>
+              <h4 className="text-accent font-medium text-sm">{t("profile.interviewSection") || "Интервью"}</h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <InfoItem label={t('profile.ropName') || 'РОП'} value={profile.rop_name} />
-                <InfoItem label={t('profile.city') || 'Город'} value={profile.city} />
-                <InfoItem label={t('profile.region') || 'Регион'} value={profile.region} />
+                <InfoItem label={t("profile.ropName") || "РОП"} value={profile.rop_name} />
+                <InfoItem label={t("profile.city") || "Город"} value={profile.city} />
+                <InfoItem label={t("profile.region") || "Регион"} value={profile.region} />
               </div>
               {profile.checklist_answers && (
                 <div className="mt-2">
-                  <p className="text-white/50 text-xs mb-1">{t('profile.checklistAnswers') || 'Ответы на чек-лист'}</p>
+                  <p className="text-white/50 text-xs mb-1">{t("profile.checklistAnswers") || "Ответы на чек-лист"}</p>
                   <p className="text-white text-sm bg-white/5 rounded-lg p-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
                     {profile.checklist_answers}
                   </p>
@@ -1392,14 +1480,14 @@ const ProfileDialog = ({
 
           {/* Contact Info */}
           <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('profile.resume') || 'Контакты'}</h4>
+            <h4 className="text-accent font-medium text-sm">{t("profile.resume") || "Контакты"}</h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoItem label={t('profile.phone') || 'Телефон'} value={profile.phone} />
-              <InfoItem label={t('profile.birthDate') || 'Дата рождения'} value={profile.birth_date} />
+              <InfoItem label={t("profile.phone") || "Телефон"} value={profile.phone} />
+              <InfoItem label={t("profile.birthDate") || "Дата рождения"} value={profile.birth_date} />
             </div>
             {profile.resume_text && (
               <div className="mt-2">
-                <p className="text-white/50 text-xs mb-1">{t('profile.resumeText') || 'Резюме'}</p>
+                <p className="text-white/50 text-xs mb-1">{t("profile.resumeText") || "Резюме"}</p>
                 <p className="text-white text-sm bg-white/5 rounded-lg p-3 whitespace-pre-wrap max-h-32 overflow-y-auto">
                   {profile.resume_text}
                 </p>
@@ -1409,30 +1497,46 @@ const ProfileDialog = ({
 
           {/* Links */}
           <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('admin.links') || 'Ссылки'}</h4>
+            <h4 className="text-accent font-medium text-sm">{t("admin.links") || "Ссылки"}</h4>
             <div className="flex flex-wrap gap-2">
               {profile.contract_link && (
-                <a href={profile.contract_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.contractLink') || 'Договор'}
+                <a
+                  href={profile.contract_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20"
+                >
+                  {t("profile.contractLink") || "Договор"}
                 </a>
               )}
               {profile.business_card_link && (
-                <a href={profile.business_card_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.businessCard') || 'Визитка'}
+                <a
+                  href={profile.business_card_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20"
+                >
+                  {t("profile.businessCard") || "Визитка"}
                 </a>
               )}
               {profile.resume_link && (
-                <a href={profile.resume_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.resumeLink') || 'Резюме'}
+                <a
+                  href={profile.resume_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20"
+                >
+                  {t("profile.resumeLink") || "Резюме"}
                 </a>
               )}
               {profile.photo_link && (
-                <a href={profile.photo_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.photoLink') || 'Фото'}
+                <a
+                  href={profile.photo_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20"
+                >
+                  {t("profile.photoLink") || "Фото"}
                 </a>
               )}
             </div>
@@ -1447,7 +1551,7 @@ const ProfileDialog = ({
 const InfoItem = ({ label, value }: { label: string; value: string | null | undefined }) => (
   <div>
     <p className="text-white/50 text-xs">{label}</p>
-    <p className="text-white truncate">{value || '—'}</p>
+    <p className="text-white truncate">{value || "—"}</p>
   </div>
 );
 

@@ -8,7 +8,7 @@ const corsHeaders = {
 const SHEET_ID = '1-krk7YGzZPfMC9gYYvzAO_ln3utynfOyhPppye7Ut0o';
 const GID = '1282056892';
 
-// Parse CSV handling quotes and commas properly
+// Parse CSV line handling quotes
 function parseCSVLine(line: string): string[] {
   const cells: string[] = [];
   let currentCell = '';
@@ -16,10 +16,8 @@ function parseCSVLine(line: string): string[] {
   
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    const nextChar = line[i + 1];
-    
     if (char === '"') {
-      if (insideQuotes && nextChar === '"') {
+      if (insideQuotes && line[i + 1] === '"') {
         currentCell += '"';
         i++;
       } else {
@@ -32,67 +30,49 @@ function parseCSVLine(line: string): string[] {
       currentCell += char;
     }
   }
-  
   cells.push(currentCell.trim());
   return cells;
 }
 
-// Create hash from telegram_id for deduplication
 function createRowHash(telegramId: string): string {
   let hash = 0;
-  const str = telegramId || '';
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+  for (let i = 0; i < telegramId.length; i++) {
+    hash = ((hash << 5) - hash) + telegramId.charCodeAt(i);
     hash = hash & hash;
   }
   return hash.toString(16);
 }
 
-// Parse date from various formats
 function parseDate(dateStr: string): string | null {
-  if (!dateStr || dateStr.trim() === '') return null;
-  
+  if (!dateStr?.trim()) return null;
   const ddmmyyyy = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (ddmmyyyy) {
-    return `${ddmmyyyy[3]}-${ddmmyyyy[2].padStart(2, '0')}-${ddmmyyyy[1].padStart(2, '0')}`;
-  }
-  
-  const yyyymmdd = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (yyyymmdd) return dateStr;
-  
+  if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2].padStart(2, '0')}-${ddmmyyyy[1].padStart(2, '0')}`;
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStr)) return dateStr;
   try {
     const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0];
-    }
+    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
   } catch { /* ignore */ }
-  
   return null;
 }
 
-// Parse boolean from various formats
 function parseBoolean(value: string): boolean {
   if (!value) return false;
   const lower = value.toLowerCase().trim();
-  return lower === 'true' || lower === '1' || lower === 'да' || lower === 'yes' || lower === 'вкл';
+  return ['true', '1', 'да', 'yes', 'вкл'].includes(lower);
 }
 
-// Parse integer
 function parseInteger(value: string): number | null {
-  if (!value || value.trim() === '') return null;
+  if (!value?.trim()) return null;
   const num = parseInt(value.trim(), 10);
   return isNaN(num) ? null : num;
 }
 
-// Map row to CRM data object
 function mapRowToCrmData(row: string[]) {
   const telegramId = row[0]?.trim();
   if (!telegramId) return null;
-  
   const telegramIdNum = parseInt(telegramId, 10);
   if (isNaN(telegramIdNum)) return null;
-  
+
   return {
     telegram_id: telegramIdNum,
     code: row[1] || null,
@@ -182,131 +162,88 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log('[sync-crm-sheets] Starting CRM sync (optimized)...');
+  // Parse pagination params
+  let offset = 0;
+  let limit = 1500; // Process 1500 rows per call (smaller chunks)
+  
+  try {
+    const url = new URL(req.url);
+    offset = parseInt(url.searchParams.get('offset') || '0', 10);
+    limit = parseInt(url.searchParams.get('limit') || '1500', 10);
+  } catch {
+    try {
+      const body = await req.json();
+      offset = body.offset || 0;
+      limit = body.limit || 1500;
+    } catch { /* use defaults */ }
+  }
+
+  console.log(`[sync-crm-sheets] Starting chunk: offset=${offset}, limit=${limit}`);
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch CSV from Google Sheets
+    // Fetch CSV
     const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-    console.log('[sync-crm-sheets] Fetching CSV...');
-    
     const response = await fetch(csvUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch sheet: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     
     const csvText = await response.text();
-    console.log('[sync-crm-sheets] CSV length:', csvText.length);
-    
-    // Split into lines and process
     const lines = csvText.split(/\r?\n/).filter(line => line.trim());
-    console.log('[sync-crm-sheets] Total lines:', lines.length);
+    const totalRows = lines.length - 1; // Exclude header
     
-    if (lines.length < 2) {
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: 'No data rows found',
-        stats: { total: 0, upserted: 0, deleted: 0 }
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    console.log(`[sync-crm-sheets] Total rows: ${totalRows}, processing ${offset}-${offset + limit}`);
 
-    // Get existing telegram_ids first
-    const { data: existingData, error: fetchError } = await supabase
-      .from('crm_data')
-      .select('telegram_id');
-    
-    if (fetchError) {
-      throw new Error(`Failed to fetch existing data: ${fetchError.message}`);
-    }
+    // If first chunk (offset=0), return total for frontend to orchestrate
+    const isFirstChunk = offset === 0;
+    const isLastChunk = offset + limit >= totalRows;
 
-    const existingIds = new Set((existingData || []).map(r => r.telegram_id));
-    const newIds = new Set<number>();
+    // Process only this chunk
+    const startIdx = 1 + offset; // +1 to skip header
+    const endIdx = Math.min(startIdx + limit, lines.length);
     
-    // Process in smaller batches - SEQUENTIAL to reduce memory
-    const BATCH_SIZE = 100; // Reduced from 500
     let upsertedCount = 0;
-    let errorCount = 0;
     let batch: ReturnType<typeof mapRowToCrmData>[] = [];
+    const BATCH_SIZE = 100;
     
-    // Skip header, process rows
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = startIdx; i < endIdx; i++) {
       const row = parseCSVLine(lines[i]);
       const crmData = mapRowToCrmData(row);
       
       if (crmData) {
-        newIds.add(crmData.telegram_id);
         batch.push(crmData);
         
-        // Process batch when full
         if (batch.length >= BATCH_SIZE) {
           const { error } = await supabase
             .from('crm_data')
             .upsert(batch, { onConflict: 'telegram_id', ignoreDuplicates: false });
           
-          if (error) {
-            console.error('[sync-crm-sheets] Batch error:', error.message);
-            errorCount++;
-          } else {
-            upsertedCount += batch.length;
-          }
+          if (!error) upsertedCount += batch.length;
+          else console.error('[sync-crm-sheets] Batch error:', error.message);
           
           batch = [];
-          
-          // Log progress every 1000 records
-          if (i % 1000 === 0) {
-            console.log(`[sync-crm-sheets] Progress: ${i}/${lines.length}`);
-          }
         }
       }
     }
     
-    // Process remaining batch
+    // Process remaining
     if (batch.length > 0) {
       const { error } = await supabase
         .from('crm_data')
         .upsert(batch, { onConflict: 'telegram_id', ignoreDuplicates: false });
-      
-      if (error) {
-        console.error('[sync-crm-sheets] Final batch error:', error.message);
-        errorCount++;
-      } else {
-        upsertedCount += batch.length;
-      }
+      if (!error) upsertedCount += batch.length;
     }
 
-    // Find and delete obsolete records
-    const idsToDelete = [...existingIds].filter(id => !newIds.has(id));
-    let deletedCount = 0;
-    
-    if (idsToDelete.length > 0 && idsToDelete.length < 1000) {
-      // Only delete if reasonable number to prevent accidental mass deletion
-      const { error: deleteError } = await supabase
-        .from('crm_data')
-        .delete()
-        .in('telegram_id', idsToDelete);
-      
-      if (!deleteError) {
-        deletedCount = idsToDelete.length;
-        console.log('[sync-crm-sheets] Deleted obsolete:', deletedCount);
-      }
-    }
-
-    console.log('[sync-crm-sheets] Complete. Upserted:', upsertedCount, 'Deleted:', deletedCount);
+    console.log(`[sync-crm-sheets] Chunk done. Upserted: ${upsertedCount}`);
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'CRM sync completed',
-      stats: {
-        total: newIds.size,
-        upserted: upsertedCount,
-        deleted: deletedCount,
-        errors: errorCount
-      }
+      chunk: { offset, limit, processed: upsertedCount },
+      total: totalRows,
+      hasMore: !isLastChunk,
+      nextOffset: isLastChunk ? null : offset + limit,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -314,10 +251,7 @@ Deno.serve(async (req) => {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[sync-crm-sheets] Error:', errorMessage);
-    return new Response(JSON.stringify({
-      success: false,
-      error: errorMessage
-    }), {
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });

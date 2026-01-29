@@ -254,17 +254,30 @@ const PublicProfile = () => {
     fetchProfile();
   }, [telegramId]);
 
-  // Handle manual sync
+  // Handle manual sync - calls sync-crm-user edge function
   const handleSync = async () => {
+    if (!telegramId) return;
+    
     setIsSyncing(true);
     try {
-      await fetchProfile();
-      toast.success(
-        language === 'ru' ? 'Данные обновлены' :
-        language === 'kz' ? 'Деректер жаңартылды' :
-        'Data updated'
-      );
+      const { data, error } = await supabase.functions.invoke('sync-crm-user', {
+        body: { telegramId: parseInt(telegramId) }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast.success(
+          language === 'ru' ? 'Данные обновлены' :
+          language === 'kz' ? 'Деректер жаңартылды' :
+          'Data updated'
+        );
+        await fetchProfile();
+      } else {
+        toast.info(data?.message || 'User not found');
+      }
     } catch (err) {
+      console.error('Sync error:', err);
       toast.error(
         language === 'ru' ? 'Ошибка обновления' :
         language === 'kz' ? 'Жаңарту қатесі' :

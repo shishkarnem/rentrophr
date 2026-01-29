@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.translate-resume]
 verify_jwt = false
+
+[functions.sync-crm-user]
+verify_jwt = false
+
+[functions.sync-projects-sheets]
+verify_jwt = false
+
+[functions.notify-project-response]
+verify_jwt = false

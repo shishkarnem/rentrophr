@@ -91,20 +91,23 @@ export const useProjectSwipes = () => {
     }
   }, []);
 
-  // Send notification to Telegram group for "respond" action
-  const sendNotification = useCallback(async (projectId: string, projectCode: string) => {
+  // Send notification to Telegram group for "respond" or "like" action
+  const sendNotification = useCallback(async (projectId: string, projectCode: string, action: SwipeAction) => {
     if (!telegramId) return;
+    
+    // Only send notifications for 'respond' and 'like' actions
+    if (action !== 'respond' && action !== 'like') return;
     
     setIsSendingNotification(true);
     try {
       const response = await supabase.functions.invoke('notify-project-response', {
-        body: { projectId, projectCode, telegramId },
+        body: { projectId, projectCode, telegramId, action },
       });
       
       if (response.error) {
         console.error('Error sending notification:', response.error);
       } else {
-        console.log('Notification sent successfully');
+        console.log(`Notification sent successfully for action: ${action}`);
       }
     } catch (err) {
       console.error('Error sending notification:', err);
@@ -170,9 +173,9 @@ export const useProjectSwipes = () => {
           return [dbRecord, ...filtered];
         });
 
-        // Send notification for "respond" action
-        if (action === 'respond') {
-          sendNotification(projectId, projectCode);
+        // Send notification for "respond" or "like" actions
+        if (action === 'respond' || action === 'like') {
+          sendNotification(projectId, projectCode, action);
         }
       }
     } catch (err) {

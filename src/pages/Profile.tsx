@@ -228,15 +228,30 @@ const Profile = () => {
     }
   }, [isTelegram, telegramId, syncOnAppLoad]);
 
-  // Handle manual sync
+  // Handle manual sync - calls sync-crm-user edge function for individual user
   const handleSync = async () => {
-    const result = await syncNow(false);
-    if (result.success) {
-      toast.success(`${result.message} (обновлено: ${result.synced || 0})`);
-      // Refetch CRM data after sync
-      refetchCrmData();
-    } else {
-      toast.error(result.message);
+    if (!telegramId) {
+      toast.error(t("profile.syncError") || "Ошибка обновления");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-crm-user", {
+        body: { telegramId },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(t("profile.synced") || "Данные обновлены");
+        // Refetch CRM data after sync
+        refetchCrmData();
+      } else {
+        toast.info(data?.message || "Данные не найдены");
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.error(t("profile.syncError") || "Ошибка обновления");
     }
   };
 
@@ -928,11 +943,35 @@ const Profile = () => {
                 value={crmData.available_skills}
               />
               <ProgressItem label={t("profile.languageChoice") || "Выбор языка"} value={crmData.language_choice} />
+              
+              {/* Interview - show button if skill "интервью" is available */}
+              {crmData.available_skills && crmData.available_skills.toLowerCase().includes("интервью") && (
+                <div className="py-2">
+                  <Button
+                    onClick={() => navigate("/interview")}
+                    variant="gold"
+                    size="lg"
+                    className="w-full gap-2"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    {t("profile.interviewButton") || "Пройти Интервью"}
+                    {crmData.interview &&
+                      crmData.interview.toLowerCase() !== "нет" &&
+                      crmData.interview !== "0" &&
+                      crmData.interview !== "" &&
+                      !crmData.interview.includes("⌛") &&
+                      !crmData.interview.includes("⌛️") &&
+                      !crmData.interview.includes("⏳") && <CheckCircle2 className="w-5 h-5 text-green-300" />}
+                  </Button>
+                </div>
+              )}
               <ProgressItem
                 label={t("profile.interview") || "Интервью"}
                 value={crmData.interview}
-                onClick={() => navigate("/interview")}
+                onClick={crmData.available_skills?.toLowerCase().includes("интервью") ? () => navigate("/interview") : undefined}
               />
+              
+              {/* Test Conditions - show button if skill "тест условий" is available */}
               {crmData.available_skills && crmData.available_skills.toLowerCase().includes("тест условий") && (
                 <div className="py-2">
                   <Button
@@ -956,7 +995,7 @@ const Profile = () => {
               <ProgressItem
                 label={t("profile.testConditions") || "Тест условий"}
                 value={crmData.test_conditions}
-                onClick={() => navigate("/tests/conditions")}
+                onClick={crmData.available_skills?.toLowerCase().includes("тест условий") ? () => navigate("/tests/conditions") : undefined}
               />
               {crmData.available_skills && crmData.available_skills.toLowerCase().includes("тест портала") && (
                 <div className="py-2">
@@ -976,7 +1015,7 @@ const Profile = () => {
               <ProgressItem
                 label={t("profile.testPortal") || "Тест портала"}
                 value={crmData.test_portal}
-                onClick={() => navigate("/tests/portal")}
+                onClick={crmData.available_skills?.toLowerCase().includes("тест портала") ? () => navigate("/tests/portal") : undefined}
               />
               {crmData.available_skills && crmData.available_skills.toLowerCase().includes("тест отчёта") && (
                 <div className="py-2">
@@ -996,7 +1035,7 @@ const Profile = () => {
               <ProgressItem
                 label={t("profile.testReport") || "Тест отчёта"}
                 value={crmData.test_report}
-                onClick={() => navigate("/tests/report")}
+                onClick={crmData.available_skills?.toLowerCase().includes("тест отчёта") ? () => navigate("/tests/report") : undefined}
               />
               {crmData.available_skills && crmData.available_skills.toLowerCase().includes("тест робот") && (
                 <div className="py-2">
@@ -1013,6 +1052,11 @@ const Profile = () => {
                   </Button>
                 </div>
               )}
+              <ProgressItem
+                label={t("profile.testRobot") || "Тест робота"}
+                value={crmData.test_robot}
+                onClick={crmData.available_skills?.toLowerCase().includes("тест робот") ? () => navigate("/tests/robot") : undefined}
+              />
               <ProgressItem
                 label={t("profile.contractSigning") || "Подписание договора"}
                 value={crmData.contract_signing}

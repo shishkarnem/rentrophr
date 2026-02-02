@@ -78,7 +78,7 @@ const InterviewForm = () => {
     
     // 898718676 - код РОПа из профиля (crm_data.code)
     if (crmData?.code) {
-      params.set('entry.898718676', crmData.code);
+      params.set('entry.898718676', crmData.code.toString());
     }
     
     // 1890080826 - username пользователя телеграм с @

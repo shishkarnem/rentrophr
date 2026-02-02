@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface CrmData {
   id: string;
   telegram_id: number | null;
-  code: string | null;
+  code: number | null;
   telegram_name: string | null;
   full_info: string | null;
   status: string | null;

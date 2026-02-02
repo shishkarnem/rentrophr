@@ -106,7 +106,7 @@ export type Database = {
           business_card_link: string | null
           checklist_answers: string | null
           city: string | null
-          code: string | null
+          code: number | null
           conditions: string | null
           contract_date: string | null
           contract_date_manual: string | null
@@ -193,7 +193,7 @@ export type Database = {
           business_card_link?: string | null
           checklist_answers?: string | null
           city?: string | null
-          code?: string | null
+          code?: number | null
           conditions?: string | null
           contract_date?: string | null
           contract_date_manual?: string | null
@@ -280,7 +280,7 @@ export type Database = {
           business_card_link?: string | null
           checklist_answers?: string | null
           city?: string | null
-          code?: string | null
+          code?: number | null
           conditions?: string | null
           contract_date?: string | null
           contract_date_manual?: string | null

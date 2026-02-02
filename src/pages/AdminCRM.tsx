@@ -389,7 +389,7 @@ const AdminCRM = () => {
         return (
           r.telegram_name?.toLowerCase().includes(lowerQuery) ||
           r.full_info?.toLowerCase().includes(lowerQuery) ||
-          r.code?.toLowerCase().includes(lowerQuery) ||
+          r.code?.toString().includes(searchQuery) ||
           r.telegram_id?.toString().includes(searchQuery) ||
           r.phone?.toLowerCase().includes(lowerQuery) ||
           r.city?.toLowerCase().includes(lowerQuery) ||
@@ -757,10 +757,12 @@ const AdminCRM = () => {
                       ? 'text-white/30 bg-white/5 cursor-not-allowed' 
                       : 'text-accent bg-accent/10 hover:bg-accent/20'
                   }`}
-                  title={canSync ? 'Синхронизировать с Google Sheets' : 'Подождите 5 минут'}
+                  title={canSync ? (t('admin.syncNow') || 'Синхронизировать с Google Sheets') : (t('admin.waitSync') || 'Подождите 5 минут')}
                 >
                   <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Обновление...' : (formatLastSyncTime() || 'Обновить')}
+                  {!isSyncing && formatLastSyncTime() && (
+                    <span className="text-xs text-white/50">{formatLastSyncTime()}</span>
+                  )}
                 </button>
               </div>
 
@@ -951,7 +953,7 @@ const AdminCRM = () => {
                 <div className="overflow-x-auto">
                   <Table style={{ tableLayout: 'fixed' }}>
                     <TableHeader>
-                      <TableRow className="border-white/10 hover:bg-transparent">
+                      <TableRow className="border-white/10 !bg-transparent hover:!bg-transparent">
                         {/* Profile button column - always first */}
                         <TableHead className="text-white/70 sticky left-0 bg-primary/90" style={{ width: 50 }}>
                           {t('admin.colActions') || ''}
@@ -1247,203 +1249,325 @@ const ProfileDialog = ({
   isOpen: boolean; 
   onClose: () => void;
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [showChecklistModal, setShowChecklistModal] = useState(false);
+  const [translatedResume, setTranslatedResume] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
   
   if (!profile) return null;
 
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto glass-dark border-white/10">
-        <DialogHeader>
-          <DialogTitle className="text-white flex items-center gap-2">
-            <User className="w-5 h-5 text-accent" />
-            {profile.telegram_name || profile.full_info?.split(',')[0] || t('admin.unknownUser') || 'Пользователь'}
-          </DialogTitle>
-        </DialogHeader>
+  const handleTranslateResume = async () => {
+    if (!profile.resume_text) return;
+    
+    setIsTranslating(true);
+    try {
+      const targetLang = language === 'ru' ? 'en' : language === 'en' ? 'ru' : language;
+      const { data, error } = await supabase.functions.invoke('translate-resume', {
+        body: { 
+          text: profile.resume_text,
+          targetLanguage: targetLang,
+          telegramId: profile.telegram_id
+        }
+      });
+      
+      if (error) throw error;
+      if (data?.translatedText) {
+        setTranslatedResume(data.translatedText);
+      }
+    } catch (err) {
+      console.error('Translation error:', err);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
-        <div className="space-y-6 mt-4">
-          {/* Telegram Section */}
-          <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('admin.telegramInfo') || 'Telegram'}</h4>
-            <div className="flex items-start gap-4">
-              {/* Telegram photo from telegram_profiles table or photo_link */}
-              {profile.photo_link && (
-                <div className="shrink-0">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                    <img 
-                      src={profile.photo_link} 
-                      alt="Telegram Photo" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                    />
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto glass-dark border-white/10">
+          {/* Gold close button with margin for Telegram */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-8 p-1.5 rounded-full hover:bg-white/10 transition-colors z-10"
+          >
+            <X className="w-5 h-5 text-accent" />
+          </button>
+          
+          <DialogHeader className="mt-4">
+            <DialogTitle className="text-white flex items-center gap-2">
+              <User className="w-5 h-5 text-accent" />
+              {profile.telegram_name || profile.full_info?.split(',')[0] || t('admin.unknownUser') || 'Пользователь'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Telegram Section */}
+            <div className="space-y-3">
+              <h4 className="text-accent font-medium text-sm">{t('admin.telegramInfo') || 'Telegram'}</h4>
+              <div className="flex items-start gap-4">
+                {profile.photo_link && (
+                  <div className="shrink-0">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                      <img 
+                        src={profile.photo_link} 
+                        alt="Telegram Photo" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              <div className="flex-1 space-y-2">
-                <div>
-                  <p className="text-white/50 text-xs">Telegram ID</p>
-                  <p className="text-white text-sm">{profile.telegram_id || '—'}</p>
-                </div>
+                )}
                 
-                {/* Telegram link - try to extract username from full_info or telegram_name */}
-                {(() => {
-                  // Extract username from full_info (format: "@username" or "(@username)")
-                  const usernameMatch = profile.full_info?.match(/@(\w+)/) || 
-                                        profile.full_info?.match(/\((@?\w+)\)/);
-                  const username = usernameMatch ? usernameMatch[1].replace('@', '') : 
-                                   (profile.telegram_name?.startsWith('@') ? profile.telegram_name.slice(1) : null);
-                  
-                  if (username) {
-                    return (
-                      <div>
-                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
-                        <a 
-                          href={`https://t.me/${username}`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
-                        >
-                          @{username}
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
-                      </div>
-                    );
-                  } else if (profile.telegram_id) {
-                    return (
-                      <div>
-                        <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
-                        <a 
-                          href={`tg://user?id=${profile.telegram_id}`}
-                          className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
-                        >
-                          {t('admin.openTelegram') || 'Открыть в Telegram'}
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-                
-                {profile.telegram_name && (
+                <div className="flex-1 space-y-2">
                   <div>
-                    <p className="text-white/50 text-xs">{t('admin.telegramName') || 'Имя в Telegram'}</p>
-                    <p className="text-white text-sm">{profile.telegram_name}</p>
+                    <p className="text-white/50 text-xs">Telegram ID</p>
+                    <p className="text-white text-sm">{profile.telegram_id || '—'}</p>
                   </div>
+                  
+                  {(() => {
+                    const usernameMatch = profile.full_info?.match(/@(\w+)/) || 
+                                          profile.full_info?.match(/\((@?\w+)\)/);
+                    const username = usernameMatch ? usernameMatch[1].replace('@', '') : 
+                                     (profile.telegram_name?.startsWith('@') ? profile.telegram_name.slice(1) : null);
+                    
+                    if (username) {
+                      return (
+                        <div>
+                          <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
+                          <a 
+                            href={`https://t.me/${username}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
+                          >
+                            @{username}
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        </div>
+                      );
+                    } else if (profile.telegram_id) {
+                      return (
+                        <div>
+                          <p className="text-white/50 text-xs">{t('admin.telegramProfile') || 'Профиль Telegram'}</p>
+                          <a 
+                            href={`tg://user?id=${profile.telegram_id}`}
+                            className="text-accent hover:text-accent/80 text-sm inline-flex items-center gap-1"
+                          >
+                            {t('admin.openTelegram') || 'Открыть в Telegram'}
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  
+                  {profile.telegram_name && (
+                    <div>
+                      <p className="text-white/50 text-xs">{t('admin.telegramName') || 'Имя в Telegram'}</p>
+                      <p className="text-white text-sm">{profile.telegram_name}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Resume photo */}
+            {profile.resume_link && (profile.resume_link.includes('.jpg') || profile.resume_link.includes('.png') || profile.resume_link.includes('.jpeg') || profile.resume_link.includes('drive.google.com')) && (
+              <div>
+                <p className="text-white/50 text-xs mb-2">{t('profile.resumePhoto') || 'Фото резюме'}</p>
+                <div className="w-40 aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                  <img 
+                    src={profile.resume_link} 
+                    alt="Resume" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Basic Info */}
+            <div className="space-y-3">
+              <h4 className="text-accent font-medium text-sm">{t('profile.workData') || 'Рабочие данные'}</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <InfoItem label={t('profile.code') || 'Код'} value={profile.code?.toString()} />
+                <InfoItem label={t('profile.fullInfo') || 'ФИО'} value={profile.full_info} />
+                <InfoItem label={t('profile.status') || 'Статус'} value={profile.status} />
+                <InfoItem label={t('profile.hr') || 'HR'} value={profile.hr} />
+                <InfoItem label={t('profile.rating') || 'Рейтинг'} value={profile.rating} />
+                <InfoItem label={t('profile.result') || 'Результат'} value={profile.result} />
+                <InfoItem label={t('profile.contractDate') || 'Дата договора'} value={profile.contract_date} />
+                <InfoItem label={t('profile.workStart') || 'Старт работы'} value={profile.work_start_date} />
+                <InfoItem label={t('admin.startDate') || 'Дата добавления'} value={profile.start_date} />
+                <InfoItem label={t('profile.dismissalDate') || 'Дата увольнения'} value={profile.dismissal_date} />
+                <InfoItem label={t('profile.daysWorked') || 'Дней работы'} value={profile.days_worked?.toString()} />
+                <InfoItem label={t('profile.testsPassed') || 'Тесты'} value={profile.tests_passed} />
+              </div>
+            </div>
+
+            {/* Interview Info */}
+            {(profile.rop_name || profile.city || profile.region || profile.checklist_answers) && (
+              <div className="space-y-3">
+                <h4 className="text-accent font-medium text-sm">{t('profile.interviewSection') || 'Интервью'}</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <InfoItem label={t('profile.ropName') || 'РОП'} value={profile.rop_name} />
+                  <InfoItem label={t('profile.city') || 'Город'} value={profile.city} />
+                  <InfoItem label={t('profile.region') || 'Регион'} value={profile.region} />
+                </div>
+                {profile.checklist_answers && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowChecklistModal(true)}
+                    className="text-accent hover:text-accent/80 text-sm"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    {t('admin.showChecklist') || 'Показать анкету'}
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Contact Info */}
+            <div className="space-y-3">
+              <h4 className="text-accent font-medium text-sm">{t('profile.resume') || 'Контакты'}</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <InfoItem label={t('profile.phone') || 'Телефон'} value={profile.phone} />
+                <InfoItem label={t('profile.birthDate') || 'Дата рождения'} value={profile.birth_date} />
+              </div>
+              {profile.resume_text && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowResumeModal(true)}
+                  className="text-accent hover:text-accent/80 text-sm"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  {t('admin.showResume') || 'Показать резюме'}
+                </Button>
+              )}
+            </div>
+
+            {/* Links */}
+            <div className="space-y-3">
+              <h4 className="text-accent font-medium text-sm">{t('admin.links') || 'Ссылки'}</h4>
+              <div className="flex flex-wrap gap-2">
+                {profile.telegram_id && (
+                  <a 
+                    href={`https://hr.rent-rop.com/${profile.telegram_id}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 bg-accent/20 rounded-full text-accent hover:bg-accent/30"
+                  >
+                    {t('admin.profileLink') || 'Профиль'}
+                  </a>
+                )}
+                {profile.contract_link && (
+                  <a href={profile.contract_link} target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
+                    {t('profile.contractLink') || 'Договор'}
+                  </a>
+                )}
+                {profile.business_card_link && (
+                  <a href={profile.business_card_link} target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
+                    {t('profile.businessCard') || 'Визитка'}
+                  </a>
+                )}
+                {profile.resume_link && (
+                  <a href={profile.resume_link} target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
+                    {t('profile.resumeLink') || 'Резюме'}
+                  </a>
+                )}
+                {profile.photo_link && (
+                  <a href={profile.photo_link} target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
+                    {t('profile.photoLink') || 'Фото'}
+                  </a>
                 )}
               </div>
             </div>
           </div>
-          
-          {/* Resume photo */}
-          {profile.resume_link && (profile.resume_link.includes('.jpg') || profile.resume_link.includes('.png') || profile.resume_link.includes('.jpeg') || profile.resume_link.includes('drive.google.com')) && (
-            <div>
-              <p className="text-white/50 text-xs mb-2">{t('profile.resumePhoto') || 'Фото резюме'}</p>
-              <div className="w-40 aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                <img 
-                  src={profile.resume_link} 
-                  alt="Resume" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Basic Info */}
-          <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('profile.workData') || 'Рабочие данные'}</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoItem label={t('profile.code') || 'Код'} value={profile.code} />
-              <InfoItem label={t('profile.fullInfo') || 'ФИО'} value={profile.full_info} />
-              <InfoItem label={t('profile.status') || 'Статус'} value={profile.status} />
-              <InfoItem label={t('profile.hr') || 'HR'} value={profile.hr} />
-              <InfoItem label={t('profile.rating') || 'Рейтинг'} value={profile.rating} />
-              <InfoItem label={t('profile.result') || 'Результат'} value={profile.result} />
-              <InfoItem label={t('profile.contractDate') || 'Дата договора'} value={profile.contract_date} />
-              <InfoItem label={t('profile.workStart') || 'Старт работы'} value={profile.work_start_date} />
-              <InfoItem label={t('admin.startDate') || 'Дата добавления'} value={profile.start_date} />
-              <InfoItem label={t('profile.dismissalDate') || 'Дата увольнения'} value={profile.dismissal_date} />
-              <InfoItem label={t('profile.daysWorked') || 'Дней работы'} value={profile.days_worked?.toString()} />
-              <InfoItem label={t('profile.testsPassed') || 'Тесты'} value={profile.tests_passed} />
-            </div>
-          </div>
-
-          {/* Interview Info */}
-          {(profile.rop_name || profile.city || profile.region || profile.checklist_answers) && (
-            <div className="space-y-3">
-              <h4 className="text-accent font-medium text-sm">{t('profile.interviewSection') || 'Интервью'}</h4>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <InfoItem label={t('profile.ropName') || 'РОП'} value={profile.rop_name} />
-                <InfoItem label={t('profile.city') || 'Город'} value={profile.city} />
-                <InfoItem label={t('profile.region') || 'Регион'} value={profile.region} />
-              </div>
-              {profile.checklist_answers && (
-                <div className="mt-2">
-                  <p className="text-white/50 text-xs mb-1">{t('profile.checklistAnswers') || 'Ответы на чек-лист'}</p>
-                  <p className="text-white text-sm bg-white/5 rounded-lg p-3 whitespace-pre-wrap max-h-40 overflow-y-auto">
-                    {profile.checklist_answers}
-                  </p>
-                </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Resume Modal */}
+      <Dialog open={showResumeModal} onOpenChange={setShowResumeModal}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto glass-dark border-white/10">
+          {/* Header with back button and close */}
+          <div className="flex items-center justify-between mt-4 mb-2">
+            <button
+              onClick={() => setShowResumeModal(false)}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-accent" />
+            </button>
+            <DialogTitle className="text-white text-center flex-1">{t('profile.resumeText') || 'Текст резюме'}</DialogTitle>
+            <button
+              onClick={handleTranslateResume}
+              disabled={isTranslating}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              title={t('profile.translateResume') || 'Перевести'}
+            >
+              {isTranslating ? (
+                <Loader2 className="w-5 h-5 text-accent animate-spin" />
+              ) : (
+                <span className="text-accent text-lg">🌐</span>
               )}
-            </div>
-          )}
-
-          {/* Contact Info */}
-          <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('profile.resume') || 'Контакты'}</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <InfoItem label={t('profile.phone') || 'Телефон'} value={profile.phone} />
-              <InfoItem label={t('profile.birthDate') || 'Дата рождения'} value={profile.birth_date} />
-            </div>
-            {profile.resume_text && (
-              <div className="mt-2">
-                <p className="text-white/50 text-xs mb-1">{t('profile.resumeText') || 'Резюме'}</p>
-                <p className="text-white text-sm bg-white/5 rounded-lg p-3 whitespace-pre-wrap max-h-32 overflow-y-auto">
-                  {profile.resume_text}
-                </p>
-              </div>
+            </button>
+          </div>
+          
+          <div className="bg-white/5 rounded-lg p-4 mt-2">
+            <p className="text-white text-sm whitespace-pre-wrap">
+              {translatedResume || profile.resume_text}
+            </p>
+            {translatedResume && (
+              <button
+                onClick={() => setTranslatedResume(null)}
+                className="mt-3 text-xs text-accent hover:text-accent/80"
+              >
+                {t('admin.showOriginal') || 'Показать оригинал'}
+              </button>
             )}
           </div>
-
-          {/* Links */}
-          <div className="space-y-3">
-            <h4 className="text-accent font-medium text-sm">{t('admin.links') || 'Ссылки'}</h4>
-            <div className="flex flex-wrap gap-2">
-              {profile.contract_link && (
-                <a href={profile.contract_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.contractLink') || 'Договор'}
-                </a>
-              )}
-              {profile.business_card_link && (
-                <a href={profile.business_card_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.businessCard') || 'Визитка'}
-                </a>
-              )}
-              {profile.resume_link && (
-                <a href={profile.resume_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.resumeLink') || 'Резюме'}
-                </a>
-              )}
-              {profile.photo_link && (
-                <a href={profile.photo_link} target="_blank" rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 bg-white/10 rounded-full text-accent hover:bg-white/20">
-                  {t('profile.photoLink') || 'Фото'}
-                </a>
-              )}
-            </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Checklist Modal */}
+      <Dialog open={showChecklistModal} onOpenChange={setShowChecklistModal}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto glass-dark border-white/10">
+          {/* Header with back button and close */}
+          <div className="flex items-center justify-between mt-4 mb-2">
+            <button
+              onClick={() => setShowChecklistModal(false)}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-accent" />
+            </button>
+            <DialogTitle className="text-white text-center flex-1">{t('profile.checklistAnswers') || 'Текст анкеты'}</DialogTitle>
+            <button
+              onClick={() => setShowChecklistModal(false)}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5 text-accent" />
+            </button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+          
+          <div className="bg-white/5 rounded-lg p-4 mt-2">
+            <p className="text-white text-sm whitespace-pre-wrap">
+              {profile.checklist_answers}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

@@ -277,12 +277,23 @@ const ProjectsHistory = () => {
   const isMobile = useIsMobile();
   const showMobileNav = isTelegram || isMobile;
   const { swipeHistory, getSwipesByAction, removeSwipe, clearHistory, addSwipe } = useProjectSwipes();
-  const { data: projects = [] } = useProjects();
+  const { data: projects = [], isLoading: projectsLoading } = useProjects();
   const { hasProjectAccess, progressStages, completedCount, totalCount, progressPercent } = useProjectAccess();
   const [selectedRecord, setSelectedRecord] = useState<SwipeRecord | null>(null);
   const [showAccessModal, setShowAccessModal] = useState(false);
 
   const tabs: SwipeAction[] = ['like', 'respond', 'pass', 'skip'];
+  
+  // Create a Set of valid project IDs for fast lookup
+  const validProjectIds = new Set(projects.map(p => p.id));
+  
+  // Filter swipe history to only show projects that exist in projects_data
+  const filteredSwipeHistory = swipeHistory.filter(s => validProjectIds.has(s.projectId));
+  
+  // Override getSwipesByAction to filter by valid projects
+  const getFilteredSwipesByAction = (action: SwipeAction) => {
+    return filteredSwipeHistory.filter(s => s.action === action);
+  };
 
   // Helper to get project by ID
   const getProject = (projectId: string) => {
@@ -318,7 +329,7 @@ const ProjectsHistory = () => {
                   <ArrowLeft className="w-4 h-4" />
                   {t('projects.backToSwipe')}
                 </Link>
-                {swipeHistory.length > 0 && (
+                {filteredSwipeHistory.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -358,14 +369,18 @@ const ProjectsHistory = () => {
                   </Link>
                 </motion.div>
 
-                {swipeHistory.length === 0 ? (
+                {projectsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <RefreshCcw className="w-6 h-6 animate-spin text-accent" />
+                  </div>
+                ) : filteredSwipeHistory.length === 0 ? (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="text-center py-12"
                   >
                     <p className="text-white/60">
-                      {t('projects.noHistory')}
+                      {t('projects.noHistory') || 'Нет истории свайпов'}
                     </p>
                   </motion.div>
                 ) : (
@@ -375,7 +390,7 @@ const ProjectsHistory = () => {
                         const config = actionConfig[action];
                         const Icon = config.icon;
                         const DirectionIcon = config.directionIcon;
-                        const count = getSwipesByAction(action).length;
+                        const count = getFilteredSwipesByAction(action).length;
                         return (
                           <TabsTrigger
                             key={action}
@@ -395,12 +410,12 @@ const ProjectsHistory = () => {
                     <AnimatePresence mode="wait">
                       {tabs.map((action) => (
                         <TabsContent key={action} value={action} className="mt-0">
-                          {getSwipesByAction(action).length === 0 ? (
+                          {getFilteredSwipesByAction(action).length === 0 ? (
                             <p className="text-white/40 text-center py-8">
-                              {t('projects.noItemsInCategory')}
+                              {t('projects.noItemsInCategory') || 'Нет проектов в этой категории'}
                             </p>
                           ) : (
-                            getSwipesByAction(action)
+                            getFilteredSwipesByAction(action)
                               .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                               .map((record) => (
                                 <HistoryItem

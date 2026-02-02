@@ -50,7 +50,7 @@ const TestPortalForm = () => {
     
     // Pre-fill CRM code (entry.1379069006)
     if (crmData?.code) {
-      params.append('entry.1379069006', crmData.code);
+      params.append('entry.1379069006', crmData.code.toString());
     }
     
     return `${baseUrl}?${params.toString()}`;

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Search, ExternalLink, Users, Loader2, RefreshCw, ChevronRight, ThumbsUp, MessageCircle, X as XIcon, Eye } from 'lucide-react';
 import { useSyncProjects } from '@/hooks/useSyncProjects';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Table,
   TableBody,
@@ -54,6 +55,7 @@ const STATUS_OPTIONS = ['Все', 'Подбор РОПа', 'В работе', '�
 
 const ProjectsAdmin = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,30 +171,30 @@ const ProjectsAdmin = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="glass-dark rounded-xl p-4">
-          <p className="text-white/50 text-xs">Всего проектов</p>
+          <p className="text-white/50 text-xs">{t('projects.totalProjects') || 'Всего проектов'}</p>
           <p className="text-2xl font-bold text-white">{filteredProjects.length}</p>
         </div>
         <div className="glass-dark rounded-xl p-4">
           <p className="text-white/50 text-xs flex items-center gap-1">
-            <ThumbsUp className="w-3 h-3" /> Понравилось
+            <ThumbsUp className="w-3 h-3" /> {t('projects.liked') || 'Понравилось'}
           </p>
           <p className="text-2xl font-bold text-green-400">{totalSwipes.like}</p>
         </div>
         <div className="glass-dark rounded-xl p-4">
           <p className="text-white/50 text-xs flex items-center gap-1">
-            <MessageCircle className="w-3 h-3" /> Откликов
+            <MessageCircle className="w-3 h-3" /> {t('projects.responses') || 'Откликов'}
           </p>
           <p className="text-2xl font-bold text-accent">{totalSwipes.respond}</p>
         </div>
         <div className="glass-dark rounded-xl p-4">
           <p className="text-white/50 text-xs flex items-center gap-1">
-            <XIcon className="w-3 h-3" /> Пропущено
+            <XIcon className="w-3 h-3" /> {t('projects.passed') || 'Пропущено'}
           </p>
           <p className="text-2xl font-bold text-red-400">{totalSwipes.pass}</p>
         </div>
         <div className="glass-dark rounded-xl p-4">
           <p className="text-white/50 text-xs flex items-center gap-1">
-            <Eye className="w-3 h-3" /> Скрыто
+            <Eye className="w-3 h-3" /> {t('projects.hidden') || 'Скрыто'}
           </p>
           <p className="text-2xl font-bold text-white/50">{totalSwipes.skip}</p>
         </div>
@@ -243,11 +245,11 @@ const ProjectsAdmin = () => {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10 hover:bg-transparent">
-                <TableHead className="text-white/70">Код</TableHead>
-                <TableHead className="text-white/70">Название</TableHead>
-                <TableHead className="text-white/70">Регион</TableHead>
-                <TableHead className="text-white/70">Статус</TableHead>
+              <TableRow className="border-white/10 !bg-transparent hover:!bg-transparent">
+                <TableHead className="text-white/70">{t('admin.colCode') || 'Код'}</TableHead>
+                <TableHead className="text-white/70">{t('admin.colName') || 'Название'}</TableHead>
+                <TableHead className="text-white/70">{t('admin.colRegion') || 'Регион'}</TableHead>
+                <TableHead className="text-white/70">{t('profile.status') || 'Статус'}</TableHead>
                 <TableHead className="text-white/70 text-center">👍</TableHead>
                 <TableHead className="text-white/70 text-center">💬</TableHead>
                 <TableHead className="text-white/70 text-center">👎</TableHead>

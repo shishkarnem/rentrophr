@@ -75,7 +75,7 @@ function mapRowToCrmData(row: string[]) {
 
   return {
     telegram_id: telegramIdNum,
-    code: row[1] || null,
+    code: row[1] ? parseInt(row[1].replace(/[^0-9]/g, ''), 10) || null : null,
     telegram_name: row[2] || null,
     full_info: row[4] || null,
     hr_comment: row[5] || null,

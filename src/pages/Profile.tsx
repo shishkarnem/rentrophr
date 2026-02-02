@@ -812,7 +812,7 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2">
-              <InfoRow label={t("profile.code") || "Код"} value={crmData.code} />
+              <InfoRow label={t("profile.code") || "Код"} value={crmData.code?.toString()} />
               <InfoRow label={t("profile.fullInfo") || "ФИО, Код и Телеграм"} value={crmData.full_info} />
               <InfoRow label={t("profile.hr") || "HR"} value={crmData.hr} />
               {/* Status row with admin button */}

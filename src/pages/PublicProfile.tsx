@@ -660,7 +660,7 @@ const PublicProfile = () => {
               <p className="text-muted-foreground">@{profileData.username}</p>
             )}
             {crmData?.code && (
-              <p className="text-accent font-medium mt-1">{crmData.code}</p>
+              <p className="text-accent font-medium mt-1">{crmData.code?.toString()}</p>
             )}
             
             {/* Telegram Link Button */}
@@ -729,7 +729,7 @@ const PublicProfile = () => {
               </Button>
             </div>
             
-            <InfoRow label={l.code} value={crmData.code} />
+            <InfoRow label={l.code} value={crmData.code?.toString()} />
             <InfoRow label={l.fullInfo} value={crmData.full_info} />
             <InfoRow label={l.hr} value={crmData.hr} />
             <InfoRow label={l.status} value={crmData.status} />
